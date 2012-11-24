@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:title="Préferences">
+           <CheckBoxPreference android:key="newgame" android:title="@string/newgame" android:summaryOn="@string/newgame1" android:summaryOff="@string/newgame2" android:defaultValue="true"/>
+   
+        <CheckBoxPreference android:key="save" android:title="@string/saveText" android:summaryOff="@string/no" android:summaryOn="@string/yes" android:defaultValue="true"/>
+     </PreferenceCategory>
+</PreferenceScreen>

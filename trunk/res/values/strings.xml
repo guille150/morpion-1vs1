@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hello">Hello World, MorpionActivity!</string>
+    <string name="app_name">Morpion / Tic-tac-toe 1vs1</string>
+    <string name="newGame">New game</string>
+    <string name="quitGame">Close the app</string>
+    <string name="welcome">Welcome to this game, Tic-tac-toe 1vs1 !</string>
+    <string name="titleGame">Have fun !</string>
+    <string name="turn">Turn of the player : </string>
+    <string name="nothing">.</string>
+    <string name="history">Old games</string>
+    <string name="help">Help</string>
+    <string name="effacer">Delete this game</string>
+    <string name="voir">See the result in detail</string>
+    <string name="aide1">Who starts a game ?</string>
+    <string name="aide2">You are player BLUE. The application will automatically switch between the player BLUE and the player to start the new game, it\'s only fair.</string>
+    <string name="aide3">I have played a game and I can\'t see it in the history. Why ?</string>
+    <string name="aide4">Because you didn\'t find the configuration screen. You can choose if the application should save a game with no winner.</string>
+    <string name="aide5">Can I play on my own ?</string>
+    <string name="aide6">Not with this app. For two reasons, firstly because it is less fun to play with a AI when you know how to automatically win. Secondly you should try playing twenty games and see who wins the most.</string>
+	<string name="aide7">Can I propose some ameliorations for this app ?</string>
+	<string name="aide8">Of course ! You should leave a comment on the Android Market.</string>
+	<string name="aide9">This app is wonderful.</string>
+	<string name="aide10">You should try the Star Wars version of this app, available on the Android Market.</string>
+	<string name="yes">Yes</string>
+	<string name="no">No</string>
+	<string name="saveText">Save the equalities</string>
+	<string name="nohistory">History is empty.</string>
+	<string name="menuhelp">Help</string>
+	<string name="menupref">Configuration</string>
+	<string name="menuquit">Close</string>
+	<string name="sharetry">Tic-tac-toe 1vs1 - Try it !</string>
+	<string name="win">Victory</string>
+	<string name="loose">Defeat</string>
+	<string name="winb">Player BLUE wins.</string>
+	<string name="winr">Player RED wins.</string>
+	<string name="equal">Equality</string>
+	<string name="equaltry">Try Rock-Paper-Scissor-Lizard-Spock.</string>
+	<string name="share1"> games : </string>
+	<string name="share2"> victories, </string>
+	<string name="share3"> defeats.</string>
+	<string name="resethistory">History clear.</string>
+	<string name="sharewith">Share with</string>
+	<string name="whattodo">What do you want to do ?</string>
+	<string name="reset">Reset</string>
+	<string name="share">Share</string>
+	<string name="sure">Are you sure ?</string>
+	<string name="resume">Game n°</string>
+	<string name="game">Game n°</string>
+	<string name="blue">BLUE</string>
+	<string name="red">RED</string>
+	<string name="over"> It\'s over.</string>
+	<string name="saved">Result saved.</string>
+	<string name="restart">Restart</string>
+	<string name="ctrlz">Undo</string>
+	<string name="newgame">End of game</string>
+	<string name="newgame1">Restart another game</string>
+	<string name="newgame2">Back to main screen</string>
+</resources>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
