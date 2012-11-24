@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hello">Hello World, MorpionActivity!</string>
+    <string name="app_name">Morpion 1vs1</string>
+    <string name="newGame">Nouvelle partie</string>
+    <string name="quitGame">Quitter le jeu</string>
+    <string name="welcome">Bienvenue dans ce jeu de Morpion !</string>
+    <string name="titleGame">Amusez-vous !</string>
+    <string name="turn">C\'est au joueur : </string>
+    <string name="nothing">.</string>
+    <string name="history">Historique</string>
+    <string name="help">Aide</string>
+    <string name="effacer">Effacer la partie</string>
+    <string name="voir">Visualiser</string>
+    <string name="aide1">Comment fonctionnent les tours ?</string>
+    <string name="aide2">Vous êtes toujours le joueur BLEU. L\'application alterne automatiquement dans le choix entre le joueur BLEU et le joueur ROUGE pour démarrer la partie, afin de respecter l\'équité.</string>
+    <string name="aide3">Pourquoi toutes les parties ne sont-elles pas sauvegardées ?</string>
+    <string name="aide4">Parce que vous n\'avez pas encore trouvé la page des paramètres. Vous pouvez y choisir de garder en mémoire les égalités ou non.</string>
+    <string name="aide5">Puis-je jouer seul au Morpion ?</string>
+    <string name="aide6">Non, pas avec cette application. Pour deux raisons, la première est que jouer contre un ordinateur est peu interessant une fois la technique trouvée. Deuxièmement, avec l\'historique disponible il est beaucoup plus interessant de jouer avec un ami et de comparer vos scores après une vingtaine de fois.</string>
+	<string name="aide7">Ai-je la possibilité de proposer des améliorations ?</string>
+	<string name="aide8">Bien sûr. Les commentaires sur l\'android market sont là pour ça.</string>
+	<string name="aide9">Qui a developpé cette application ?</string>
+	<string name="aide10">Moi, Stéphane Mathis. Simplement pour m\'initier au développement sur Android, c\'est ma première application.</string>
+	<string name="yes">Oui</string>
+	<string name="no">No</string>
+	<string name="saveText">Sauvegarder les égalités</string>
+	<string name="nohistory">Aucune partie dans l\'historique</string>
+	<string name="menuhelp">Aide</string>
+	<string name="menupref">Préference</string>
+	<string name="menuquit">Fermer</string>
+	<string name="sharetry">Morpion 1vs1 - Essaye le !</string>
+	<string name="win">Victoire</string>
+	<string name="loose">Défaite</string>
+	<string name="winb">Le joueur BLEU a gagné.</string>
+	<string name="winr">Le joueur ROUGE a gagné.</string>
+	<string name="equal">Egalité</string>
+	<string name="equaltry">Essayez Pierre-Feuille-Ciseau-Lezard-Spock.</string>
+	<string name="share1"> parties : </string>
+	<string name="share2"> victoires, </string>
+	<string name="share3"> défaites.</string>
+	<string name="resethistory">Historique vidé.</string>
+	<string name="sharewith">Partager avec</string>
+	<string name="whattodo">Que faire ?</string>
+	<string name="reset">Remettre à zéro</string>
+	<string name="share">Partager</string>
+	<string name="sure">Etes-vous sûr ?</string>
+	<string name="resume">Résumé n°</string>
+	<string name="game">Partie n°</string>
+	<string name="blue">BLEU</string>
+	<string name="red">ROUGE</string>
+	<string name="over">Terminé</string>
+	<string name="saved">Partie sauvegardé dans l\'historique</string>
+	<string name="ctrlz">Annuler</string>
+	<string name="restart">Recommencer</string>
+	<string name="newgame">Fin de partie</string>
+	<string name="newgame1">Recommencer automatiquement une nouvelle partie</string>
+	<string name="newgame2">Retourner à l\'accueil</string>
+</resources>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
