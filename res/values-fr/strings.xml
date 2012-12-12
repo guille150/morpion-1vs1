@@ -23,7 +23,7 @@
 	<string name="aide9">Qui a developpé cette application ?</string>
 	<string name="aide10">Moi, Stéphane Mathis. Simplement pour m\'initier au développement sur Android, c\'est ma première application.</string>
 	<string name="yes">Oui</string>
-	<string name="no">No</string>
+	<string name="no">Non</string>
 	<string name="saveText">Sauvegarder les égalités</string>
 	<string name="nohistory">Aucune partie dans l\'historique</string>
 	<string name="menuhelp">Aide</string>
@@ -44,11 +44,11 @@
 	<string name="whattodo">Que faire ?</string>
 	<string name="reset">Remettre à zéro</string>
 	<string name="share">Partager</string>
-	<string name="sure">Etes-vous sûr ?</string>
+	<string name="sure">Voulez-vous supprimer l\'historique ?</string>
 	<string name="resume">Résumé n°</string>
 	<string name="game">Partie n°</string>
-	<string name="blue">BLEU</string>
-	<string name="red">ROUGE</string>
+	<string name="blue">C\'est à votre tour</string>
+	<string name="red">C\'est à votre adversaire</string>
 	<string name="over">Terminé</string>
 	<string name="saved">Partie sauvegardé dans l\'historique</string>
 	<string name="ctrlz">Annuler</string>
@@ -56,6 +56,12 @@
 	<string name="newgame">Fin de partie</string>
 	<string name="newgame1">Recommencer automatiquement une nouvelle partie</string>
 	<string name="newgame2">Retourner à l\'accueil</string>
+	<string name="deletegame">Supprimer cette partie ?</string>
+	<string name="previous">Précédent</string>
+	<string name="next">Suivant</string>
+	<string name="m1">Partie</string>
+	<string name="m2">Historique</string>
+	<string name="m3">Aide</string>
 </resources>
 
 

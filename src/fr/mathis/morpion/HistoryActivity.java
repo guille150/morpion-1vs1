@@ -3,21 +3,15 @@ package fr.mathis.morpion;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import fr.mathis.morpion.tools.ToolsBDD;
-
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
@@ -26,11 +20,18 @@ import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.Toast;
 
-public class HistoryActivity extends Activity implements OnItemClickListener, OnClickListener, OnItemLongClickListener{
+import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
 
-	private static final int MENU_RESET = 0;
-	private static final int MENU_QUIT_GAME = 1;
-	private static final int MENU_SHARE = 2;
+import fr.mathis.morpion.tools.ToolsBDD;
+
+
+
+public class HistoryActivity extends SherlockActivity implements OnItemLongClickListener, OnItemClickListener {
+
+	static final int MENU_RESET = 0;
+	static final int MENU_SHARE = 2;
 	private static int currentId;
 	ArrayList<HashMap<String, String>> listItem;
 	private ListView lv;
@@ -40,11 +41,14 @@ public class HistoryActivity extends Activity implements OnItemClickListener, On
 	String share;
 	
 	@Override
-    public void onCreate(Bundle savedInstanceState) 
+	protected void onCreate(Bundle savedInstanceState) 
 	{
-        super.onCreate(savedInstanceState);
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
-        setContentView(R.layout.listviewcustom);
+		super.onCreate(savedInstanceState);
+		
+		getSupportActionBar().setHomeButtonEnabled(true);
+		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+		
+		setContentView(R.layout.listviewcustom);
 		
 		lv = (ListView)findViewById(R.id.listviewperso);
 		
@@ -59,7 +63,7 @@ public class HistoryActivity extends Activity implements OnItemClickListener, On
 		}
 		else 
 		{
-			share = "Morpion 1vs1 - ";
+			share = getString(R.string.app_name)+" - https://play.google.com/store/apps/details?id=fr.mathis.morpion - ";
 			int win = 0;
 			int lost = 0;
 			int equal = 0;
@@ -67,7 +71,7 @@ public class HistoryActivity extends Activity implements OnItemClickListener, On
 			for(int i = 0; i < c.getCount();i++)
 			{
 				int n = c.getInt(1);
-				if(n == GameActivity.BLUE_PLAYER)
+				if(n == MainActivity.BLUE_PLAYER)
 				{
 			        map = new HashMap<String, String>();
 			        map.put("titre", "N°"+c.getInt(0)+" - "+getString(R.string.win));
@@ -75,7 +79,7 @@ public class HistoryActivity extends Activity implements OnItemClickListener, On
 			        map.put("img", String.valueOf(R.drawable.croix));
 			        win++;
 				}
-				else if(n == GameActivity.RED_PLAYER){
+				else if(n == MainActivity.RED_PLAYER){
 			        map = new HashMap<String, String>();
 			        map.put("titre", "N°"+c.getInt(0)+" - "+getString(R.string.loose));
 			        map.put("description", getString(R.string.winr));
@@ -103,7 +107,31 @@ public class HistoryActivity extends Activity implements OnItemClickListener, On
         lv.setOnItemClickListener(this);
 	}
 		
+	public boolean onMenuItemSelected(int featureId, MenuItem item) {
 
+    	if(item.getTitle().toString().compareTo(getString(R.string.share))==0)
+    	{
+    		share();
+    	}
+    	else if(item.getTitle().toString().compareTo(getString(R.string.reset))==0)
+    	{
+	    	AlertDialog.Builder builder = new AlertDialog.Builder(this);
+	    	builder.setTitle(R.string.sure).setPositiveButton(R.string.yes, dialogClickListener).setNegativeButton(R.string.no, dialogClickListener).show();
+    	}
+    	else {
+		    int itemId = item.getItemId();
+		    switch (itemId) {
+		    case android.R.id.home:
+	
+		        finish();
+		        break;
+
+		    }
+    	}
+
+	    return true;
+	}
+	
 	private void share() 
 	{
 		final Intent MessIntent = new Intent(Intent.ACTION_SEND);
@@ -122,46 +150,18 @@ public class HistoryActivity extends Activity implements OnItemClickListener, On
 	//Click on an item from the listview
 	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) 
 	{
+
+		
 		@SuppressWarnings("unchecked")
 		HashMap<String, String> map = (HashMap<String, String>) lv.getItemAtPosition(arg2);
 		String s = map.get("titre");
 		currentId = Integer.parseInt(s.split("N°")[1].split(" ")[0]);
-        dialog = new Dialog(this);
-        dialog.setContentView(R.layout.menuhistory);
-        dialog.setTitle(R.string.whattodo);
-        dialog.show();
-		effacer =(Button)dialog.findViewById(R.id.effacerPartie);
-		visu = (Button)dialog.findViewById(R.id.voirPartie);
-		effacer.setOnClickListener(this);
-		visu.setOnClickListener(this);
-	}
-
-	//Click on the dialog box from the click event on an item
-	public void onClick(View v) {
-		if(v.getId() == R.id.voirPartie)
-		{
-			Bundle objetbunble = new Bundle();
-			objetbunble.putString("id", ""+HistoryActivity.currentId);
-			Intent intent = new Intent(HistoryActivity.this, VisuActivity.class);
-			intent.putExtras(objetbunble);
-			dialog.dismiss();	
-			startActivity(intent);
-		}
-		if(v.getId() == R.id.effacerPartie)
-		{
-			ToolsBDD.getInstance(this).removePartie(HistoryActivity.currentId);
-			dialog.dismiss();
-			finish();
-			if(listItem.size() > 1)
-			{
-				Intent intent = new Intent(HistoryActivity.this, HistoryActivity.class);
-				startActivity(intent);
-			}
-			else {
-				resetHistory();
-				Toast.makeText(this, R.string.resethistory, Toast.LENGTH_LONG).show();
-			}
-		}
+		
+		Bundle objetbunble = new Bundle();
+		objetbunble.putString("id", ""+HistoryActivity.currentId);
+		Intent intent = new Intent(HistoryActivity.this, VisuActivity.class);
+		intent.putExtras(objetbunble);
+		startActivity(intent);
 	}
 	
 	DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
@@ -179,40 +179,46 @@ public class HistoryActivity extends Activity implements OnItemClickListener, On
 	/*MENU*/
 	
 	public boolean onCreateOptionsMenu(Menu menu) {
-		menu.add(0, MENU_SHARE, 0, R.string.share).setIcon(android.R.drawable.ic_menu_share);
-	    menu.add(0, MENU_RESET, 0, R.string.reset).setIcon(R.drawable.reset);
+		menu.add(0, MENU_SHARE, 0, R.string.share).setIcon(R.drawable.social_share2).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM|MenuItem.SHOW_AS_ACTION_WITH_TEXT);;
+	    menu.add(0, MENU_RESET, 0, R.string.reset).setIcon(R.drawable.content_discard2).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM|MenuItem.SHOW_AS_ACTION_WITH_TEXT);;
 	    return true;
 	}
 	
-	public boolean onOptionsItemSelected(MenuItem item) {
-	    switch (item.getItemId()) {
-	    case MENU_RESET:
-	    	AlertDialog.Builder builder = new AlertDialog.Builder(this);
-	    	builder.setMessage(R.string.sure).setPositiveButton(R.string.yes, dialogClickListener).setNegativeButton(R.string.no, dialogClickListener).show();
-	        return true;
-	    case MENU_QUIT_GAME:
-	    	finish();
-	    	return true;
-	    case MENU_SHARE:
-	    	share();
-	    	return true;
-	    }
-	    return false;
-	}
-
-
 	public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int arg2,
 			long arg3) {
+		
 		@SuppressWarnings("unchecked")
 		HashMap<String, String> map = (HashMap<String, String>) lv.getItemAtPosition(arg2);
 		String s = map.get("titre");
 		currentId = Integer.parseInt(s.split("N°")[1].split(" ")[0]);
+		final Context c = getApplicationContext();
+	    final AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+		dialog.setTitle(R.string.deletegame);
+	    dialog.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
+	        public void onClick(DialogInterface dialog, int id) {
+	        	ToolsBDD.getInstance(c).removePartie(HistoryActivity.currentId);
+				dialog.dismiss();
+				finish();
+				if(listItem.size() > 1)
+				{
+					Intent intent = new Intent(HistoryActivity.this, HistoryActivity.class);
+					startActivity(intent);
+				}
+				else {
+					resetHistory();
+					Toast.makeText(c, getString(R.string.resethistory), Toast.LENGTH_LONG).show();
+				}
+	        }
+	    });
+	    dialog.setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener() {
+	        public void onClick(DialogInterface dialog, int which) {
+	        	dialog.dismiss();
+	        }
+	    });
+	    AlertDialog alert = dialog.create();		
+		alert.show();
 		
-		Bundle objetbunble = new Bundle();
-		objetbunble.putString("id", ""+HistoryActivity.currentId);
-		Intent intent = new Intent(HistoryActivity.this, VisuActivity.class);
-		intent.putExtras(objetbunble);
-		startActivity(intent);
+		
 		return false;
 	}
 	
@@ -221,5 +227,4 @@ public class HistoryActivity extends Activity implements OnItemClickListener, On
 	public void onConfigurationChanged(Configuration newConfig) {
 	    super.onConfigurationChanged(newConfig);	    
 	}
-
 }
