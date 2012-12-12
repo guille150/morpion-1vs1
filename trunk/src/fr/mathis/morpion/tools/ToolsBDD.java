@@ -59,6 +59,50 @@ public class ToolsBDD {
 		return bdd.delete("partie", "id = " +id, null);
 	}
 	
+	public int getNextId(int id)
+	{
+		int res = 0;
+		Cursor c = bdd.query("partie", new String[] {"id"}, null, null, null, null, null);
+		if (c.getCount() == 0)
+			return 0;
+		else 
+		{
+			c.moveToFirst();
+			res = c.getInt(0);
+			while(c.moveToNext())
+			{
+				if(id<c.getInt(0))
+				{
+					res = c.getInt(0);
+					break;
+				}
+			}
+		}
+		return res;
+	}
+	
+	public int getPreviousId(int id)
+	{
+		int res = 0;
+		Cursor c = bdd.query("partie", new String[] {"id"}, null, null, null, null, null);
+		if (c.getCount() == 0)
+			return 0;
+		else 
+		{
+			c.moveToLast();
+			res = c.getInt(0);
+			while(c.moveToPrevious())
+			{
+				if(id>c.getInt(0))
+				{
+					res = c.getInt(0);
+					break;
+				}
+			}
+		}
+		return res;
+	}
+	
 	public int getNbPartie(){
 		int res = 0;
 			Cursor c = bdd.query("partie", new String[] {"COALESCE(max(id),0)"}, null, null, null, null, null);

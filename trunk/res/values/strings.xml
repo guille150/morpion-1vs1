@@ -44,11 +44,11 @@
 	<string name="whattodo">What do you want to do ?</string>
 	<string name="reset">Reset</string>
 	<string name="share">Share</string>
-	<string name="sure">Are you sure ?</string>
+	<string name="sure">Do you want to delete the history ?</string>
 	<string name="resume">Game n°</string>
 	<string name="game">Game n°</string>
-	<string name="blue">BLUE</string>
-	<string name="red">RED</string>
+	<string name="blue">It is your turn</string>
+	<string name="red">It is your opponent\'s turn </string>
 	<string name="over"> It\'s over.</string>
 	<string name="saved">Result saved.</string>
 	<string name="restart">Restart</string>
@@ -56,6 +56,12 @@
 	<string name="newgame">End of game</string>
 	<string name="newgame1">Restart another game</string>
 	<string name="newgame2">Back to main screen</string>
+	<string name="deletegame">Delete this game ?</string>
+	<string name="previous">Previous</string>
+	<string name="next">Next</string>
+	<string name="m1">Game</string>
+	<string name="m2">History</string>
+	<string name="m3">Help</string>
 </resources>
 
 
