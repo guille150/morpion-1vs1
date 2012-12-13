@@ -37,10 +37,12 @@ import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.slidingmenu.lib.SlidingMenu;
+import com.slidingmenu.lib.SlidingMenu.OnClosedListener;
+import com.slidingmenu.lib.SlidingMenu.OnOpenedListener;
 
 import fr.mathis.morpion.tools.ToolsBDD;
 
-public class MainActivity extends SherlockActivity implements OnNavigationListener, OnClickListener, OnCheckedChangeListener {
+public class MainActivity extends SherlockActivity implements OnNavigationListener, OnClickListener, OnCheckedChangeListener, OnOpenedListener, OnClosedListener {
 
 	public static final int RED_PLAYER = 4;
 	public static final int BLUE_PLAYER = 3;
@@ -71,14 +73,15 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
         // configure the SlidingMenu
         menu = new SlidingMenu(this);
         menu.setMode(SlidingMenu.LEFT);
-        menu.setTouchModeAbove(SlidingMenu.TOUCHMODE_NONE);
+        menu.setTouchModeAbove(SlidingMenu.TOUCHMODE_FULLSCREEN);
         menu.setShadowWidthRes(R.dimen.shadow_width);
         menu.setShadowDrawable(R.drawable.shadow);
         menu.setBehindOffsetRes(R.dimen.slidingmenu_offset);
         menu.setFadeDegree(0.35f);
         menu.attachToActivity(this, SlidingMenu.SLIDING_CONTENT);
         menu.setMenu(R.layout.menu);
-        
+        menu.setOnOpenedListener(this);
+        menu.setOnClosedListener(this);
 		//this method is called by the action bar
 		//createNewGame();
         
@@ -128,11 +131,9 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 		     if(isMenuOpen)
 		     {
 		    	 menu.toggle(true);
-		    	 isMenuOpen = false;
 		     }
 		     else {
 		    	 menu.toggle(true);
-				isMenuOpen = true;
 		     }
 
 		}
@@ -147,7 +148,6 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 	     if(isMenuOpen)
 	     {
 	    	 menu.toggle(true);
-	    	 isMenuOpen = false;
 	     }
 	     else {
 	    	 super.onBackPressed();
@@ -167,7 +167,7 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 			{
 				Intent intent = new Intent(MainActivity.this, HistoryActivity.class);
 				startActivityForResult(intent, 0);
-
+				
 			}
 			else {Toast.makeText(this, R.string.nohistory, Toast.LENGTH_SHORT).show();}
 		}
@@ -179,6 +179,7 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 				m.getItem(0).setVisible(false);
 				m.getItem(1).setVisible(false);
 			}
+			menu.invalidate();
 		}
 		return false;
 	}
@@ -557,6 +558,18 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 		    editor.putBoolean("save", isChecked);
 		    editor.commit();
 		}
+		
+	}
+
+	@Override
+	public void onOpened() {
+		isMenuOpen = true;
+		
+	}
+
+	@Override
+	public void onClosed() {
+		isMenuOpen = false;
 		
 	}
 
