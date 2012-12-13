@@ -1,7 +1,13 @@
 <resources>
-    
+
     <dimen name="app_defaultsize_w">200.0dip</dimen>
-	<dimen name="app_defaultsize_h">400.0dip</dimen>
-	<dimen name="app_minimumsize_w">200.0dip</dimen>
-	<dimen name="app_minimumsize_h">80.0dip</dimen>
+    <dimen name="app_defaultsize_h">400.0dip</dimen>
+    <dimen name="app_minimumsize_w">200.0dip</dimen>
+    <dimen name="app_minimumsize_h">80.0dip</dimen>
+    <dimen name="shadow_width">15dp</dimen>
+    <dimen name="slidingmenu_offset">60dp</dimen>
+    <dimen name="list_padding">10dp</dimen>
+
+    <integer name="num_cols">1</integer>
+
 </resources>

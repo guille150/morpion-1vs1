@@ -62,6 +62,8 @@
 	<string name="m1">Game</string>
 	<string name="m2">History</string>
 	<string name="m3">Help</string>
+	<string name="empty"></string>
+	<string name="preference">PREFERENCES</string>
 </resources>
 
 

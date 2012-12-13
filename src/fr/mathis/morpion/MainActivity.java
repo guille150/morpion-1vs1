@@ -23,6 +23,9 @@ import android.view.View.OnClickListener;
 import android.view.ViewTreeObserver;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ImageButton;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -33,14 +36,11 @@ import com.actionbarsherlock.app.ActionBar.OnNavigationListener;
 import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
+import com.slidingmenu.lib.SlidingMenu;
 
 import fr.mathis.morpion.tools.ToolsBDD;
 
-
-
-
-
-public class MainActivity extends SherlockActivity implements OnNavigationListener, OnClickListener {
+public class MainActivity extends SherlockActivity implements OnNavigationListener, OnClickListener, OnCheckedChangeListener {
 
 	public static final int RED_PLAYER = 4;
 	public static final int BLUE_PLAYER = 3;
@@ -54,7 +54,9 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 	int w;
 	ArrayList<String> annulerList;
 	Menu m;
-
+	SlidingMenu menu;
+	boolean isMenuOpen = false;
+	CheckBox cbSaveEqual;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -66,9 +68,20 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 		getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
 		getSupportActionBar().setListNavigationCallbacks(list, this);
 
-
+        // configure the SlidingMenu
+        menu = new SlidingMenu(this);
+        menu.setMode(SlidingMenu.LEFT);
+        menu.setTouchModeAbove(SlidingMenu.TOUCHMODE_NONE);
+        menu.setShadowWidthRes(R.dimen.shadow_width);
+        menu.setShadowDrawable(R.drawable.shadow);
+        menu.setBehindOffsetRes(R.dimen.slidingmenu_offset);
+        menu.setFadeDegree(0.35f);
+        menu.attachToActivity(this, SlidingMenu.SLIDING_CONTENT);
+        menu.setMenu(R.layout.menu);
+        
 		//this method is called by the action bar
 		//createNewGame();
+        
 
 	}
 
@@ -110,11 +123,35 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 		}
 		if(item.getTitle().toString().compareTo(getString(R.string.menupref))==0)
 		{
-			Intent intent = new Intent(MainActivity.this, PrefActivity.class);
-			startActivity(intent);
+			//Intent intent = new Intent(MainActivity.this, PrefActivity.class);
+			//startActivity(intent);
+		     if(isMenuOpen)
+		     {
+		    	 menu.toggle(true);
+		    	 isMenuOpen = false;
+		     }
+		     else {
+		    	 menu.toggle(true);
+				isMenuOpen = true;
+		     }
+
 		}
 
 		return super.onMenuItemSelected(featureId, item);
+	}
+	
+	@Override
+	public void onBackPressed() 
+	{
+		
+	     if(isMenuOpen)
+	     {
+	    	 menu.toggle(true);
+	    	 isMenuOpen = false;
+	     }
+	     else {
+	    	 super.onBackPressed();
+	     }
 	}
 
 	@Override
@@ -168,13 +205,24 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 		}
 
 	}
-
+	
 	@SuppressLint("NewApi")
 	@SuppressWarnings("deprecation")
 	public void createNewGame()
 	{
 		setContentView(R.layout.game);  
 
+		cbSaveEqual = (CheckBox)findViewById(R.id.checkBoxSaveEqual);
+		SharedPreferences mgr = PreferenceManager.getDefaultSharedPreferences(this);
+		final boolean save = mgr.getBoolean("save", false);	
+
+		if(save)
+		{
+			cbSaveEqual.setChecked(true);
+		}
+		
+		cbSaveEqual.setOnCheckedChangeListener(this);
+		
 		nbGame = ToolsBDD.getInstance(this).getNbPartie()+1;
 		TextView tv1 = (TextView)findViewById(R.id.welcomeGame);
 		tv1.setText(getString(R.string.game)+nbGame);
@@ -240,7 +288,7 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 			m.getItem(1).setVisible(false);
 		}
 
-		
+		menu.invalidate();
 	}
 
 	public void recalculateSize()
@@ -295,19 +343,14 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 					obs.removeGlobalOnLayoutListener(this);
 				}
 			}
-		});		
+		});
 	}
 	
 	
 	//Click on a button
 	public void onClick(View view) 
 	{
-		if(m != null)
-		{
-			m.getItem(0).setVisible(true);
-			m.getItem(1).setVisible(true);
-		}
-
+		
 		for(int i = 0 ; i < 3 ; i++)
 		{
 			for(int j = 0 ; j < 3 ; j++)
@@ -327,10 +370,19 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 						tabVal[i][j] = RED_PLAYER;
 						displayNextTurn();
 					}
+					
+					if(m != null)
+					{
+						m.getItem(0).setVisible(true);
+						m.getItem(1).setVisible(true);
+					}
+					
 					tabIB[i][j].setImageDrawable(d);
 					tabIB[i][j].setEnabled(false);
 					annulerList.add(i+","+j);
+					menu.invalidate();
 					this.checkWinner(i,j);
+					
 				}
 			}
 		}
@@ -393,7 +445,7 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 		values = values.substring(1);
 
 		SharedPreferences mgr = PreferenceManager.getDefaultSharedPreferences(this);
-		final boolean save = mgr.getBoolean("save", true);	
+		final boolean save = mgr.getBoolean("save", false);	
 
 		if(winner == BLUE_PLAYER)
 		{
@@ -494,6 +546,18 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 		
 		recalculateSize();
 
+	}
+
+	@Override
+	public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+		if(buttonView.getId()==R.id.checkBoxSaveEqual)
+		{
+			SharedPreferences mgr = PreferenceManager.getDefaultSharedPreferences(this);
+			SharedPreferences.Editor editor = mgr.edit();
+		    editor.putBoolean("save", isChecked);
+		    editor.commit();
+		}
+		
 	}
 
 
