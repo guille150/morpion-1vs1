@@ -62,6 +62,8 @@
 	<string name="m1">Partie</string>
 	<string name="m2">Historique</string>
 	<string name="m3">Aide</string>
+	<string name="empty"></string>
+	<string name="preference">PRÉFÉRENCES</string>
 </resources>
 
 
