@@ -64,6 +64,8 @@
 	<string name="m3">Aide</string>
 	<string name="empty"></string>
 	<string name="preference">PRÉFÉRENCES</string>
+	<string name="s1">parties sélectionnées</string>
+	<string name="s2">partie sélectionné</string>
 </resources>
 
 
