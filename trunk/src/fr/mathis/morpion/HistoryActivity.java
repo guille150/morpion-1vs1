@@ -20,6 +20,9 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.Toast;
@@ -108,6 +111,11 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 			share += " "+lost+ " " +getString(R.string.share3);
 		}
 
+		if(listItem.size()==0)
+		{
+			resetHistory();
+		}
+		
 		mSchedule = new MyAdapter(this.getBaseContext(), listItem, R.layout.itemlistviewcustom, new String[] {"img", "titre", "description"}, new int[] {R.id.img, R.id.titre, R.id.description});
 		lv.setAdapter(mSchedule);
 		lv.setOnItemLongClickListener(this);
@@ -215,45 +223,12 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 
 	public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int arg2,
 			long arg3) {
-
-		/*@SuppressWarnings("unchecked")
-		HashMap<String, String> map = (HashMap<String, String>) lv.getItemAtPosition(arg2);
-		String s = map.get("titre");
-		currentId = Integer.parseInt(s.split("N°")[1].split(" ")[0]);
-		final Context c = getApplicationContext();
-	    final AlertDialog.Builder dialog = new AlertDialog.Builder(this);
-		dialog.setTitle(R.string.deletegame);
-	    dialog.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
-	        public void onClick(DialogInterface dialog, int id) {
-	        	ToolsBDD.getInstance(c).removePartie(HistoryActivity.currentId);
-				dialog.dismiss();
-				finish();
-				if(listItem.size() > 1)
-				{
-					Intent intent = new Intent(HistoryActivity.this, HistoryActivity.class);
-					startActivity(intent);
-				}
-				else {
-					resetHistory();
-					Toast.makeText(c, getString(R.string.resethistory), Toast.LENGTH_LONG).show();
-				}
-	        }
-	    });
-	    dialog.setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener() {
-	        public void onClick(DialogInterface dialog, int which) {
-	        	dialog.dismiss();
-	        }
-	    });
-	    AlertDialog alert = dialog.create();		
-		alert.show();
-		 */
 		if (!pos.contains(arg2)) {
 			if(pos.size()==0)
 			{
 				mActionMode = startActionMode(mActionModeCallback);
 			}
 			pos.add(arg2);
-
 		}
 		else {
 			pos = removeInt(pos,arg2);
@@ -302,12 +277,60 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
 			View v = super.getView(position, convertView,   parent);
+			CheckBox cb = (CheckBox)v.findViewById(R.id.checkBox1);
+			final int posid = position;
+			cb.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+				public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+					int i = posid;
+					if(isChecked)
+					{
+						if(pos.contains(i))
+						{
+							
+						}
+						else {
+							pos.add(i);
+							mSchedule.notifyDataSetChanged();
+						}
+					}
+					else {
+						pos = removeInt(pos,i);
+						mSchedule.notifyDataSetChanged();
+					}
+					
+					if(mActionMode != null)
+					{
+						if(pos.size()==1)
+							mActionMode.setTitle(pos.size()+" "+getString(R.string.s2));
+						else mActionMode.setTitle(pos.size()+" "+getString(R.string.s1));
+						
+						if(pos.size()==0)
+						{
+							mActionMode.finish();
+						}
+					}
+					
+				}
+			});
+
+
+
+
 			if(pos!=null){
 				if (pos.contains(position)) {
 					v.setBackgroundColor(Color.LTGRAY);
+					cb.setChecked(true);
 				}
 				else {
 					v.setBackgroundColor(Color.TRANSPARENT);
+					cb.setChecked(false);
+				}
+				if(pos.size()!=0)
+				{
+					cb.setVisibility(View.VISIBLE);
+				}
+				else {
+					cb.setVisibility(View.GONE);
 				}
 			}
 			return v;
@@ -320,7 +343,7 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 		// Called when the action mode is created; startActionMode() was called
 		@Override
 		public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-			menu.add(0, 50, 0, R.string.reset).setIcon(R.drawable.content_discard2).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM|MenuItem.SHOW_AS_ACTION_WITH_TEXT);
+			menu.add(0, 50, 0, R.string.empty).setIcon(R.drawable.content_discard2).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM|MenuItem.SHOW_AS_ACTION_WITH_TEXT);
 			return true;
 		}
 
