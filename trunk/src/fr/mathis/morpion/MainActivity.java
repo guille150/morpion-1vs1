@@ -433,6 +433,7 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 		playerText.setText(R.string.over);
 		playerText.setTextColor(Color.WHITE);
 		AlertDialog alertDialog = new AlertDialog.Builder(this).create();  
+		alertDialog.setCancelable(false);
 		alertDialog.setIcon(R.drawable.icon);  
 
 		String values ="";
