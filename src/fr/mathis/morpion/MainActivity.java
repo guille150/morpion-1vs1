@@ -70,21 +70,21 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 		getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
 		getSupportActionBar().setListNavigationCallbacks(list, this);
 
-        // configure the SlidingMenu
-        menu = new SlidingMenu(this);
-        menu.setMode(SlidingMenu.LEFT);
-        menu.setTouchModeAbove(SlidingMenu.TOUCHMODE_FULLSCREEN);
-        menu.setShadowWidthRes(R.dimen.shadow_width);
-        menu.setShadowDrawable(R.drawable.shadow);
-        menu.setBehindOffsetRes(R.dimen.slidingmenu_offset);
-        menu.setFadeDegree(0.35f);
-        menu.attachToActivity(this, SlidingMenu.SLIDING_CONTENT);
-        menu.setMenu(R.layout.menu);
-        menu.setOnOpenedListener(this);
-        menu.setOnClosedListener(this);
+		// configure the SlidingMenu
+		menu = new SlidingMenu(this);
+		menu.setMode(SlidingMenu.LEFT);
+		menu.setTouchModeAbove(SlidingMenu.TOUCHMODE_FULLSCREEN);
+		menu.setShadowWidthRes(R.dimen.shadow_width);
+		menu.setShadowDrawable(R.drawable.shadow);
+		menu.setBehindOffsetRes(R.dimen.slidingmenu_offset);
+		menu.setFadeDegree(0.35f);
+		menu.attachToActivity(this, SlidingMenu.SLIDING_CONTENT);
+		menu.setMenu(R.layout.menu);
+		menu.setOnOpenedListener(this);
+		menu.setOnClosedListener(this);
 		//this method is called by the action bar
 		//createNewGame();
-        
+
 
 	}
 
@@ -128,30 +128,30 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 		{
 			//Intent intent = new Intent(MainActivity.this, PrefActivity.class);
 			//startActivity(intent);
-		     if(isMenuOpen)
-		     {
-		    	 menu.toggle(true);
-		     }
-		     else {
-		    	 menu.toggle(true);
-		     }
+			if(isMenuOpen)
+			{
+				menu.toggle(true);
+			}
+			else {
+				menu.toggle(true);
+			}
 
 		}
 
 		return super.onMenuItemSelected(featureId, item);
 	}
-	
+
 	@Override
 	public void onBackPressed() 
 	{
-		
-	     if(isMenuOpen)
-	     {
-	    	 menu.toggle(true);
-	     }
-	     else {
-	    	 super.onBackPressed();
-	     }
+
+		if(isMenuOpen)
+		{
+			menu.toggle(true);
+		}
+		else {
+			super.onBackPressed();
+		}
 	}
 
 	@Override
@@ -167,7 +167,7 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 			{
 				Intent intent = new Intent(MainActivity.this, HistoryActivity.class);
 				startActivityForResult(intent, 0);
-				
+
 			}
 			else {Toast.makeText(this, R.string.nohistory, Toast.LENGTH_SHORT).show();}
 		}
@@ -206,7 +206,7 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 		}
 
 	}
-	
+
 	@SuppressLint("NewApi")
 	@SuppressWarnings("deprecation")
 	public void createNewGame()
@@ -221,9 +221,9 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 		{
 			cbSaveEqual.setChecked(true);
 		}
-		
+
 		cbSaveEqual.setOnCheckedChangeListener(this);
-		
+
 		nbGame = ToolsBDD.getInstance(this).getNbPartie()+1;
 		TextView tv1 = (TextView)findViewById(R.id.welcomeGame);
 		tv1.setText(getString(R.string.game)+nbGame);
@@ -298,7 +298,7 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 		ViewTreeObserver vto = sc.getViewTreeObserver();
 		final Display display = getWindowManager().getDefaultDisplay();
 		vto.addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
-		
+
 			@SuppressLint("NewApi")
 			@SuppressWarnings("deprecation")
 			@Override
@@ -307,9 +307,9 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 				ViewTreeObserver obs = sc.getViewTreeObserver();
 
 				w = sc.getWidth();
-				
+
 				int h = sc.getHeight() - playerText.getHeight() - (((TextView)findViewById(R.id.welcomeGame)).getHeight());
-				
+
 				if(h<w)
 					w = h;
 				int ratio = 3;
@@ -335,7 +335,7 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 						tabIB[i][j].invalidate();
 					}
 				}
-				
+
 				if(android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
 				{
 					obs.removeOnGlobalLayoutListener(this);
@@ -346,12 +346,12 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 			}
 		});
 	}
-	
-	
+
+
 	//Click on a button
 	public void onClick(View view) 
 	{
-		
+
 		for(int i = 0 ; i < 3 ; i++)
 		{
 			for(int j = 0 ; j < 3 ; j++)
@@ -371,19 +371,19 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 						tabVal[i][j] = RED_PLAYER;
 						displayNextTurn();
 					}
-					
+
 					if(m != null)
 					{
 						m.getItem(0).setVisible(true);
 						m.getItem(1).setVisible(true);
 					}
-					
+
 					tabIB[i][j].setImageDrawable(d);
 					tabIB[i][j].setEnabled(false);
 					annulerList.add(i+","+j);
 					menu.invalidate();
 					this.checkWinner(i,j);
-					
+
 				}
 			}
 		}
@@ -520,33 +520,36 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
 		super.onConfigurationChanged(newConfig);
-  
-	    Display display = getWindowManager().getDefaultDisplay();
 
-		int ratio = 5;
-
-		if(android.os.Build.VERSION.SDK_INT > Build.VERSION_CODES.ECLAIR_MR1)
+		if(getActionBar().getSelectedNavigationIndex()==0)
 		{
-			if(display.getRotation() == Surface.ROTATION_0)
-				ratio = 3;	
+			Display display = getWindowManager().getDefaultDisplay();
+
+			int ratio = 5;
+
+			if(android.os.Build.VERSION.SDK_INT > Build.VERSION_CODES.ECLAIR_MR1)
+			{
+				if(display.getRotation() == Surface.ROTATION_0)
+					ratio = 3;	
+			}
+			else {
+				if(display.getOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
+					ratio = 3;	
+			}
+
+			for(int i = 0 ; i < 3 ; i++)
+			{
+				for(int j = 0 ; j < 3 ; j++)
+				{
+					tabIB[i][j].setMinimumHeight(w/ratio);
+					tabIB[i][j].setMaxHeight(w/ratio);
+					tabIB[i][j].setMinimumWidth(w/ratio);
+					tabIB[i][j].setMaxWidth(w/ratio);
+				}
+			}	
+
+			recalculateSize();
 		}
-		else {
-			if(display.getOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
-				ratio = 3;	
-		}
-	    
-    	for(int i = 0 ; i < 3 ; i++)
-    	{
-        	for(int j = 0 ; j < 3 ; j++)
-        	{
-        		tabIB[i][j].setMinimumHeight(w/ratio);
-        		tabIB[i][j].setMaxHeight(w/ratio);
-        		tabIB[i][j].setMinimumWidth(w/ratio);
-        		tabIB[i][j].setMaxWidth(w/ratio);
-        	}
-	    }	
-		
-		recalculateSize();
 
 	}
 
@@ -556,22 +559,22 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 		{
 			SharedPreferences mgr = PreferenceManager.getDefaultSharedPreferences(this);
 			SharedPreferences.Editor editor = mgr.edit();
-		    editor.putBoolean("save", isChecked);
-		    editor.commit();
+			editor.putBoolean("save", isChecked);
+			editor.commit();
 		}
-		
+
 	}
 
 	@Override
 	public void onOpened() {
 		isMenuOpen = true;
-		
+
 	}
 
 	@Override
 	public void onClosed() {
 		isMenuOpen = false;
-		
+
 	}
 
 
