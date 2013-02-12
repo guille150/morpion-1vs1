@@ -1,14 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    >
- 
+    android:orientation="vertical" >
+
     <ListView
         android:id="@+id/listviewperso"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-      />
- 
-</LinearLayout>
+        android:visibility="gone" />
+
+    <com.fima.cardsui.views.CardUI
+        android:id="@+id/cardsview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/abs__background_holo_light"
+        android:visibility="gone" />
+
+    <com.michaelpardo.android.widget.chartview.ChartView
+        android:id="@+id/chart_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="8dp"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/undobar"
+        style="@style/UndoBar"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="20dp"
+        android:alpha="0" >
+
+        <TextView
+            android:id="@+id/undobar_message"
+            style="@style/UndoBarMessage" />
+
+        <Button
+            android:id="@+id/undobar_button"
+            style="@style/UndoBarButton" />
+    </LinearLayout>
+
+</RelativeLayout>

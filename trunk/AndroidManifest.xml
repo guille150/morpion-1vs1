@@ -2,11 +2,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="fr.mathis.morpion"
     android:installLocation="preferExternal"
-    android:versionCode="11"
-    android:versionName="2.1.2" >
+    android:versionCode="12"
+    android:versionName="2.2" >
 
     <uses-sdk
-        android:minSdkVersion="7"
+        android:minSdkVersion="8"
         android:targetSdkVersion="17" />
 
     <application
@@ -32,6 +32,7 @@
 		<meta-data android:name="com.sec.android.multiwindow.DEFAULT_SIZE_H" android:resource="@dimen/app_defaultsize_h" />
 		<meta-data android:name="com.sec.android.multiwindow.MINIMUM_SIZE_W" android:resource="@dimen/app_minimumsize_w" />
 		<meta-data android:name="com.sec.android.multiwindow.MINIMUM_SIZE_H" android:resource="@dimen/app_minimumsize_h" />
+		<activity android:name="VisuPagerActivity"></activity>
     </application>
     
 

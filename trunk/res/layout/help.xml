@@ -1,81 +1,111 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" >
 
-    <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent">
-   
-    <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <TableLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/tableLayout1"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp" >
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp" >
 
-            <TextView
-                android:id="@+id/helptitle1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/aide1"
-                android:textAppearance="?android:attr/textAppearanceMedium" />
+        <TextView
+            android:id="@+id/helptitle1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/aide1"
+            android:textAllCaps="true"
+            android:textSize="20sp" />
 
-            <TextView
-                android:id="@+id/helptext1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/aide2" />
-
+        <TextView
+            android:id="@+id/helptext1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="32dp"
+            android:text="@string/aide2"
+            android:textSize="16sp" />
 
         <TextView
             android:id="@+id/helptitle2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/aide3"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:textAllCaps="true"
+            android:textSize="20sp" />
 
         <TextView
             android:id="@+id/helptext2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/aide4" />
+            android:layout_marginBottom="32dp"
+            android:text="@string/aide4"
+            android:textSize="16sp" />
 
         <TextView
-            android:id="@+id/textView1"
+            android:id="@+id/helptitle6"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/aide11"
+            android:textAllCaps="true"
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/helptext6"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="32dp"
+            android:text="@string/aide12"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/helptitle3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/aide5"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:textAllCaps="true"
+            android:textSize="20sp" />
 
         <TextView
-            android:id="@+id/textView2"
+            android:id="@+id/helptext3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/aide6" />
+            android:layout_marginBottom="32dp"
+            android:text="@string/aide6"
+            android:textSize="16sp" />
 
         <TextView
-            android:id="@+id/textView3"
+            android:id="@+id/helptitle4"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/aide7"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:textAllCaps="true"
+            android:textSize="20sp" />
 
         <TextView
-            android:id="@+id/textView4"
+            android:id="@+id/helptext4"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/aide8" />
+            android:layout_marginBottom="32dp"
+            android:text="@string/aide8"
+            android:textSize="16sp" />
 
         <TextView
-            android:id="@+id/textView5"
+            android:id="@+id/helptitle5"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/aide9"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:textAllCaps="true"
+            android:textSize="20sp" />
 
         <TextView
-            android:id="@+id/textView6"
+            android:id="@+id/helptext5"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/aide10" />
-
+            android:layout_marginBottom="32dp"
+            android:text="@string/aide10"
+            android:textSize="16sp" />
     </TableLayout>
-    
-    </ScrollView>
+
+</ScrollView>

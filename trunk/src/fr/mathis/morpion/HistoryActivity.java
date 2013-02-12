@@ -14,11 +14,15 @@ import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Parcelable;
+import android.view.Gravity;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -27,16 +31,27 @@ import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.Toast;
 
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.ActionBar.OnNavigationListener;
 import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.ActionMode;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
+import com.fima.cardsui.objects.Card;
+import com.fima.cardsui.objects.Card.OnCardSwiped;
+import com.fima.cardsui.views.CardUI;
+import com.michaelpardo.android.widget.TextView;
+import com.michaelpardo.android.widget.chartview.ChartView;
+import com.michaelpardo.android.widget.chartview.LabelAdapter;
+import com.michaelpardo.android.widget.chartview.LinearSeries;
+import com.michaelpardo.android.widget.chartview.LinearSeries.LinearPoint;
 
+import fr.mathis.morpion.tools.SwipeDismissListViewTouchListener;
 import fr.mathis.morpion.tools.ToolsBDD;
+import fr.mathis.morpion.tools.UndoBarController;
+import fr.mathis.morpion.tools.UndoBarController.UndoListener;
 
-
-
-public class HistoryActivity extends SherlockActivity implements OnItemLongClickListener, OnItemClickListener {
+public class HistoryActivity extends SherlockActivity implements OnItemLongClickListener, OnItemClickListener, OnNavigationListener, OnCardSwiped, UndoListener {
 
 	static final int MENU_RESET = 0;
 	static final int MENU_SHARE = 2;
@@ -49,22 +64,43 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 	String share;
 	MyAdapter mSchedule;
 	ActionMode mActionMode;
+	CardUI cards;
+	ChartView chartView;
+	private UndoBarController mUndoBarController;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) 
 	{
 		super.onCreate(savedInstanceState);
 
+		ArrayAdapter<CharSequence> list = ArrayAdapter.createFromResource(this, R.array.secondNavigationList, R.layout.sherlock_spinner_item);
+		list.setDropDownViewResource(R.layout.sherlock_spinner_dropdown_item);
+
+		getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
+		getSupportActionBar().setListNavigationCallbacks(list, this);		
+
 		getSupportActionBar().setHomeButtonEnabled(true);
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
 		setContentView(R.layout.listviewcustom);
+	}
+
+	public void createList()
+	{
 
 		lv = (ListView)findViewById(R.id.listviewperso);
+		lv.setVisibility(View.VISIBLE);
 
+		cards = (CardUI)findViewById(R.id.cardsview);
+		cards.setVisibility(View.GONE);
+
+		chartView = (ChartView) findViewById(R.id.chart_view);
+		chartView.setVisibility(View.GONE);
+		
+		mUndoBarController = new UndoBarController(findViewById(R.id.undobar), this);
+		
 		listItem = new ArrayList<HashMap<String, String>>();
 		HashMap<String, String> map = new HashMap<String, String>();
-
 
 		Cursor c = ToolsBDD.getInstance(this).getAllParties();
 		if (c == null || c.getCount() == 0)
@@ -103,6 +139,8 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 					map.put("img", String.valueOf(R.drawable.icon));
 					equal++;
 				}
+				map.put("winner", n+"");
+				map.put("disposition", c.getString(2));
 				listItem.add(map);
 				c.moveToNext();
 			}
@@ -111,16 +149,37 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 			share += " "+lost+ " " +getString(R.string.share3);
 		}
 
-		if(listItem.size()==0)
-		{
-			resetHistory();
-		}
-		
 		mSchedule = new MyAdapter(this.getBaseContext(), listItem, R.layout.itemlistviewcustom, new String[] {"img", "titre", "description"}, new int[] {R.id.img, R.id.titre, R.id.description});
 		lv.setAdapter(mSchedule);
 		lv.setOnItemLongClickListener(this);
 		lv.setOnItemClickListener(this);
 		lv.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+		setSwypeListener();
+	}
+
+	private void setSwypeListener() {
+		//if(android.os.Build.VERSION.SDK_INT > Build.VERSION_CODES.HONEYCOMB_MR1)
+		{
+			SwipeDismissListViewTouchListener touchListener =
+					new SwipeDismissListViewTouchListener(
+							lv,
+							new SwipeDismissListViewTouchListener.OnDismissCallback() {
+								@Override
+								public void onDismiss(ListView listView, int[] reverseSortedPositions) {
+									for (int position : reverseSortedPositions) {
+										mSchedule.remove(mSchedule.getItem(position));
+									}
+									mSchedule.notifyDataSetChanged();
+								}
+							});
+			lv.setOnTouchListener(touchListener);
+			lv.setOnScrollListener(touchListener.makeScrollListener());
+		}
+	}
+	
+	private void removeSwypeListener() {
+		lv.setOnTouchListener(null);
+		lv.setOnScrollListener(null);
 	}
 
 	public boolean onMenuItemSelected(int featureId, MenuItem item) {
@@ -165,14 +224,15 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 	{
 		if(pos.size()==0)
 		{
+			setSwypeListener();
 			@SuppressWarnings("unchecked")
 			HashMap<String, String> map = (HashMap<String, String>) lv.getItemAtPosition(arg2);
 			String s = map.get("titre");
 			currentId = Integer.parseInt(s.split("N°")[1].split(" ")[0]);
 
+			Intent intent = new Intent(HistoryActivity.this, VisuPagerActivity.class);		
 			Bundle objetbunble = new Bundle();
 			objetbunble.putString("id", ""+HistoryActivity.currentId);
-			Intent intent = new Intent(HistoryActivity.this, VisuActivity.class);
 			intent.putExtras(objetbunble);
 			startActivity(intent);
 		}
@@ -187,8 +247,10 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 			if(pos.size()==0)
 			{
 				mActionMode.finish();
+				setSwypeListener();
 			}
 			else {
+				removeSwypeListener();
 				if(mActionMode != null)
 				{
 					if(pos.size()==1)
@@ -211,7 +273,6 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 			}
 		}
 	};
-
 
 	/*MENU*/
 
@@ -236,12 +297,14 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 		if(pos.size()==0)
 		{
 			mActionMode.finish();
+			setSwypeListener();
 		}
 		if(mActionMode != null)
 		{
 			if(pos.size()==1)
 				mActionMode.setTitle(pos.size()+" "+getString(R.string.s2));
 			else mActionMode.setTitle(pos.size()+" "+getString(R.string.s1));
+			removeSwypeListener();
 		}
 		mSchedule.notifyDataSetChanged();
 		return true;
@@ -267,11 +330,33 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 	}
 
 	ArrayList<Integer> pos = new ArrayList<Integer>();
+
 	private class MyAdapter extends SimpleAdapter {
 
 		public MyAdapter(Context context, List<? extends Map<String, ?>> data,
 				int resource, String[] from, int[] to) {
 			super(context, data, resource, from, to);
+		}
+
+		public void remove(Object item) {
+
+			@SuppressWarnings("unchecked")
+			HashMap<String, String> map = (HashMap<String, String>) item;
+			String s = map.get("titre");
+			int id = Integer.parseInt(s.split("N°")[1].split(" ")[0]);
+			ToolsBDD.getInstance(getApplicationContext()).removePartie(id);
+
+			saveId = id;
+			saveWinner = Integer.parseInt(map.get("winner"));
+			saveDisposition = map.get("disposition");
+			saveFromCards = false;
+			mUndoBarController.showUndoBar(
+	                false,
+	                getString(R.string.undobar_sample_message),
+	                null);			
+			
+			listItem.remove(item);
+			notifyDataSetChanged();
 		}
 
 		@Override
@@ -286,7 +371,7 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 					{
 						if(pos.contains(i))
 						{
-							
+
 						}
 						else {
 							pos.add(i);
@@ -297,24 +382,22 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 						pos = removeInt(pos,i);
 						mSchedule.notifyDataSetChanged();
 					}
-					
+
 					if(mActionMode != null)
 					{
 						if(pos.size()==1)
 							mActionMode.setTitle(pos.size()+" "+getString(R.string.s2));
 						else mActionMode.setTitle(pos.size()+" "+getString(R.string.s1));
-						
+						removeSwypeListener();
 						if(pos.size()==0)
 						{
+							setSwypeListener();
 							mActionMode.finish();
 						}
 					}
-					
+
 				}
 			});
-
-
-
 
 			if(pos!=null){
 				if (pos.contains(position)) {
@@ -373,6 +456,7 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 
 				return true;
 			default:
+				
 				return false;
 			}
 		}
@@ -383,6 +467,269 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 			mActionMode = null;
 			pos = new ArrayList<Integer>();
 			mSchedule.notifyDataSetChanged();
+			setSwypeListener();
 		}
 	};
+
+	@Override
+	public boolean onNavigationItemSelected(int itemPosition, long itemId) {
+
+		if(itemPosition==0)
+		{
+			createList();
+		}
+		if(itemPosition==1)
+		{
+			createCards();
+		}
+		if(itemPosition==2)
+		{
+			if(ToolsBDD.getInstance(this).getNbPartie()>=2)
+			{
+				createChart();
+			}
+			else {
+				Toast.makeText(this, R.string.charteneeds, Toast.LENGTH_SHORT).show();
+				getSupportActionBar().setSelectedNavigationItem(0);
+			}
+		}
+
+		return false;
+	}
+
+	private void createChart() {
+		lv.setVisibility(View.GONE);
+		cards.setVisibility(View.GONE);
+		
+		chartView.setVisibility(View.VISIBLE);
+		
+		LinearSeries seriesBlue = new LinearSeries();
+		seriesBlue.setLineColor(Color.rgb(0, 148, 255));
+		seriesBlue.setLineWidth(4);
+		
+		LinearSeries seriesRed = new LinearSeries();
+		seriesRed.setLineColor(Color.RED);
+		seriesRed.setLineWidth(4);
+		
+		LinearSeries seriesGreen= new LinearSeries();
+		seriesGreen.setLineColor(Color.BLACK);
+		seriesGreen.setLineWidth(4);
+		
+		Cursor c = ToolsBDD.getInstance(this).getAllParties();
+		c.moveToFirst();
+		
+		int bluecount = 0;
+		int greencount = 0;
+		int redcount = 0;
+		
+		for(int i = 0; i < c.getCount();i++)
+		{
+			int n = c.getInt(1);
+			if(n == MainActivity.BLUE_PLAYER)
+			{
+				bluecount++;
+			}
+			else if(n == MainActivity.RED_PLAYER){
+				redcount++;
+			}
+			else {
+				greencount++;
+			}
+
+			seriesBlue.addPoint(new LinearPoint(i, bluecount));
+			seriesRed.addPoint(new LinearPoint(i, redcount));
+			seriesGreen.addPoint(new LinearPoint(i, greencount));
+			c.moveToNext();
+		}
+
+		chartView.addSeries(seriesBlue);
+		chartView.addSeries(seriesRed);
+		chartView.addSeries(seriesGreen);
+	}
+
+	public static class ValueLabelAdapter extends LabelAdapter {
+		public enum LabelOrientation {
+			HORIZONTAL, VERTICAL
+		}
+
+		private Context mContext;
+		private LabelOrientation mOrientation;
+
+		public ValueLabelAdapter(Context context, LabelOrientation orientation) {
+			mContext = context;
+			mOrientation = orientation;
+		}
+
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent) {
+			TextView labelTextView;
+			if (convertView == null) {
+				convertView = new TextView(mContext);
+			}
+
+			labelTextView = (TextView) convertView;
+
+			int gravity = Gravity.CENTER;
+			if (mOrientation == LabelOrientation.VERTICAL) {
+				if (position == 0) {
+					gravity = Gravity.BOTTOM | Gravity.RIGHT;
+				}
+				else if (position == getCount() - 1) {
+					gravity = Gravity.TOP | Gravity.RIGHT;
+				}
+				else {
+					gravity = Gravity.CENTER | Gravity.RIGHT;
+				}
+			}
+			else if (mOrientation == LabelOrientation.HORIZONTAL) {
+				if (position == 0) {
+					gravity = Gravity.CENTER | Gravity.LEFT;
+				}
+				else if (position == getCount() - 1) {
+					gravity = Gravity.CENTER | Gravity.RIGHT;
+				}
+			}
+
+			labelTextView.setGravity(gravity);
+			labelTextView.setPadding(8, 0, 8, 0);
+			labelTextView.setText(String.format("%.1f", getItem(position)));
+
+			return convertView;
+		}
+	}
+	
+	public void createCards()
+	{
+		cards.setSwipeable(true);
+		cards.setVisibility(View.VISIBLE);
+
+		cards.clearCards();
+
+		lv.setVisibility(View.GONE);
+		chartView.setVisibility(View.GONE);
+		Cursor c = ToolsBDD.getInstance(this).getAllParties();
+
+		if (c == null || c.getCount() == 0)
+		{
+
+		}
+		else 
+		{
+			c.moveToFirst();
+
+			for(int i = 0; i < c.getCount();i++)
+			{
+				String v="N°"+c.getInt(0)+" - ";
+				int n = c.getInt(1);
+				if(n == MainActivity.BLUE_PLAYER)
+				{
+					v += getString(R.string.win);
+				}
+				else if(n == MainActivity.RED_PLAYER){
+					v+= getString(R.string.loose);
+				}
+				else {
+					v+= getString(R.string.equal);
+				}				
+
+				CardGame cg = new CardGame(c.getInt(1),c.getString(2),v, c.getInt(0), getWindowManager().getDefaultDisplay(), getApplicationContext());
+				cg.setOnCardSwipedListener(this);
+				final int idC = c.getInt(0);
+				cg.setOnClickListener(new OnClickListener() {
+
+					@Override
+					public void onClick(View v) {
+
+						Intent intent = new Intent(HistoryActivity.this, VisuPagerActivity.class);		
+						Bundle objetbunble = new Bundle();
+						objetbunble.putString("id", ""+idC);
+						intent.putExtras(objetbunble);
+						startActivity(intent);
+					}
+				});
+				cards.addCard(cg);
+
+				c.moveToNext();
+			}
+		}
+
+		cards.refresh();
+	}
+
+	@Override
+	public void onCardSwiped(Card card, View layout) {
+		if(card instanceof CardGame)
+		{
+			int id = ((CardGame)card).get_id();
+			ToolsBDD.getInstance(getApplicationContext()).removePartie(id);
+			saveId = id;
+			saveWinner = ((CardGame)card).get_winner();
+			saveDisposition = ((CardGame)card).get_disposition();
+			saveFromCards = true;
+			mUndoBarController.showUndoBar(
+	                false,
+	                getString(R.string.undobar_sample_message),
+	                null);
+		}
+	}
+
+	int saveId = -1;
+	int saveWinner = -1;
+	String saveDisposition = "";
+	boolean saveFromCards = false;
+	@Override
+	public void onUndo(Parcelable token) {
+		
+		ToolsBDD.getInstance(this).insertPartie(saveId,saveWinner,saveDisposition);
+		if(saveFromCards)
+			createCards();
+		else {
+			//createList();
+
+			HashMap<String, String> map = new HashMap<String, String>();
+
+			int n = saveWinner;
+			if(n == MainActivity.BLUE_PLAYER)
+			{
+				map = new HashMap<String, String>();
+				map.put("titre", "N°"+saveId+" - "+getString(R.string.win));
+				map.put("description", getString(R.string.winb));
+				map.put("img", String.valueOf(R.drawable.croix));
+			}
+			else if(n == MainActivity.RED_PLAYER){
+				map = new HashMap<String, String>();
+				map.put("titre", "N°"+saveId+" - "+getString(R.string.loose));
+				map.put("description", getString(R.string.winr));
+				map.put("img", String.valueOf(R.drawable.cercle));
+			}
+			else {
+				map = new HashMap<String, String>();
+				map.put("titre", "N°"+saveId+" - "+getString(R.string.equal));
+				map.put("description", getString(R.string.equaltry));
+				map.put("img", String.valueOf(R.drawable.icon));
+			}
+	
+			map.put("winner", n+"");
+			map.put("disposition", saveDisposition);
+			
+			listItem.add(findCorrectPlace(map),map);
+			mSchedule.notifyDataSetChanged();
+		}
+	}
+
+	private int findCorrectPlace(HashMap<String, String> map) {
+		
+		int res = 0;
+		int toinsertid =Integer.parseInt(map.get("titre").split("N°")[1].split(" ")[0]);
+		for(res = 0 ; res < listItem.size() ; res++)
+		{
+			String titleCurrent = listItem.get(res).get("titre");
+			int currentid = Integer.parseInt(titleCurrent.split("N°")[1].split(" ")[0]);
+			if(toinsertid <= currentid)
+			{
+				break;
+			}
+		}
+		return res;
+	}
 }
