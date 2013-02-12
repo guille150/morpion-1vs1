@@ -75,5 +75,5 @@
     <string name="charteneeds">Deux parties sont nécessaires pour afficher le graphique</string>
     <string name="undobar_sample_message">Partie supprimée.</string>
     <string name="undo">Annuler</string>
-
+	<string name="m7">Nouvelle partie</string>
 </resources>

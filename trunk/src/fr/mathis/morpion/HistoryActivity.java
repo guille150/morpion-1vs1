@@ -82,6 +82,8 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 		getSupportActionBar().setHomeButtonEnabled(true);
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+		getSupportActionBar().setTitle("");
+		
 		setContentView(R.layout.listviewcustom);
 	}
 
@@ -492,6 +494,10 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 				Toast.makeText(this, R.string.charteneeds, Toast.LENGTH_SHORT).show();
 				getSupportActionBar().setSelectedNavigationItem(0);
 			}
+		}
+		if(itemPosition==3)
+		{
+			finish();
 		}
 
 		return false;

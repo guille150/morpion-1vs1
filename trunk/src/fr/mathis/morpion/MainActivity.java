@@ -96,10 +96,6 @@ OnClosedListener {
 		.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
 		menu.getItem(0).setVisible(false);
 
-		menu.add(R.string.ctrlz).setIcon(R.drawable.content_edit2)
-		.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
-		menu.getItem(1).setVisible(false);
-
 		menu.add(R.string.menupref).setIcon(R.drawable.action_settings2)
 		.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
 
@@ -116,7 +112,6 @@ OnClosedListener {
 			annuler();
 			if (annulerList.size() == 0) {
 				m.getItem(0).setVisible(false);
-				m.getItem(1).setVisible(false);
 			}
 		}
 		if (item.getTitle().toString().compareTo(getString(R.string.menupref)) == 0) {
@@ -182,7 +177,6 @@ OnClosedListener {
 			
 			if (m != null) {
 				m.getItem(0).setVisible(false);
-				m.getItem(1).setVisible(false);
 			}
 			menu.invalidate();
 		}
@@ -285,7 +279,6 @@ OnClosedListener {
 
 		if (m != null) {
 			m.getItem(0).setVisible(false);
-			m.getItem(1).setVisible(false);
 		}
 
 		menu.invalidate();
@@ -358,7 +351,6 @@ OnClosedListener {
 
 					if (m != null) {
 						m.getItem(0).setVisible(true);
-						m.getItem(1).setVisible(true);
 					}
 
 					tabIB[i][j].setImageDrawable(d);
