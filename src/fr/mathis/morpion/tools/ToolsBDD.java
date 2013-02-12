@@ -20,7 +20,7 @@ public class ToolsBDD {
 	
 	public ToolsBDD(Context context)
 	{
-		database = new MyDBOpenHelper(context, "morpion.db", null, 4);
+		database = new MyDBOpenHelper(context, "morpion.db", null, 5);
 		open();
 	}
 	
@@ -45,11 +45,18 @@ public class ToolsBDD {
 	{
 		return bdd;
 	}
-	
-	
-	
+
 	public long insertPartie(int winner, String disposition){
 		ContentValues values = new ContentValues();
+		values.put("id", getNbPartieNumber()+1);
+		values.put("winner", winner);
+		values.put("disposition", disposition);
+		return bdd.insert("partie", null, values);
+	}
+	
+	public long insertPartie(int id, int winner, String disposition){
+		ContentValues values = new ContentValues();
+		values.put("id", id);
 		values.put("winner", winner);
 		values.put("disposition", disposition);
 		return bdd.insert("partie", null, values);
@@ -105,6 +112,20 @@ public class ToolsBDD {
 	
 	public int getNbPartie(){
 		int res = 0;
+			Cursor c = bdd.query("partie", new String[] {"COALESCE(count(id),0)"}, null, null, null, null, null);
+			if (c.getCount() == 0)
+				return 0;
+			else 
+			{
+				c.moveToFirst();
+				res =  c.getInt(0);
+			}
+		
+		return res;
+	}
+	
+	public int getNbPartieNumber(){
+		int res = 0;
 			Cursor c = bdd.query("partie", new String[] {"COALESCE(max(id),0)"}, null, null, null, null, null);
 			if (c.getCount() == 0)
 				return 0;
@@ -133,14 +154,13 @@ public class ToolsBDD {
 	
 	public Cursor getAllParties()
 	{
-		Cursor c = bdd.query("partie", new String[] {"id","winner"}, null, null, null, null, null);
+		Cursor c = bdd.query("partie", new String[] {"id","winner","disposition"}, null, null, null, null, null);
 		return c;
 	}
 	
 	public void resetTable()
 	{
 		bdd.execSQL("DELETE FROM partie;");
-		bdd.execSQL("DELETE FROM sqlite_sequence;");
 	}
 	
 	public static void backupDatabase() throws IOException {
@@ -162,6 +182,19 @@ public class ToolsBDD {
 	    output.flush();
 	    output.close();
 	    fis.close();
+	}
+
+	public int getWinner(int id) {
+		int res = -1;
+		Cursor c = bdd.query("partie", new String[] {"winner"}, "id = "+id, null, null, null, null);
+		if (c.getCount() == 0)
+			return res;
+		else 
+		{
+			c.moveToFirst();
+			res =  c.getInt(0);
+		}	
+		return res;	
 	}
 
 

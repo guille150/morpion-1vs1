@@ -1,15 +1,38 @@
-<?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/layoutswipe"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent" >
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingBottom="16dp" >
 
-    <TableLayout
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center" >
+        android:gravity="center_vertical"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp" >
 
+        <TextView
+            android:id="@+id/title"
+            style="@style/CardTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/app_name" />
+    </LinearLayout>
 
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="4dp"
+        android:background="@color/stroke" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/selectable_background_cardbank"
+        android:gravity="center_vertical"
+        android:padding="4dp"
+        android:orientation="vertical" >
 
         <LinearLayout
             android:id="@+id/linearLayout2"
@@ -42,7 +65,7 @@
 
         <LinearLayout
             android:id="@+id/linearLayout3"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_horizontal" >
 
@@ -70,7 +93,7 @@
 
         <LinearLayout
             android:id="@+id/linearLayout4"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_horizontal" >
 
@@ -95,6 +118,6 @@
                 android:contentDescription="@string/nothing"
                 android:src="@drawable/transparent" />
         </LinearLayout>
-    </TableLayout>
+    </LinearLayout>
 
-</ScrollView>
+</LinearLayout>
