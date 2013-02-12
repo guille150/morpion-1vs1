@@ -75,5 +75,5 @@
     <string name="charteneeds">You need to do at least two games in order to display the chart</string>
     <string name="undobar_sample_message">Game deleted.</string>
     <string name="undo">Undo</string>
-
+	<string name="m7">New game</string>
 </resources>

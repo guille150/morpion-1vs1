@@ -27,6 +27,7 @@ public class VisuFragment extends SherlockFragment {
 	int id = 0;
 	int w = 0;
 	ImageButton[][] tabIB;
+	int[][] tabVal;
 	View v;
 
 	public static VisuFragment newInstance(int id) {
@@ -93,6 +94,7 @@ public class VisuFragment extends SherlockFragment {
 		}
 
 		tabIB = new ImageButton[3][3];
+		tabVal = new int[3][3];
 		tabIB[0][0] = (ImageButton) v.findViewById(R.id.imageButton1);
 		tabIB[0][1] = (ImageButton) v.findViewById(R.id.imageButton2);
 		tabIB[0][2] = (ImageButton) v.findViewById(R.id.imageButton3);
@@ -114,16 +116,55 @@ public class VisuFragment extends SherlockFragment {
 				if (val[i][j] == MainActivity.BLUE_PLAYER) {
 					Drawable d = getResources().getDrawable(R.drawable.croix);
 					tabIB[i][j].setImageDrawable(d);
-				}
-				if (val[i][j] == MainActivity.RED_PLAYER) {
+					tabVal[i][j] = MainActivity.BLUE_PLAYER;
+				} else if (val[i][j] == MainActivity.RED_PLAYER) {
 					Drawable d = getResources().getDrawable(R.drawable.cercle);
 					tabIB[i][j].setImageDrawable(d);
+					tabVal[i][j] = MainActivity.RED_PLAYER;
+				} else {
+					tabVal[i][j] = MainActivity.NONE_PLAYER;
 				}
 			}
 		}
 		recalculateSize();
-
+		checkWinner();
 		return v;
+	}
+
+	private void checkWinner() {
+		if (tabVal[0][0] == tabVal[0][1] && tabVal[0][1] == tabVal[0][2] && tabVal[0][2] != MainActivity.NONE_PLAYER) {
+			tabIB[0][0].setBackgroundResource(R.drawable.btn_default_normal_holo_light);
+			tabIB[0][1].setBackgroundResource(R.drawable.btn_default_normal_holo_light);
+			tabIB[0][2].setBackgroundResource(R.drawable.btn_default_normal_holo_light);
+		} else if (tabVal[1][0] == tabVal[1][1] && tabVal[1][1] == tabVal[1][2] && tabVal[1][2] != MainActivity.NONE_PLAYER) {
+			tabIB[1][0].setBackgroundResource(R.drawable.btn_default_normal_holo_light);
+			tabIB[1][1].setBackgroundResource(R.drawable.btn_default_normal_holo_light);
+			tabIB[1][2].setBackgroundResource(R.drawable.btn_default_normal_holo_light);
+		} else if (tabVal[2][0] == tabVal[2][1] && tabVal[2][1] == tabVal[2][2] && tabVal[2][2] != MainActivity.NONE_PLAYER) {
+			tabIB[2][0].setBackgroundResource(R.drawable.btn_default_normal_holo_light);
+			tabIB[2][1].setBackgroundResource(R.drawable.btn_default_normal_holo_light);
+			tabIB[2][2].setBackgroundResource(R.drawable.btn_default_normal_holo_light);
+		} else if (tabVal[0][0] == tabVal[1][0] && tabVal[1][0] == tabVal[2][0] && tabVal[2][0] != MainActivity.NONE_PLAYER) {
+			tabIB[0][0].setBackgroundResource(R.drawable.btn_default_normal_holo_light);
+			tabIB[1][0].setBackgroundResource(R.drawable.btn_default_normal_holo_light);
+			tabIB[2][0].setBackgroundResource(R.drawable.btn_default_normal_holo_light);
+		} else if (tabVal[0][1] == tabVal[1][1] && tabVal[1][1] == tabVal[2][1] && tabVal[2][1] != MainActivity.NONE_PLAYER) {
+			tabIB[0][1].setBackgroundResource(R.drawable.btn_default_normal_holo_light);
+			tabIB[1][1].setBackgroundResource(R.drawable.btn_default_normal_holo_light);
+			tabIB[2][1].setBackgroundResource(R.drawable.btn_default_normal_holo_light);
+		} else if (tabVal[0][2] == tabVal[1][2] && tabVal[1][2] == tabVal[2][2] && tabVal[2][2] != MainActivity.NONE_PLAYER) {
+			tabIB[0][2].setBackgroundResource(R.drawable.btn_default_normal_holo_light);
+			tabIB[1][2].setBackgroundResource(R.drawable.btn_default_normal_holo_light);
+			tabIB[1][2].setBackgroundResource(R.drawable.btn_default_normal_holo_light);
+		} else if (tabVal[0][0] == tabVal[1][1] && tabVal[1][1] == tabVal[2][2] && tabVal[2][2] != MainActivity.NONE_PLAYER) {
+			tabIB[0][0].setBackgroundResource(R.drawable.btn_default_normal_holo_light);
+			tabIB[1][1].setBackgroundResource(R.drawable.btn_default_normal_holo_light);
+			tabIB[2][2].setBackgroundResource(R.drawable.btn_default_normal_holo_light);
+		} else if (tabVal[2][0] == tabVal[1][1] && tabVal[1][1] == tabVal[0][2] && tabVal[0][2] != MainActivity.NONE_PLAYER) {
+			tabIB[2][0].setBackgroundResource(R.drawable.btn_default_normal_holo_light);
+			tabIB[1][1].setBackgroundResource(R.drawable.btn_default_normal_holo_light);
+			tabIB[0][2].setBackgroundResource(R.drawable.btn_default_normal_holo_light);
+		}
 	}
 
 	public void recalculateSize() {

@@ -9,6 +9,7 @@
         <item>@string/m4</item>
         <item>@string/m5</item>
         <item>@string/m6</item>
+        <item>@string/m7</item>
     </string-array>
 
 </resources>
