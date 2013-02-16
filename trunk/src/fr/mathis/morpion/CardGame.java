@@ -159,7 +159,7 @@ public class CardGame extends Card {
 		} else if (tabVal[0][2] == tabVal[1][2] && tabVal[1][2] == tabVal[2][2] && tabVal[2][2] != MainActivity.NONE_PLAYER) {
 			tabIB[0][2].setBackgroundResource(R.drawable.btn_default_normal_holo_light);
 			tabIB[1][2].setBackgroundResource(R.drawable.btn_default_normal_holo_light);
-			tabIB[1][2].setBackgroundResource(R.drawable.btn_default_normal_holo_light);
+			tabIB[2][2].setBackgroundResource(R.drawable.btn_default_normal_holo_light);
 		} else if (tabVal[0][0] == tabVal[1][1] && tabVal[1][1] == tabVal[2][2] && tabVal[2][2] != MainActivity.NONE_PLAYER) {
 			tabIB[0][0].setBackgroundResource(R.drawable.btn_default_normal_holo_light);
 			tabIB[1][1].setBackgroundResource(R.drawable.btn_default_normal_holo_light);

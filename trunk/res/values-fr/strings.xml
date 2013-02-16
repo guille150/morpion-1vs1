@@ -53,7 +53,7 @@
     <string name="blue">C\'est à votre tour</string>
     <string name="red">C\'est à votre adversaire</string>
     <string name="over">Terminé</string>
-    <string name="saved">Partie sauvegardé dans l\'historique</string>
+    <string name="saved">Partie sauvegardée dans l\'historique</string>
     <string name="ctrlz">Annuler</string>
     <string name="restart">Recommencer</string>
     <string name="newgame">Fin de partie</string>
