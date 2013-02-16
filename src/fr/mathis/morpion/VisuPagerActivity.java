@@ -77,9 +77,9 @@ public class VisuPagerActivity extends SherlockFragmentActivity implements OnPag
 		switch (itemId) {
 		case android.R.id.home:
 			finish();
-			break;
+			return true;
 		}
-		return true;
+		return super.onMenuItemSelected(featureId, item);
 	}
 
 	private class ScreenSlidePagerAdapter extends FragmentStatePagerAdapter {

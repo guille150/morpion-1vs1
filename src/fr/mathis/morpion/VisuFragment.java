@@ -2,10 +2,16 @@ package fr.mathis.morpion;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.MediaStore.Images;
 import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.LayoutInflater;
@@ -16,14 +22,17 @@ import android.view.ViewTreeObserver;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.widget.ImageButton;
 import android.widget.ScrollView;
-import android.widget.TextView;
 
 import com.actionbarsherlock.app.SherlockFragment;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
 
 import fr.mathis.morpion.tools.ToolsBDD;
 
 public class VisuFragment extends SherlockFragment {
 
+	private static final int MENU_SHARE = 0;
 	int id = 0;
 	int w = 0;
 	ImageButton[][] tabIB;
@@ -46,8 +55,48 @@ public class VisuFragment extends SherlockFragment {
 	public void onCreate(Bundle savedInstanceState) {
 
 		id = getArguments().getInt("id");
-
+		setHasOptionsMenu(true);
 		super.onCreate(savedInstanceState);
+	}
+
+	@Override
+	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+		menu.add(0, MENU_SHARE, 0, R.string.share).setIcon(R.drawable.social_share2).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+		super.onCreateOptionsMenu(menu, inflater);
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		int itemId = item.getItemId();
+		switch (itemId) {
+		case MENU_SHARE:
+			generateImageThenShare();
+			return true;
+		}
+		return super.onOptionsItemSelected(item);
+	}
+
+	private void generateImageThenShare() {
+		View viewToPrint = v.findViewById(R.id.screenshot);
+		Bitmap bmpToShare = getBitmapFromView(viewToPrint);
+				
+		Intent share = new Intent(Intent.ACTION_SEND);
+		share.setType("image/jpeg");
+		String url = Images.Media.insertImage(getActivity().getContentResolver(), bmpToShare, "share", null);
+		share.putExtra(Intent.EXTRA_STREAM, Uri.parse(url));
+		startActivity(Intent.createChooser(share, getString(R.string.sharewith)));
+	}
+	
+	public static Bitmap getBitmapFromView(View view) {
+	    Bitmap returnedBitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(),Bitmap.Config.ARGB_8888);
+	    Canvas canvas = new Canvas(returnedBitmap);
+	    Drawable bgDrawable =view.getBackground();
+	    if (bgDrawable!=null) 
+	        bgDrawable.draw(canvas);
+	    else 
+	        canvas.drawColor(Color.WHITE);
+	    view.draw(canvas);
+	    return returnedBitmap;
 	}
 
 	@SuppressWarnings("deprecation")
@@ -155,7 +204,7 @@ public class VisuFragment extends SherlockFragment {
 		} else if (tabVal[0][2] == tabVal[1][2] && tabVal[1][2] == tabVal[2][2] && tabVal[2][2] != MainActivity.NONE_PLAYER) {
 			tabIB[0][2].setBackgroundResource(R.drawable.btn_default_normal_holo_light);
 			tabIB[1][2].setBackgroundResource(R.drawable.btn_default_normal_holo_light);
-			tabIB[1][2].setBackgroundResource(R.drawable.btn_default_normal_holo_light);
+			tabIB[2][2].setBackgroundResource(R.drawable.btn_default_normal_holo_light);
 		} else if (tabVal[0][0] == tabVal[1][1] && tabVal[1][1] == tabVal[2][2] && tabVal[2][2] != MainActivity.NONE_PLAYER) {
 			tabIB[0][0].setBackgroundResource(R.drawable.btn_default_normal_holo_light);
 			tabIB[1][1].setBackgroundResource(R.drawable.btn_default_normal_holo_light);
