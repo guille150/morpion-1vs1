@@ -7,12 +7,26 @@
         <item name="android:imageButtonStyle">@style/ImageButtonAppTheme</item>
     </style>
 
+    <style name="AppThemeDark" parent="@style/Theme.Sherlock">
+        <item name="android:listChoiceIndicatorMultiple">@drawable/btn_check_holo_dark</item>
+        <item name="android:buttonStyle">@style/ButtonAppThemeDark</item>
+        <item name="android:imageButtonStyle">@style/ImageButtonAppThemeDark</item>
+    </style>
+
     <style name="ButtonAppTheme" parent="android:Widget.Holo.Light.Button">
         <item name="android:background">@drawable/btn_default_holo_light</item>
     </style>
 
     <style name="ImageButtonAppTheme" parent="android:Widget.Holo.Light.ImageButton">
         <item name="android:background">@drawable/btn_default_holo_light</item>
+    </style>
+
+    <style name="ButtonAppThemeDark" parent="android:Widget.Holo.Button">
+        <item name="android:background">@drawable/btn_default_holo_dark</item>
+    </style>
+
+    <style name="ImageButtonAppThemeDark" parent="android:Widget.Holo.ImageButton">
+        <item name="android:background">@drawable/btn_default_holo_dark</item>
     </style>
 
 </resources>
