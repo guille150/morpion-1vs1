@@ -75,5 +75,12 @@
     <string name="charteneeds">Deux parties sont nécessaires pour afficher le graphique</string>
     <string name="undobar_sample_message">Partie supprimée.</string>
     <string name="undo">Annuler</string>
-	<string name="m7">Nouvelle partie</string>
+    <string name="m7">Nouvelle partie</string>
+    <string name="chossetheme">Utiliser le thème sombre</string>
+    <string name="sc1">Swype</string>
+    <string name="sc2">Glisser votre doigt vers la gauche ou la droite pour supprimer la partie.</string>
+    <string name="sc3">Changer le thème</string>
+    <string name="sc4">Cliquer sur la case à cocher pour activer le thème sombre, vous pourrez revenir au thème clair en revenant sur cet écran.</string>
+    <string name="sc5">Accéder à l\'écran des préférences pour avoir la possibilité de passer du thème clair au sombre.</string>
+
 </resources>

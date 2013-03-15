@@ -76,4 +76,11 @@
     <string name="undobar_sample_message">Game deleted.</string>
     <string name="undo">Undo</string>
 	<string name="m7">New game</string>
+	<string name="delete">Supprimer</string>
+	<string name="chossetheme">Use the Dark theme</string>
+	<string name="sc1">Swype</string>
+	<string name="sc2">Swype to the left or the right in order to remove this game from the list.</string>
+	<string name="sc3">Change the theme</string>
+	<string name="sc4">Check the box to activate the dark theme, go back to this screen and click again to activate the light theme.</string>
+	<string name="sc5">Show the preference screen to change between the light and dark theme.</string>
 </resources>

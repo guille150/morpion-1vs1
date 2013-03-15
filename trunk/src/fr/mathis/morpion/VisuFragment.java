@@ -3,6 +3,7 @@ package fr.mathis.morpion;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -11,6 +12,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.provider.MediaStore.Images;
 import android.util.DisplayMetrics;
 import android.view.Display;
@@ -38,6 +40,7 @@ public class VisuFragment extends SherlockFragment {
 	ImageButton[][] tabIB;
 	int[][] tabVal;
 	View v;
+	private boolean isDark;
 
 	public static VisuFragment newInstance(int id) {
 		VisuFragment fragment = new VisuFragment();
@@ -54,6 +57,9 @@ public class VisuFragment extends SherlockFragment {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 
+		SharedPreferences mgr = PreferenceManager.getDefaultSharedPreferences(getActivity());
+		isDark = mgr.getBoolean("isDark", false);
+
 		id = getArguments().getInt("id");
 		setHasOptionsMenu(true);
 		super.onCreate(savedInstanceState);
@@ -61,7 +67,7 @@ public class VisuFragment extends SherlockFragment {
 
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-		menu.add(0, MENU_SHARE, 0, R.string.share).setIcon(R.drawable.social_share2).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+		menu.add(0, MENU_SHARE, 0, R.string.share).setIcon(isDark ? R.drawable.ic_action_sharedark : R.drawable.ic_action_share).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
 		super.onCreateOptionsMenu(menu, inflater);
 	}
 
@@ -182,37 +188,37 @@ public class VisuFragment extends SherlockFragment {
 
 	private void checkWinner() {
 		if (tabVal[0][0] == tabVal[0][1] && tabVal[0][1] == tabVal[0][2] && tabVal[0][2] != MainActivity.NONE_PLAYER) {
-			tabIB[0][0].setBackgroundResource(R.drawable.btn_default_normal_holo_light);
-			tabIB[0][1].setBackgroundResource(R.drawable.btn_default_normal_holo_light);
-			tabIB[0][2].setBackgroundResource(R.drawable.btn_default_normal_holo_light);
+			tabIB[0][0].setBackgroundResource(isDark ? R.drawable.btn_default_normal_holo_dark : R.drawable.btn_default_normal_holo_light);
+			tabIB[0][1].setBackgroundResource(isDark ? R.drawable.btn_default_normal_holo_dark : R.drawable.btn_default_normal_holo_light);
+			tabIB[0][2].setBackgroundResource(isDark ? R.drawable.btn_default_normal_holo_dark : R.drawable.btn_default_normal_holo_light);
 		} else if (tabVal[1][0] == tabVal[1][1] && tabVal[1][1] == tabVal[1][2] && tabVal[1][2] != MainActivity.NONE_PLAYER) {
-			tabIB[1][0].setBackgroundResource(R.drawable.btn_default_normal_holo_light);
-			tabIB[1][1].setBackgroundResource(R.drawable.btn_default_normal_holo_light);
-			tabIB[1][2].setBackgroundResource(R.drawable.btn_default_normal_holo_light);
+			tabIB[1][0].setBackgroundResource(isDark ? R.drawable.btn_default_normal_holo_dark : R.drawable.btn_default_normal_holo_light);
+			tabIB[1][1].setBackgroundResource(isDark ? R.drawable.btn_default_normal_holo_dark : R.drawable.btn_default_normal_holo_light);
+			tabIB[1][2].setBackgroundResource(isDark ? R.drawable.btn_default_normal_holo_dark : R.drawable.btn_default_normal_holo_light);
 		} else if (tabVal[2][0] == tabVal[2][1] && tabVal[2][1] == tabVal[2][2] && tabVal[2][2] != MainActivity.NONE_PLAYER) {
-			tabIB[2][0].setBackgroundResource(R.drawable.btn_default_normal_holo_light);
-			tabIB[2][1].setBackgroundResource(R.drawable.btn_default_normal_holo_light);
-			tabIB[2][2].setBackgroundResource(R.drawable.btn_default_normal_holo_light);
+			tabIB[2][0].setBackgroundResource(isDark ? R.drawable.btn_default_normal_holo_dark : R.drawable.btn_default_normal_holo_light);
+			tabIB[2][1].setBackgroundResource(isDark ? R.drawable.btn_default_normal_holo_dark : R.drawable.btn_default_normal_holo_light);
+			tabIB[2][2].setBackgroundResource(isDark ? R.drawable.btn_default_normal_holo_dark : R.drawable.btn_default_normal_holo_light);
 		} else if (tabVal[0][0] == tabVal[1][0] && tabVal[1][0] == tabVal[2][0] && tabVal[2][0] != MainActivity.NONE_PLAYER) {
-			tabIB[0][0].setBackgroundResource(R.drawable.btn_default_normal_holo_light);
-			tabIB[1][0].setBackgroundResource(R.drawable.btn_default_normal_holo_light);
-			tabIB[2][0].setBackgroundResource(R.drawable.btn_default_normal_holo_light);
+			tabIB[0][0].setBackgroundResource(isDark ? R.drawable.btn_default_normal_holo_dark : R.drawable.btn_default_normal_holo_light);
+			tabIB[1][0].setBackgroundResource(isDark ? R.drawable.btn_default_normal_holo_dark : R.drawable.btn_default_normal_holo_light);
+			tabIB[2][0].setBackgroundResource(isDark ? R.drawable.btn_default_normal_holo_dark : R.drawable.btn_default_normal_holo_light);
 		} else if (tabVal[0][1] == tabVal[1][1] && tabVal[1][1] == tabVal[2][1] && tabVal[2][1] != MainActivity.NONE_PLAYER) {
-			tabIB[0][1].setBackgroundResource(R.drawable.btn_default_normal_holo_light);
-			tabIB[1][1].setBackgroundResource(R.drawable.btn_default_normal_holo_light);
-			tabIB[2][1].setBackgroundResource(R.drawable.btn_default_normal_holo_light);
+			tabIB[0][1].setBackgroundResource(isDark ? R.drawable.btn_default_normal_holo_dark : R.drawable.btn_default_normal_holo_light);
+			tabIB[1][1].setBackgroundResource(isDark ? R.drawable.btn_default_normal_holo_dark : R.drawable.btn_default_normal_holo_light);
+			tabIB[2][1].setBackgroundResource(isDark ? R.drawable.btn_default_normal_holo_dark : R.drawable.btn_default_normal_holo_light);
 		} else if (tabVal[0][2] == tabVal[1][2] && tabVal[1][2] == tabVal[2][2] && tabVal[2][2] != MainActivity.NONE_PLAYER) {
-			tabIB[0][2].setBackgroundResource(R.drawable.btn_default_normal_holo_light);
-			tabIB[1][2].setBackgroundResource(R.drawable.btn_default_normal_holo_light);
-			tabIB[2][2].setBackgroundResource(R.drawable.btn_default_normal_holo_light);
+			tabIB[0][2].setBackgroundResource(isDark ? R.drawable.btn_default_normal_holo_dark : R.drawable.btn_default_normal_holo_light);
+			tabIB[1][2].setBackgroundResource(isDark ? R.drawable.btn_default_normal_holo_dark : R.drawable.btn_default_normal_holo_light);
+			tabIB[2][2].setBackgroundResource(isDark ? R.drawable.btn_default_normal_holo_dark : R.drawable.btn_default_normal_holo_light);
 		} else if (tabVal[0][0] == tabVal[1][1] && tabVal[1][1] == tabVal[2][2] && tabVal[2][2] != MainActivity.NONE_PLAYER) {
-			tabIB[0][0].setBackgroundResource(R.drawable.btn_default_normal_holo_light);
-			tabIB[1][1].setBackgroundResource(R.drawable.btn_default_normal_holo_light);
-			tabIB[2][2].setBackgroundResource(R.drawable.btn_default_normal_holo_light);
+			tabIB[0][0].setBackgroundResource(isDark ? R.drawable.btn_default_normal_holo_dark : R.drawable.btn_default_normal_holo_light);
+			tabIB[1][1].setBackgroundResource(isDark ? R.drawable.btn_default_normal_holo_dark : R.drawable.btn_default_normal_holo_light);
+			tabIB[2][2].setBackgroundResource(isDark ? R.drawable.btn_default_normal_holo_dark : R.drawable.btn_default_normal_holo_light);
 		} else if (tabVal[2][0] == tabVal[1][1] && tabVal[1][1] == tabVal[0][2] && tabVal[0][2] != MainActivity.NONE_PLAYER) {
-			tabIB[2][0].setBackgroundResource(R.drawable.btn_default_normal_holo_light);
-			tabIB[1][1].setBackgroundResource(R.drawable.btn_default_normal_holo_light);
-			tabIB[0][2].setBackgroundResource(R.drawable.btn_default_normal_holo_light);
+			tabIB[2][0].setBackgroundResource(isDark ? R.drawable.btn_default_normal_holo_dark : R.drawable.btn_default_normal_holo_light);
+			tabIB[1][1].setBackgroundResource(isDark ? R.drawable.btn_default_normal_holo_dark : R.drawable.btn_default_normal_holo_light);
+			tabIB[0][2].setBackgroundResource(isDark ? R.drawable.btn_default_normal_holo_dark : R.drawable.btn_default_normal_holo_light);
 		}
 	}
 

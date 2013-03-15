@@ -1,7 +1,9 @@
 package fr.mathis.morpion;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
+import android.preference.PreferenceManager;
 import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.LayoutInflater;
@@ -67,7 +69,10 @@ public class CardGame extends Card {
 
 	@Override
 	public View getCardContent(Context context) {
-		View view = LayoutInflater.from(context).inflate(R.layout.cardgame, null);
+		SharedPreferences mgr = PreferenceManager.getDefaultSharedPreferences(context);
+		boolean isDark = mgr.getBoolean("isDark", false);
+		
+		View view = LayoutInflater.from(context).inflate(isDark ? R.layout.cardgamedark : R.layout.cardgame, null);
 		((TextView) view.findViewById(R.id.title)).setText(_title);
 
 		String resultat = _disposition;

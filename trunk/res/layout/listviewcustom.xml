@@ -14,7 +14,6 @@
         android:id="@+id/cardsview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/abs__background_holo_light"
         android:visibility="gone" />
 
     <com.michaelpardo.android.widget.chartview.ChartView

@@ -3,6 +3,7 @@ package fr.mathis.morpion;
 import java.util.ArrayList;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -13,6 +14,7 @@ import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -37,14 +39,16 @@ import com.actionbarsherlock.app.ActionBar.OnNavigationListener;
 import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
+import com.github.espiandev.showcaseview.ShowcaseView;
+import com.github.espiandev.showcaseview.ShowcaseView.OnShowcaseEventListener;
 import com.slidingmenu.lib.SlidingMenu;
 import com.slidingmenu.lib.SlidingMenu.OnClosedListener;
 import com.slidingmenu.lib.SlidingMenu.OnOpenedListener;
 
+import fr.mathis.morpion.tools.StateHolder;
 import fr.mathis.morpion.tools.ToolsBDD;
 
-public class MainActivity extends SherlockActivity implements OnNavigationListener, OnClickListener, OnCheckedChangeListener, OnOpenedListener,
-OnClosedListener {
+public class MainActivity extends SherlockActivity implements OnNavigationListener, OnClickListener, OnCheckedChangeListener, OnOpenedListener, OnClosedListener {
 
 	public static final int RED_PLAYER = 4;
 	public static final int BLUE_PLAYER = 3;
@@ -61,10 +65,23 @@ OnClosedListener {
 	SlidingMenu menu;
 	boolean isMenuOpen = false;
 	CheckBox cbSaveEqual;
+	CheckBox cbTheme;
+	boolean isDark;
+	private ShowcaseView sv;
+	MenuItem miPref;
+	private ShowcaseView sv2;
+	Activity a;
+	protected ShowcaseView sv3;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
+		SharedPreferences mgr = PreferenceManager.getDefaultSharedPreferences(this);
+		isDark = mgr.getBoolean("isDark", false);
+
+		if (isDark)
+			super.setTheme(R.style.AppThemeDark);
 
 		Context context = getSupportActionBar().getThemedContext();
 		ArrayAdapter<CharSequence> list = ArrayAdapter.createFromResource(context, R.array.mainNavigationList, R.layout.sherlock_spinner_item);
@@ -82,23 +99,79 @@ OnClosedListener {
 		menu.setBehindOffsetRes(R.dimen.slidingmenu_offset);
 		menu.setFadeDegree(0.35f);
 		menu.attachToActivity(this, SlidingMenu.SLIDING_WINDOW);
-		menu.setMenu(R.layout.menu);
+		menu.setMenu(isDark ? R.layout.menudark : R.layout.menu);
 		menu.setOnOpenedListener(this);
 		menu.setOnClosedListener(this);
 		// this method is called by the action bar
 		// createNewGame();
+		a = this;
+
+		if (!StateHolder.GetMemorizedValue("showpref", this)) {
+			if (miPref != null) {
+				ShowcaseView.ConfigOptions co = new ShowcaseView.ConfigOptions();
+				co.hideOnClickOutside = true;
+				sv = ShowcaseView.insertShowcaseViewWithType(ShowcaseView.ITEM_ACTION_ITEM, miPref.getItemId(), this, R.string.sc3, R.string.sc5, co);
+				sv.setOnShowcaseEventListener(new OnShowcaseEventListener() {
+
+					@Override
+					public void onShowcaseViewShow(ShowcaseView showcaseView) {
+						// TODO Auto-generated method stub
+
+					}
+
+					@Override
+					public void onShowcaseViewHide(ShowcaseView showcaseView) {
+						sv = null;
+					}
+				});
+			} else {
+				new Async().execute();
+			}
+		}
+	}
+
+	class Async extends AsyncTask<Void, Void, Void> {
+
+		@Override
+		protected Void doInBackground(Void... params) {
+			try {
+				Thread.sleep(1500);
+			}
+			catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(Void result) {
+			ShowcaseView.ConfigOptions co = new ShowcaseView.ConfigOptions();
+			co.hideOnClickOutside = true;
+			sv = ShowcaseView.insertShowcaseViewWithType(ShowcaseView.ITEM_ACTION_ITEM, miPref.getItemId(), a, R.string.sc3, R.string.sc5, co);
+			sv.setOnShowcaseEventListener(new OnShowcaseEventListener() {
+
+				@Override
+				public void onShowcaseViewShow(ShowcaseView showcaseView) {
+					// TODO Auto-generated method stub
+
+				}
+
+				@Override
+				public void onShowcaseViewHide(ShowcaseView showcaseView) {
+					sv = null;
+				}
+			});
+		}
 	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		m = menu;
-		menu.add(R.string.restart).setIcon(R.drawable.images_rotate_right2)
-		.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
+		menu.add(R.string.restart).setIcon((isDark) ? R.drawable.ic_action_replaydark : R.drawable.ic_action_replay).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
 		menu.getItem(0).setVisible(false);
 
-		menu.add(R.string.menupref).setIcon(R.drawable.action_settings2)
-		.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
-
+		miPref = menu.add(R.string.menupref).setIcon((isDark) ? R.drawable.ic_action_prefdark : R.drawable.ic_action_pref);
+		miPref.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
 		return true;
 	}
 
@@ -115,6 +188,11 @@ OnClosedListener {
 			}
 		}
 		if (item.getTitle().toString().compareTo(getString(R.string.menupref)) == 0) {
+			if (sv != null) {
+				sv.hide();
+				sv = null;
+				StateHolder.MemorizeValue("showpref", true, this);
+			}
 			if (isMenuOpen) {
 				menu.toggle(true);
 			} else {
@@ -128,10 +206,19 @@ OnClosedListener {
 	@Override
 	public void onBackPressed() {
 
-		if (isMenuOpen) {
-			menu.toggle(true);
+		if (sv != null) {
+			sv.hide();
+			sv = null;
+		} else if (sv2 != null) {
+			sv2.hide();
+			sv2 = null;
 		} else {
-			super.onBackPressed();
+
+			if (isMenuOpen) {
+				menu.toggle(true);
+			} else {
+				super.onBackPressed();
+			}
 		}
 	}
 
@@ -153,28 +240,28 @@ OnClosedListener {
 		}
 		if (itemPosition == 2) {
 			setContentView(R.layout.help);
-			
-			Typeface tftitle = Typeface.createFromAsset(getApplication().getAssets(),"fonts/Roboto-BoldCondensed.ttf");
-			Typeface tftext = Typeface.createFromAsset(getApplication().getAssets(),"fonts/Rosario-Regular.ttf");
-			
-			((TextView)findViewById(R.id.helptitle1)).setTypeface(tftitle);
-			((TextView)findViewById(R.id.helptext1)).setTypeface(tftext);
-			
-			((TextView)findViewById(R.id.helptitle2)).setTypeface(tftitle);
-			((TextView)findViewById(R.id.helptext2)).setTypeface(tftext);
-			
-			((TextView)findViewById(R.id.helptitle3)).setTypeface(tftitle);
-			((TextView)findViewById(R.id.helptext3)).setTypeface(tftext);
-			
-			((TextView)findViewById(R.id.helptitle4)).setTypeface(tftitle);
-			((TextView)findViewById(R.id.helptext4)).setTypeface(tftext);
-			
-			((TextView)findViewById(R.id.helptitle5)).setTypeface(tftitle);
-			((TextView)findViewById(R.id.helptext5)).setTypeface(tftext);
-			
-			((TextView)findViewById(R.id.helptitle6)).setTypeface(tftitle);
-			((TextView)findViewById(R.id.helptext6)).setTypeface(tftext);
-			
+
+			Typeface tftitle = Typeface.createFromAsset(getApplication().getAssets(), "fonts/Roboto-BoldCondensed.ttf");
+			Typeface tftext = Typeface.createFromAsset(getApplication().getAssets(), "fonts/Rosario-Regular.ttf");
+
+			((TextView) findViewById(R.id.helptitle1)).setTypeface(tftitle);
+			((TextView) findViewById(R.id.helptext1)).setTypeface(tftext);
+
+			((TextView) findViewById(R.id.helptitle2)).setTypeface(tftitle);
+			((TextView) findViewById(R.id.helptext2)).setTypeface(tftext);
+
+			((TextView) findViewById(R.id.helptitle3)).setTypeface(tftitle);
+			((TextView) findViewById(R.id.helptext3)).setTypeface(tftext);
+
+			((TextView) findViewById(R.id.helptitle4)).setTypeface(tftitle);
+			((TextView) findViewById(R.id.helptext4)).setTypeface(tftext);
+
+			((TextView) findViewById(R.id.helptitle5)).setTypeface(tftitle);
+			((TextView) findViewById(R.id.helptext5)).setTypeface(tftext);
+
+			((TextView) findViewById(R.id.helptitle6)).setTypeface(tftitle);
+			((TextView) findViewById(R.id.helptext6)).setTypeface(tftext);
+
 			if (m != null) {
 				m.getItem(0).setVisible(false);
 			}
@@ -209,14 +296,19 @@ OnClosedListener {
 		setContentView(R.layout.game);
 
 		cbSaveEqual = (CheckBox) findViewById(R.id.checkBoxSaveEqual);
+		cbTheme = (CheckBox) findViewById(R.id.checkBoxSelectTheme);
 		SharedPreferences mgr = PreferenceManager.getDefaultSharedPreferences(this);
 		final boolean save = mgr.getBoolean("save", true);
-
+		final boolean isDark = mgr.getBoolean("isDark", false);
 		if (save) {
 			cbSaveEqual.setChecked(true);
 		}
 
+		if (isDark)
+			cbTheme.setChecked(true);
+
 		cbSaveEqual.setOnCheckedChangeListener(this);
+		cbTheme.setOnCheckedChangeListener(this);
 
 		nbGame = ToolsBDD.getInstance(this).getNbPartieNumber() + 1;
 		TextView tv1 = (TextView) findViewById(R.id.welcomeGame);
@@ -268,14 +360,11 @@ OnClosedListener {
 
 		if (nbGame % 2 != 0) {
 			turn = RED_PLAYER;
-		}
-		else {
+		} else {
 			turn = BLUE_PLAYER;
 		}
-		
-		
-		displayNextTurn();
 
+		displayNextTurn();
 
 		if (m != null) {
 			m.getItem(0).setVisible(false);
@@ -473,18 +562,22 @@ OnClosedListener {
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
 		super.onConfigurationChanged(newConfig);
-
-		if (getActionBar().getSelectedNavigationIndex() == 0) {
+		boolean isLandscape = true;
+		if (getSupportActionBar().getSelectedNavigationIndex() == 0) {
 			Display display = getWindowManager().getDefaultDisplay();
 
 			int ratio = 5;
 
 			if (android.os.Build.VERSION.SDK_INT > Build.VERSION_CODES.ECLAIR_MR1) {
-				if (display.getRotation() == Surface.ROTATION_0)
+				if (display.getRotation() == Surface.ROTATION_0) {
 					ratio = 3;
+					isLandscape = false;
+				}
 			} else {
-				if (display.getOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
+				if (display.getOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
 					ratio = 3;
+					isLandscape = false;
+				}
 			}
 
 			for (int i = 0; i < 3; i++) {
@@ -498,7 +591,42 @@ OnClosedListener {
 
 			recalculateSize();
 		}
+		if (sv != null)
+			sv.hide();
+		if (!StateHolder.GetMemorizedValue("showpref", this)) {
+			ShowcaseView.ConfigOptions co = new ShowcaseView.ConfigOptions();
+			co.hideOnClickOutside = true;
+			sv = ShowcaseView.insertShowcaseViewWithType(ShowcaseView.ITEM_ACTION_ITEM, miPref.getItemId(), this, "", isLandscape ? "" : "", co);
+			sv.setOnShowcaseEventListener(new OnShowcaseEventListener() {
 
+				@Override
+				public void onShowcaseViewShow(ShowcaseView showcaseView) {
+				}
+
+				@Override
+				public void onShowcaseViewHide(ShowcaseView showcaseView) {
+					sv = null;
+				}
+			});
+		}
+		if (sv2 != null)
+			sv2.hide();
+		if (isMenuOpen && !StateHolder.GetMemorizedValue("changedtheme", this)) {
+			ShowcaseView.ConfigOptions co = new ShowcaseView.ConfigOptions();
+			co.hideOnClickOutside = true;
+			sv2 = ShowcaseView.insertShowcaseView(R.id.checkBoxSelectTheme, this, "", "", co);
+			sv2.setOnShowcaseEventListener(new OnShowcaseEventListener() {
+
+				@Override
+				public void onShowcaseViewShow(ShowcaseView showcaseView) {
+				}
+
+				@Override
+				public void onShowcaseViewHide(ShowcaseView showcaseView) {
+					sv2 = null;
+				}
+			});
+		}
 	}
 
 	@Override
@@ -510,6 +638,15 @@ OnClosedListener {
 			editor.commit();
 		}
 
+		if (buttonView.getId() == R.id.checkBoxSelectTheme) {
+			SharedPreferences mgr = PreferenceManager.getDefaultSharedPreferences(this);
+			SharedPreferences.Editor editor = mgr.edit();
+			editor.putBoolean("isDark", isChecked);
+			editor.commit();
+			finish();
+			startActivity(getIntent());
+			StateHolder.MemorizeValue("changedtheme", true, getApplicationContext());
+		}
 	}
 
 	@Override
@@ -517,6 +654,22 @@ OnClosedListener {
 		isMenuOpen = true;
 		getSupportActionBar().setHomeButtonEnabled(true);
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+		if (!StateHolder.GetMemorizedValue("changedtheme", this)) {
+			ShowcaseView.ConfigOptions co = new ShowcaseView.ConfigOptions();
+			co.hideOnClickOutside = true;
+			sv2 = ShowcaseView.insertShowcaseView(R.id.checkBoxSelectTheme, this, R.string.sc3, R.string.sc4, co);
+			sv2.setOnShowcaseEventListener(new OnShowcaseEventListener() {
+				@Override
+				public void onShowcaseViewShow(ShowcaseView showcaseView) {
+				}
+
+				@Override
+				public void onShowcaseViewHide(ShowcaseView showcaseView) {
+					sv2 = null;
+				}
+			});
+		}
 	}
 
 	@Override
