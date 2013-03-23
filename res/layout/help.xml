@@ -15,6 +15,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
+            android:fontFamily="sans-serif-condansed"
             android:text="@string/aide1"
             android:textAllCaps="true"
             android:textSize="20sp" />
@@ -24,6 +25,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="32dp"
+            android:fontFamily="sans-serif-light"
             android:text="@string/aide2"
             android:textSize="16sp" />
 
@@ -31,6 +33,7 @@
             android:id="@+id/helptitle2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-condansed"
             android:text="@string/aide3"
             android:textAllCaps="true"
             android:textSize="20sp" />
@@ -40,6 +43,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="32dp"
+            android:fontFamily="sans-serif-light"
             android:text="@string/aide4"
             android:textSize="16sp" />
 
@@ -47,6 +51,7 @@
             android:id="@+id/helptitle6"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-condansed"
             android:text="@string/aide11"
             android:textAllCaps="true"
             android:textSize="20sp" />
@@ -56,6 +61,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="32dp"
+            android:fontFamily="sans-serif-light"
             android:text="@string/aide12"
             android:textSize="16sp" />
 
@@ -63,6 +69,7 @@
             android:id="@+id/helptitle3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-condansed"
             android:text="@string/aide5"
             android:textAllCaps="true"
             android:textSize="20sp" />
@@ -72,6 +79,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="32dp"
+            android:fontFamily="sans-serif-light"
             android:text="@string/aide6"
             android:textSize="16sp" />
 
@@ -79,6 +87,7 @@
             android:id="@+id/helptitle4"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-condansed"
             android:text="@string/aide7"
             android:textAllCaps="true"
             android:textSize="20sp" />
@@ -88,6 +97,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="32dp"
+            android:fontFamily="sans-serif-light"
             android:text="@string/aide8"
             android:textSize="16sp" />
 
@@ -95,6 +105,7 @@
             android:id="@+id/helptitle5"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-condansed"
             android:text="@string/aide9"
             android:textAllCaps="true"
             android:textSize="20sp" />
@@ -104,6 +115,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="32dp"
+            android:fontFamily="sans-serif-light"
             android:text="@string/aide10"
             android:textSize="16sp" />
     </TableLayout>

@@ -2,14 +2,15 @@
 
     <string-array name="mainNavigationList">
         <item>@string/m1</item>
+        <item>@string/m8</item>
         <item>@string/m2</item>
         <item>@string/m3</item>
+
     </string-array>
     <string-array name="secondNavigationList">
         <item>@string/m4</item>
         <item>@string/m5</item>
         <item>@string/m6</item>
-        <item>@string/m7</item>
     </string-array>
 
 </resources>

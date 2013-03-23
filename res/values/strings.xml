@@ -14,7 +14,7 @@
     <string name="effacer">Delete this game</string>
     <string name="voir">See the result in detail</string>
     <string name="aide1">Who starts a game ?</string>
-    <string name="aide2">You are player BLUE. The application will automatically switch between the player BLUE and the player to start the new game, it\'s only fair.</string>
+    <string name="aide2">You are player "X". The application will automatically switch between the player "X" and the player "O" to start the new game, it\'s only fair.</string>
     <string name="aide3">I have played a game and I can\'t see it in the history. Why ?</string>
     <string name="aide4">Because you didn\'t find the configuration screen. You can choose if the application should save a game with no winner.</string>
     <string name="aide5">Can I play on my own ?</string>
@@ -83,4 +83,45 @@
 	<string name="sc3">Change the theme</string>
 	<string name="sc4">Check the box to activate the dark theme, go back to this screen and click again to activate the light theme.</string>
 	<string name="sc5">Show the preference screen to change between the light and dark theme.</string>
+	<string name="m8">Via Bluetooth</string>
+	
+	<string name="s1s">Bluetooth is not Impossible to establish the connection</string>
+	<string name="s2s">Your device is already visible</string>
+	<string name="s3">Stop service</string>
+	<string name="s4">Launch service</string>
+	<string name="s5">You are not connected with your partner</string>
+	<string name="s6">Connection established</string>
+	<string name="s7">Connected :</string>
+	<string name="s8">Impossible to establish the connection</string>
+	<string name="s9">Connection lost</string>
+	<string name="s10">No device</string>
+	<string name="s11">Scan in progress…</string>
+	<string name="s12">Choose a device</string>
+	<string name="s13">No device found</string>
+	<string name="s14">Saved devices</string>
+	<string name="s15">New devices</string>
+	<string name="s16">Scann the network</string>
+	<string name="s17">The fastest begins</string>
+	<string name="s18">How to connect with your partner?</string>
+	<string name="s19">1. Turn on the bluetooth</string>
+	<string name="s20">The button below enabled your phone to be visible by other phone via bluetooth. It may be necessary for the next step.</string>
+	<string name="s21">Enable the other devices to see yours for 300s.</string>
+	<string name="s22">2. Join your two devices</string>
+	<string name="s23">The button below will display the list of phones which you have already established a connection with. If the desired one is not present, you will have to scan the network to find it.</string>
+	<string name="s24">Search your partner</string>
+	<string name="s25">Close the connection</string>
+	<string name="s26">You can turn on and off the bluetooth service with the button below.</string>
+	<string name="s27">Stop service</string>
+	<string name="s28">Primary color</string>
+	<string name="s29">Secondary coolor</string>
+	<string name="s30">c</string>
+	<string name="s31"></string>
+	<string name="s32"></string>
+	<string name="s33"></string>
+	<string name="s34"></string>
+	<string name="s35"></string>
+	<string name="s36"></string>
+	
+	
+	
 </resources>
