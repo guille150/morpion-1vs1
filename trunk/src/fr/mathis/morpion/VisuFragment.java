@@ -30,6 +30,7 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 
+import fr.mathis.morpion.tools.ColorHolder;
 import fr.mathis.morpion.tools.ToolsBDD;
 
 public class VisuFragment extends SherlockFragment {
@@ -169,11 +170,11 @@ public class VisuFragment extends SherlockFragment {
 				tabIB[i][j].setEnabled(false);
 
 				if (val[i][j] == MainActivity.BLUE_PLAYER) {
-					Drawable d = getResources().getDrawable(R.drawable.croix);
+					Drawable d = getResources().getDrawable(ColorHolder.getInstance(getActivity()).getDrawable(MainActivity.BLUE_PLAYER));
 					tabIB[i][j].setImageDrawable(d);
 					tabVal[i][j] = MainActivity.BLUE_PLAYER;
 				} else if (val[i][j] == MainActivity.RED_PLAYER) {
-					Drawable d = getResources().getDrawable(R.drawable.cercle);
+					Drawable d = getResources().getDrawable(ColorHolder.getInstance(getActivity()).getDrawable(MainActivity.RED_PLAYER));
 					tabIB[i][j].setImageDrawable(d);
 					tabVal[i][j] = MainActivity.RED_PLAYER;
 				} else {

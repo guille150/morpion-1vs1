@@ -13,6 +13,8 @@ import android.widget.TextView;
 
 import com.fima.cardsui.objects.Card;
 
+import fr.mathis.morpion.tools.ColorHolder;
+
 public class CardGame extends Card {
 
 	private int _id = 0;
@@ -121,11 +123,11 @@ public class CardGame extends Card {
 				tabIB[i][j].setEnabled(false);
 
 				if (val[i][j] == MainActivity.BLUE_PLAYER) {
-					Drawable d = _c.getResources().getDrawable(R.drawable.croix);
+					Drawable d = _c.getResources().getDrawable(ColorHolder.getInstance(_c).getDrawable(MainActivity.BLUE_PLAYER));
 					tabIB[i][j].setImageDrawable(d);
 					tabVal[i][j] = MainActivity.BLUE_PLAYER;
 				} else if (val[i][j] == MainActivity.RED_PLAYER) {
-					Drawable d = _c.getResources().getDrawable(R.drawable.cercle);
+					Drawable d = _c.getResources().getDrawable(ColorHolder.getInstance(_c).getDrawable(MainActivity.RED_PLAYER));
 					tabIB[i][j].setImageDrawable(d);
 					tabVal[i][j] = MainActivity.RED_PLAYER;
 				} else {

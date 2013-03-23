@@ -11,4 +11,8 @@
 
     <style name="AppThemeDark" parent="@style/Theme.Sherlock"></style>
 
+    <style name="AppThemeDialog" parent="@style/Theme.Sherlock.Light.Dialog"></style>
+    
+    <style name="AppThemeDialogDark" parent="@style/Theme.Sherlock.Dialog"></style>
+    
 </resources>

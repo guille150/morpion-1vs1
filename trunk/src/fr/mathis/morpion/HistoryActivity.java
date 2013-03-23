@@ -54,6 +54,7 @@ import com.michaelpardo.android.widget.chartview.LinearSeries;
 import com.michaelpardo.android.widget.chartview.LinearSeries.LinearPoint;
 import com.slidingmenu.lib.SlidingMenu;
 
+import fr.mathis.morpion.tools.ColorHolder;
 import fr.mathis.morpion.tools.StateHolder;
 import fr.mathis.morpion.tools.SwipeDismissListViewTouchListener;
 import fr.mathis.morpion.tools.ToolsBDD;
@@ -99,8 +100,6 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 
 		getSupportActionBar().setHomeButtonEnabled(true);
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-		getSupportActionBar().setTitle("");
 
 		setContentView(R.layout.listviewcustom);
 
@@ -148,19 +147,19 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 					map = new HashMap<String, String>();
 					map.put("titre", "N°" + c.getInt(0) + " - " + getString(R.string.win));
 					map.put("description", getString(R.string.winb));
-					map.put("img", String.valueOf(R.drawable.croix));
+					map.put("img", String.valueOf(ColorHolder.getInstance(this).getDrawable(MainActivity.BLUE_PLAYER)));
 					win++;
 				} else if (n == MainActivity.RED_PLAYER) {
 					map = new HashMap<String, String>();
 					map.put("titre", "N°" + c.getInt(0) + " - " + getString(R.string.loose));
 					map.put("description", getString(R.string.winr));
-					map.put("img", String.valueOf(R.drawable.cercle));
+					map.put("img", String.valueOf(ColorHolder.getInstance(this).getDrawable(MainActivity.RED_PLAYER)));
 					lost++;
 				} else {
 					map = new HashMap<String, String>();
 					map.put("titre", "N°" + c.getInt(0) + " - " + getString(R.string.equal));
 					map.put("description", getString(R.string.equaltry));
-					map.put("img", String.valueOf(R.drawable.icon));
+					map.put("img", String.valueOf(R.drawable.ic_launcher));
 					equal++;
 				}
 				map.put("winner", n + "");
@@ -710,17 +709,17 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 				map = new HashMap<String, String>();
 				map.put("titre", "N°" + saveId + " - " + getString(R.string.win));
 				map.put("description", getString(R.string.winb));
-				map.put("img", String.valueOf(R.drawable.croix));
+				map.put("img", String.valueOf(ColorHolder.getInstance(this).getDrawable(MainActivity.BLUE_PLAYER)));
 			} else if (n == MainActivity.RED_PLAYER) {
 				map = new HashMap<String, String>();
 				map.put("titre", "N°" + saveId + " - " + getString(R.string.loose));
 				map.put("description", getString(R.string.winr));
-				map.put("img", String.valueOf(R.drawable.cercle));
+				map.put("img", String.valueOf(ColorHolder.getInstance(this).getDrawable(MainActivity.RED_PLAYER)));
 			} else {
 				map = new HashMap<String, String>();
 				map.put("titre", "N°" + saveId + " - " + getString(R.string.equal));
 				map.put("description", getString(R.string.equaltry));
-				map.put("img", String.valueOf(R.drawable.icon));
+				map.put("img", String.valueOf(R.drawable.ic_launcher));
 			}
 
 			map.put("winner", n + "");
