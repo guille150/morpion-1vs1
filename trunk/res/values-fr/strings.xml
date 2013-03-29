@@ -24,7 +24,7 @@
     <string name="aide9">Qui a developpé cette application ?</string>
     <string name="aide10">Moi, Stéphane Mathis. Simplement pour m\'initier au développement sur Android, c\'est ma première application.</string>
     <string name="aide11">Qu\'est-ce qui est affiché sur le graphique ?</string>
-    <string name="aide12">La courbe bleue correspond à vos victoires, la courbe rouge aux victoires de votre adversaires et la courbe noire aux égalités. Elles vous permettent de comparer l\'évolution du score au fil des parties (axe horizontale).</string>
+    <string name="aide12">La courbe de couleur primaire correspond à vos victoires, la courbe de couleur secondaire aux victoires de votre adversaires et la courbe noire aux égalités. Elles vous permettent de comparer l\'évolution du score au fil des parties (axe horizontale).</string>
     <string name="yes">Oui</string>
     <string name="no">Non</string>
     <string name="saveText">Sauvegarder les égalités</string>
@@ -35,8 +35,8 @@
     <string name="sharetry">Morpion 1vs1 - Essaye le !</string>
     <string name="win">Victoire</string>
     <string name="loose">Défaite</string>
-    <string name="winb">Le joueur BLEU a gagné.</string>
-    <string name="winr">Le joueur ROUGE a gagné.</string>
+    <string name="winb">Vous avez gagné</string>
+    <string name="winr">Votre adversaire a gagné</string>
     <string name="equal">Egalité</string>
     <string name="equaltry">Essayez Pierre-Feuille-Ciseau-Lezard-Spock.</string>
     <string name="share1"> parties : </string>

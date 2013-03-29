@@ -24,6 +24,7 @@ import android.os.Message;
 import android.preference.PreferenceManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.Surface;
@@ -34,13 +35,13 @@ import android.view.ViewTreeObserver;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
-import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.Spinner;
@@ -118,11 +119,19 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 			super.setTheme(R.style.AppThemeDark);
 
 		Context context = getSupportActionBar().getThemedContext();
-		ArrayAdapter<CharSequence> list = ArrayAdapter.createFromResource(context, R.array.mainNavigationList, R.layout.sherlock_spinner_item);
-		list.setDropDownViewResource(R.layout.sherlock_spinner_dropdown_item);
+
+		ArrayList<AbMenu> data = new ArrayList<AbMenu>();
+		data.add(new AbMenu(isDark ? R.drawable.ic_action_spinner_partiedark : R.drawable.ic_action_spinner_partie, getString(R.string.m1), 1));
+		data.add(new AbMenu(isDark ? R.drawable.ic_action_spinner_partiemultidark : R.drawable.ic_action_spinner_partiemulti, getString(R.string.m8), 2));
+		data.add(new AbMenu(isDark ? R.drawable.ic_action_spinner_savedark : R.drawable.ic_action_spinner_save, getString(R.string.m2), 3));
+		data.add(new AbMenu(isDark ? R.drawable.ic_action_spinner_partiehelpdark : R.drawable.ic_action_spinner_partiehelp, getString(R.string.m3), 4));
+
+		AbMenuAdapter adapter = new AbMenuAdapter(context, R.layout.ab_spinner_item, data);
 
 		getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
-		getSupportActionBar().setListNavigationCallbacks(list, this);
+		getSupportActionBar().setListNavigationCallbacks(adapter, this);
+
+		getSupportActionBar().setDisplayShowTitleEnabled(false);
 
 		// configure the SlidingMenu
 		menu = new SlidingMenu(this);
@@ -284,7 +293,7 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 			}
 			menu.invalidate();
 		} else if (itemPosition == 1) {
-			getSupportActionBar().setIcon(R.drawable.ic_launcher);
+			getSupportActionBar().setIcon(R.drawable.two_player);
 			startBluetooth();
 		}
 		return false;
@@ -844,9 +853,6 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 
 	private void congratsWinner(int winner, final boolean fromBT) {
 		nbGame++;
-		if (fromBT)
-			createNewMuliGame();
-
 		if (!fromBT) {
 			playerText.setText(R.string.over);
 			playerText.setTextColor(Color.WHITE);
@@ -862,6 +868,9 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 			}
 		}
 		values = values.substring(1);
+
+		if (fromBT)
+			createNewMuliGame();
 
 		SharedPreferences mgr = PreferenceManager.getDefaultSharedPreferences(this);
 		final boolean save = mgr.getBoolean("save", true);
@@ -1121,6 +1130,87 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 			LinearLayout layout = (LinearLayout) spinView;
 			layout.setBackgroundColor(Color.parseColor((String) getItem(position)));
 			return spinView;
+		}
+	}
+
+	public class AbMenu {
+		public int icon;
+		public String title;
+		public int id;
+
+		public AbMenu() {
+			super();
+		}
+
+		public AbMenu(int icon, String title, int id) {
+			super();
+			this.icon = icon;
+			this.title = title;
+			this.id = id;
+		}
+	}
+
+	public class AbMenuAdapter extends BaseAdapter implements SpinnerAdapter {
+
+		Context context;
+		int layoutResourceId;
+		ArrayList<AbMenu> data;
+		LayoutInflater inflater;
+
+		public AbMenuAdapter(Context a, int textViewResourceId, ArrayList<AbMenu> data) {
+			// super(a, textViewResourceId, data);
+			this.data = data;
+			inflater = (LayoutInflater) a.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			this.context = a;
+			this.layoutResourceId = textViewResourceId;
+
+		}
+
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent) {
+			View v = convertView;
+			if (v == null) {
+				v = inflater.inflate(layoutResourceId, null);
+			}
+			final AbMenu item = data.get(position);
+			if (item != null) {
+				((android.widget.TextView) v.findViewById(R.id.textViewSpinner)).setText(item.title);
+				((ImageView) v.findViewById(R.id.imageViewSpinner)).setImageResource(item.icon);
+			}
+			return v;
+		}
+
+		@Override
+		public View getDropDownView(int position, View convertView, ViewGroup parent) {
+			View v = convertView;
+			if (v == null) {
+				v = inflater.inflate(layoutResourceId, null);
+			}
+			final AbMenu item = data.get(position);
+			if (item != null) {
+				((android.widget.TextView) v.findViewById(R.id.textViewSpinner)).setText(item.title);
+				((android.widget.TextView) v.findViewById(R.id.textViewSpinner)).setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16 );
+				((ImageView) v.findViewById(R.id.imageViewSpinner)).setImageResource(item.icon);
+			}
+			return v;
+		}
+
+		@Override
+		public int getCount() {
+			// TODO Auto-generated method stub
+			return data.size();
+		}
+
+		@Override
+		public Object getItem(int position) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public long getItemId(int position) {
+			// TODO Auto-generated method stub
+			return 0;
 		}
 	}
 }

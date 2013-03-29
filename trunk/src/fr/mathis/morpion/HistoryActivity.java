@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 
+import android.annotation.SuppressLint;
+import android.app.ActivityOptions;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -14,24 +16,28 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.preference.PreferenceManager;
 import android.util.TypedValue;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.Toast;
@@ -92,15 +98,21 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 		if (isDark)
 			super.setTheme(R.style.AppThemeDark);
 
-		ArrayAdapter<CharSequence> list = ArrayAdapter.createFromResource(this, R.array.secondNavigationList, R.layout.sherlock_spinner_item);
-		list.setDropDownViewResource(R.layout.sherlock_spinner_dropdown_item);
+		Context context = getSupportActionBar().getThemedContext();
+
+		ArrayList<AbMenu> data = new ArrayList<AbMenu>();
+		data.add(new AbMenu(isDark ? R.drawable.ic_action_spinner_listdark : R.drawable.ic_action_spinner_list, getString(R.string.m4), 1));
+		data.add(new AbMenu(isDark ? R.drawable.ic_action_spinner_carddark : R.drawable.ic_action_spinner_cards, getString(R.string.m5), 2));
+		data.add(new AbMenu(isDark ? R.drawable.ic_action_spinner_chartdark : R.drawable.ic_action_spinner_chart, getString(R.string.m6), 3));
+
+		AbMenuAdapter adapter = new AbMenuAdapter(context, R.layout.ab_spinner_item, data);
 
 		getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
-		getSupportActionBar().setListNavigationCallbacks(list, this);
+		getSupportActionBar().setListNavigationCallbacks(adapter, this);
 
 		getSupportActionBar().setHomeButtonEnabled(true);
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
+		getSupportActionBar().setDisplayShowTitleEnabled(false);
 		setContentView(R.layout.listviewcustom);
 
 		menu = new SlidingMenu(this);
@@ -118,7 +130,6 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 
 		lv = (ListView) findViewById(R.id.listviewperso);
 		lv.setVisibility(View.VISIBLE);
-
 		cards = (CardUI) findViewById(R.id.cardsview);
 		if (!isDark)
 			cards.setBackgroundResource(R.color.abs__background_holo_light);
@@ -282,19 +293,40 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 		finish();
 	}
 
+	@SuppressLint("NewApi")
 	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
 		if (pos.size() == 0) {
 			setSwypeListener();
 			@SuppressWarnings("unchecked")
 			HashMap<String, String> map = (HashMap<String, String>) lv.getItemAtPosition(arg2);
 			String s = map.get("titre");
+			String winner = map.get("winner");
 			currentId = Integer.parseInt(s.split("N°")[1].split(" ")[0]);
 
 			Intent intent = new Intent(HistoryActivity.this, VisuPagerActivity.class);
-			Bundle objetbunble = new Bundle();
-			objetbunble.putString("id", "" + HistoryActivity.currentId);
-			intent.putExtras(objetbunble);
-			startActivity(intent);
+			intent.putExtra("id", HistoryActivity.currentId);
+
+			Bundle b = null;
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+
+				View view = arg1.findViewById(R.id.img);
+
+				Bitmap bitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(), Bitmap.Config.ARGB_8888);
+				if (winner.compareTo("" + MainActivity.BLUE_PLAYER) == 0) {
+					bitmap.eraseColor(Color.parseColor(ColorHolder.getInstance(getApplicationContext()).getColor(MainActivity.BLUE_PLAYER)));
+					b = ActivityOptions.makeThumbnailScaleUpAnimation(view, bitmap, 0, 0).toBundle();
+				} else if (winner.compareTo("" + MainActivity.RED_PLAYER) == 0) {
+					bitmap.eraseColor(Color.parseColor(ColorHolder.getInstance(getApplicationContext()).getColor(MainActivity.RED_PLAYER)));
+					b = ActivityOptions.makeThumbnailScaleUpAnimation(view, bitmap, 0, 0).toBundle();
+				} else {
+					bitmap.eraseColor(isDark ? Color.DKGRAY : Color.LTGRAY);
+					b = ActivityOptions.makeThumbnailScaleUpAnimation(view, bitmap, 0, 0).toBundle();
+				}
+				startActivity(intent, b);
+			} else {
+				startActivity(intent);
+			}
+
 		} else {
 			if (!pos.contains(arg2)) {
 				pos.add(arg2);
@@ -458,6 +490,87 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 
 	}
 
+	public class AbMenu {
+		public int icon;
+		public String title;
+		public int id;
+
+		public AbMenu() {
+			super();
+		}
+
+		public AbMenu(int icon, String title, int id) {
+			super();
+			this.icon = icon;
+			this.title = title;
+			this.id = id;
+		}
+	}
+
+	public class AbMenuAdapter extends BaseAdapter {
+
+		Context context;
+		int layoutResourceId;
+		ArrayList<AbMenu> data;
+		LayoutInflater inflater;
+
+		public AbMenuAdapter(Context a, int textViewResourceId, ArrayList<AbMenu> data) {
+			// super(a, textViewResourceId, data);
+			this.data = data;
+			inflater = (LayoutInflater) a.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			this.context = a;
+			this.layoutResourceId = textViewResourceId;
+
+		}
+
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent) {
+			View v = convertView;
+			if (v == null) {
+				v = inflater.inflate(layoutResourceId, null);
+			}
+			final AbMenu item = data.get(position);
+			if (item != null) {
+				((android.widget.TextView) v.findViewById(R.id.textViewSpinner)).setText(item.title);
+				((ImageView) v.findViewById(R.id.imageViewSpinner)).setImageResource(item.icon);
+			}
+			return v;
+		}
+
+		@Override
+		public View getDropDownView(int position, View convertView, ViewGroup parent) {
+			View v = convertView;
+			if (v == null) {
+				v = inflater.inflate(layoutResourceId, null);
+			}
+			final AbMenu item = data.get(position);
+			if (item != null) {
+				((android.widget.TextView) v.findViewById(R.id.textViewSpinner)).setText(item.title);
+				((android.widget.TextView) v.findViewById(R.id.textViewSpinner)).setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16 );
+				((ImageView) v.findViewById(R.id.imageViewSpinner)).setImageResource(item.icon);
+			}
+			return v;
+		}
+
+		@Override
+		public int getCount() {
+			// TODO Auto-generated method stub
+			return data.size();
+		}
+
+		@Override
+		public Object getItem(int position) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public long getItemId(int position) {
+			// TODO Auto-generated method stub
+			return 0;
+		}
+	}
+
 	private ActionMode.Callback mActionModeCallback = new ActionMode.Callback() {
 
 		// Called when the action mode is created; startActionMode() was called
@@ -539,11 +652,11 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 		chartView.setVisibility(View.VISIBLE);
 		chartView.setGridLineColor(isDark ? Color.rgb(19, 133, 173) : Color.BLACK);
 		LinearSeries seriesBlue = new LinearSeries();
-		seriesBlue.setLineColor(Color.rgb(0, 148, 255));
+		seriesBlue.setLineColor(Color.parseColor(ColorHolder.getInstance(this).getColor(MainActivity.BLUE_PLAYER)));
 		seriesBlue.setLineWidth(4);
 
 		LinearSeries seriesRed = new LinearSeries();
-		seriesRed.setLineColor(Color.RED);
+		seriesRed.setLineColor(Color.parseColor(ColorHolder.getInstance(this).getColor(MainActivity.RED_PLAYER)));
 		seriesRed.setLineWidth(4);
 
 		LinearSeries seriesGreen = new LinearSeries();
@@ -658,11 +771,8 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 
 					@Override
 					public void onClick(View v) {
-
 						Intent intent = new Intent(HistoryActivity.this, VisuPagerActivity.class);
-						Bundle objetbunble = new Bundle();
-						objetbunble.putString("id", "" + idC);
-						intent.putExtras(objetbunble);
+						intent.putExtra("id", idC);
 						startActivity(intent);
 					}
 				});

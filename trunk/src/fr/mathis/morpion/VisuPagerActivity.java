@@ -89,7 +89,7 @@ public class VisuPagerActivity extends SherlockFragmentActivity implements OnPag
 		UnderlinePageIndicator titleIndicator = (UnderlinePageIndicator) findViewById(R.id.indicator);
 		titleIndicator.setViewPager(mPager);
 
-		int premsIndex = Integer.parseInt(this.getIntent().getStringExtra("id"));
+		int premsIndex = this.getIntent().getIntExtra("id",0);
 		int pos = 0;
 		Cursor c = ToolsBDD.getInstance(getApplicationContext()).getAllParties();
 		c.moveToFirst();
