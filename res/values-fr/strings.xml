@@ -62,7 +62,7 @@
     <string name="deletegame">Supprimer cette partie ?</string>
     <string name="previous">Précédent</string>
     <string name="next">Suivant</string>
-    <string name="m1">Partie</string>
+    <string name="m1">Via le même téléphone</string>
     <string name="m2">Historique</string>
     <string name="m3">Aide</string>
     <string name="empty"></string>
@@ -114,9 +114,9 @@
 	<string name="s28">Couleur primaire</string>
 	<string name="s29">Couleur secondaire</string>
 	<string name="s30"></string>
-	<string name="s31"></string>
-	<string name="s32"></string>
-	<string name="s33"></string>
+	<string name="s31">Contre l\'IA</string>
+	<string name="s32">Bienvenu !</string>
+	<string name="s33">Cette application vous permet de jouer seul contre l\'IA ou à deux joueurs, sur le même téléphone ou par Bluetooth. Pour passer d\'un mode de jeu à l\'autre, utilisez la liste de navigation. Par défaut vous êtes sur le jeu à deux joueurs sur le même téléphone.</string>
 	<string name="s34"></string>
 	<string name="s35"></string>
 	<string name="s36"></string>
