@@ -25,6 +25,8 @@
         android:layout_marginLeft="8dp"
         android:layout_marginRight="16dp"
         android:layout_toRightOf="@+id/imageViewSpinner"
-        android:text="@string/empty" />
+        android:text="@string/empty"
+        android:ellipsize="end"
+        android:singleLine="true" />
 
 </RelativeLayout>

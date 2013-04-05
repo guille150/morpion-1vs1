@@ -15,6 +15,7 @@ import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Color;
+import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -83,6 +84,7 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 	boolean isMenuOpen = false;
 	boolean amILatestPlayerMulti = false;
 	boolean firstIsPlayed = false;
+	boolean computerStarted = false;
 	CheckBox cbSaveEqual;
 	CheckBox cbTheme;
 	Spinner spBlue;
@@ -121,8 +123,9 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 		Context context = getSupportActionBar().getThemedContext();
 
 		ArrayList<AbMenu> data = new ArrayList<AbMenu>();
-		data.add(new AbMenu(isDark ? R.drawable.ic_action_spinner_partiedark : R.drawable.ic_action_spinner_partie, getString(R.string.m1), 1));
+		data.add(new AbMenu(isDark ? R.drawable.ic_action_spinner_partiemultidark : R.drawable.ic_action_spinner_partiemulti, getString(R.string.m1), 1));
 		data.add(new AbMenu(isDark ? R.drawable.ic_action_spinner_partiemultidark : R.drawable.ic_action_spinner_partiemulti, getString(R.string.m8), 2));
+		data.add(new AbMenu(isDark ? R.drawable.ic_action_spinner_partiedark : R.drawable.ic_action_spinner_partie, getString(R.string.s31), 5));
 		data.add(new AbMenu(isDark ? R.drawable.ic_action_spinner_savedark : R.drawable.ic_action_spinner_save, getString(R.string.m2), 3));
 		data.add(new AbMenu(isDark ? R.drawable.ic_action_spinner_partiehelpdark : R.drawable.ic_action_spinner_partiehelp, getString(R.string.m3), 4));
 
@@ -149,27 +152,40 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 		// createNewGame();
 		a = this;
 
-		if (!StateHolder.GetMemorizedValue("showpref", this)) {
-			if (miPref != null) {
-				ShowcaseView.ConfigOptions co = new ShowcaseView.ConfigOptions();
-				co.hideOnClickOutside = true;
-				sv = ShowcaseView.insertShowcaseViewWithType(ShowcaseView.ITEM_ACTION_ITEM, miPref.getItemId(), this, R.string.sc3, R.string.sc5, co);
-				sv.setOnShowcaseEventListener(new OnShowcaseEventListener() {
+		if (!StateHolder.GetMemorizedValue("showwelcome", this)) {
+			AlertDialog alertDialog = new AlertDialog.Builder(this).create();
+			alertDialog.setCancelable(false);
+			alertDialog.setTitle(getString(R.string.s32));
+			alertDialog.setMessage(getString(R.string.s33));
 
-					@Override
-					public void onShowcaseViewShow(ShowcaseView showcaseView) {
-						// TODO Auto-generated method stub
+			alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, "OK", new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int which) {
 
+					StateHolder.MemorizeValue("showwelcome", true, getApplicationContext());
+					if (!StateHolder.GetMemorizedValue("showpref", getApplicationContext())) {
+						if (miPref != null) {
+							ShowcaseView.ConfigOptions co = new ShowcaseView.ConfigOptions();
+							co.hideOnClickOutside = true;
+							sv = ShowcaseView.insertShowcaseViewWithType(ShowcaseView.ITEM_ACTION_ITEM, miPref.getItemId(), a, R.string.sc3, R.string.sc5, co);
+							sv.setOnShowcaseEventListener(new OnShowcaseEventListener() {
+
+								@Override
+								public void onShowcaseViewShow(ShowcaseView showcaseView) {
+
+								}
+
+								@Override
+								public void onShowcaseViewHide(ShowcaseView showcaseView) {
+									sv = null;
+								}
+							});
+						} else {
+							new Async().execute();
+						}
 					}
-
-					@Override
-					public void onShowcaseViewHide(ShowcaseView showcaseView) {
-						sv = null;
-					}
-				});
-			} else {
-				new Async().execute();
-			}
+				}
+			});
+			alertDialog.show();
 		}
 
 	}
@@ -196,7 +212,6 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 
 				@Override
 				public void onShowcaseViewShow(ShowcaseView showcaseView) {
-					// TODO Auto-generated method stub
 
 				}
 
@@ -223,7 +238,13 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 	public boolean onMenuItemSelected(int featureId, MenuItem item) {
 
 		if (item.getTitle().toString().compareTo(getString(R.string.restart)) == 0) {
-			createNewGame();
+			if (getSupportActionBar().getSelectedNavigationIndex() == 0)
+				createNewGame();
+			else if (getSupportActionBar().getSelectedNavigationIndex() == 1) {
+
+			} else {
+				createNewGameAI();
+			}
 		}
 		if (item.getTitle().toString().compareTo(getString(R.string.ctrlz)) == 0) {
 			annuler();
@@ -270,10 +291,11 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 	public boolean onNavigationItemSelected(int itemPosition, long itemId) {
 
 		if (itemPosition == 0) {
+			getSupportActionBar().setIcon(R.drawable.two_player);
 			getSupportActionBar().setIcon(R.drawable.ic_launcher);
 			createNewGame();
 		}
-		if (itemPosition == 2) {
+		if (itemPosition == 3) {
 			getSupportActionBar().setIcon(R.drawable.ic_launcher);
 			if (0 != ToolsBDD.getInstance(this).getNbPartie()) {
 				Intent intent = new Intent(MainActivity.this, HistoryActivity.class);
@@ -284,7 +306,7 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 				getSupportActionBar().setSelectedNavigationItem(0);
 			}
 		}
-		if (itemPosition == 3) {
+		if (itemPosition == 4) {
 			getSupportActionBar().setIcon(R.drawable.ic_launcher);
 			setContentView(R.layout.help);
 
@@ -295,8 +317,309 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 		} else if (itemPosition == 1) {
 			getSupportActionBar().setIcon(R.drawable.two_player);
 			startBluetooth();
+		} else if (itemPosition == 2) {
+			getSupportActionBar().setIcon(R.drawable.ic_launcher);
+			createNewGameAI();
 		}
 		return false;
+	}
+
+	@SuppressWarnings("deprecation")
+	private void createNewGameAI() {
+		setContentView(R.layout.game);
+
+		nbGame = ToolsBDD.getInstance(this).getNbPartieNumber() + 1;
+		TextView tv1 = (TextView) findViewById(R.id.welcomeGame);
+		tv1.setText(getString(R.string.game) + nbGame);
+
+		Display display = getWindowManager().getDefaultDisplay();
+		DisplayMetrics metrics = new DisplayMetrics();
+		getWindowManager().getDefaultDisplay().getMetrics(metrics);
+
+		w = metrics.widthPixels;
+		if (metrics.heightPixels < w)
+			w = metrics.heightPixels;
+		int ratio = 5;
+
+		if (android.os.Build.VERSION.SDK_INT > Build.VERSION_CODES.ECLAIR_MR1) {
+			if (display.getRotation() == Surface.ROTATION_0)
+				ratio = 3;
+		} else {
+			if (display.getOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
+				ratio = 3;
+		}
+
+		playerText = (TextView) findViewById(R.id.playerText);
+		annulerList = new ArrayList<String>();
+		tabIB = new ImageButton[3][3];
+		tabVal = new int[3][3];
+
+		tabIB[0][0] = (ImageButton) findViewById(R.id.imageButton1);
+		tabIB[0][1] = (ImageButton) findViewById(R.id.imageButton2);
+		tabIB[0][2] = (ImageButton) findViewById(R.id.imageButton3);
+		tabIB[1][0] = (ImageButton) findViewById(R.id.imageButton4);
+		tabIB[1][1] = (ImageButton) findViewById(R.id.imageButton5);
+		tabIB[1][2] = (ImageButton) findViewById(R.id.imageButton6);
+		tabIB[2][0] = (ImageButton) findViewById(R.id.imageButton7);
+		tabIB[2][1] = (ImageButton) findViewById(R.id.imageButton8);
+		tabIB[2][2] = (ImageButton) findViewById(R.id.imageButton9);
+
+		for (int i = 0; i < 3; i++) {
+			for (int j = 0; j < 3; j++) {
+				tabIB[i][j].setMinimumWidth((w) / ratio);
+				tabIB[i][j].setMinimumHeight((w) / ratio);
+				tabIB[i][j].setMaxWidth((w) / ratio);
+				tabIB[i][j].setMaxHeight((w) / ratio);
+
+				tabIB[i][j].setOnClickListener(new OnClickListener() {
+
+					@Override
+					public void onClick(View v) {
+
+						for (int i = 0; i < 3; i++) {
+							for (int j = 0; j < 3; j++) {
+								if (v.getId() == tabIB[i][j].getId()) {
+									Drawable d = getResources().getDrawable(ColorHolder.getInstance(getApplicationContext()).getDrawable(turn));
+									if (turn == BLUE_PLAYER) {
+										tabVal[i][j] = BLUE_PLAYER;
+										makeTheAIPlay(i, j);
+									} else {
+										tabVal[i][j] = RED_PLAYER;
+										makeTheAIPlay(i, j);
+									}
+									if (m != null) {
+										m.getItem(0).setVisible(true);
+										menu.invalidate();
+									}
+									tabIB[i][j].setImageDrawable(d);
+									tabIB[i][j].setEnabled(false);
+									annulerList.add(i + "," + j);
+									menu.invalidate();
+									checkWinner(i, j, false, true);
+
+								}
+							}
+						}
+					}
+				});
+				tabVal[i][j] = NONE_PLAYER;
+			}
+		}
+
+		if (nbGame % 2 != 0) {
+			computerStarted = true;
+			makeTheAIPlay(-1, -1);
+			turn = BLUE_PLAYER;
+
+			displayNextTurn();
+			displayNextTurn();
+		} else {
+			computerStarted = false;
+			turn = BLUE_PLAYER;
+
+			displayNextTurn();
+			displayNextTurn();
+
+		}
+
+		if (m != null) {
+			m.getItem(0).setVisible(false);
+			menu.invalidate();
+		}
+
+	}
+
+	private void makeTheAIPlay(int lastI, int lastJ) {
+		int i, j;
+		i = -1;
+		j = -1;
+
+		Point p = doINeedToPlaceItThere();
+		if (p.x != -1 && p.y != -1) {
+			i = p.x;
+			j = p.y;
+		}
+
+		if (computerStarted) {
+
+			if (numberOfTurn() == 0) {
+				i = 0;
+				j = 0;
+			}
+
+			if (numberOfTurn() == 1) {
+				if (lastI == 1 && lastJ == 1) {
+					i = 2;
+					j = 2;
+				} else if (tabVal[0][2] == BLUE_PLAYER) {
+					i = 2;
+					j = 0;
+				} else if (tabVal[2][0] == BLUE_PLAYER) {
+					i = 0;
+					j = 2;
+				} else if (tabVal[2][2] == BLUE_PLAYER) {
+					i = 2;
+					j = 0;
+				} else if (tabVal[0][1] == BLUE_PLAYER) {
+					i = 2;
+					j = 0;
+				} else if (tabVal[1][0] == BLUE_PLAYER) {
+					i = 0;
+					j = 2;
+				} else if (tabVal[1][2] == BLUE_PLAYER) {
+					i = 0;
+					j = 2;
+				} else if (tabVal[2][1] == BLUE_PLAYER) {
+					i = 2;
+					j = 0;
+				}
+			}
+
+			if (numberOfTurn() == 2 && i == -1 && j == -1) {
+				if (tabVal[0][2] == NONE_PLAYER) {
+					i = 0;
+					j = 2;
+				} else if (tabVal[2][2] == NONE_PLAYER) {
+					i = 2;
+					j = 2;
+				} else if (tabVal[2][0] == NONE_PLAYER) {
+					i = 2;
+					j = 0;
+				}
+			}
+		} else {
+
+			if (numberOfTurn() == 0 && tabVal[1][1] == NONE_PLAYER) {
+				i = 1;
+				j = 1;
+			}
+
+			if (numberOfTurn() == 1 && i == -1 && j == -1) {
+				if (tabVal[1][1] == RED_PLAYER) {
+					if (tabVal[2][1] == NONE_PLAYER) {
+						i = 2;
+						j = 1;
+					} else if (tabVal[1][2] == NONE_PLAYER) {
+						i = 1;
+						j = 2;
+					}
+				}
+			}
+
+		}
+
+		if (i == -1 && j == -1) {
+			p = findRandomPlace();
+			i = p.x;
+			j = p.y;
+		}
+
+		if (tabVal[i][j] == NONE_PLAYER) {
+			Drawable d = getResources().getDrawable(ColorHolder.getInstance(this).getDrawable(RED_PLAYER));
+			tabVal[i][j] = RED_PLAYER;
+			tabIB[i][j].setImageDrawable(d);
+			tabIB[i][j].setEnabled(false);
+		}
+	}
+
+	private Point findRandomPlace() {
+		Point p = new Point();
+		for (int i = 0; i < 3; i++) {
+			for (int j = 0; j < 3; j++) {
+				if (tabVal[i][j] == NONE_PLAYER) {
+					p = new Point(i, j);
+					break;
+				}
+			}
+
+		}
+		return p;
+	}
+
+	private int numberOfTurn() {
+		int res = 0;
+		for (int i = 0; i < 3; i++) {
+			for (int j = 0; j < 3; j++) {
+				if (tabVal[i][j] == RED_PLAYER)
+					res++;
+			}
+
+		}
+		return res;
+	}
+
+	private Point doINeedToPlaceItThere() {
+		Point p = new Point();
+		p.x = -1;
+		p.y = -1;
+
+		for (int i = 0; i < 3; i++) {
+			for (int j = 0; j < 3; j++) {
+				if (tabVal[i][j] == NONE_PLAYER && p.x == -1 && p.y == -1) {
+
+					tabVal[i][j] = RED_PLAYER;
+
+					if (tabVal[0][0] == tabVal[0][1] && tabVal[0][1] == tabVal[0][2] && tabVal[0][2] != NONE_PLAYER) {
+						p.x = i;
+						p.y = j;
+					} else if (tabVal[1][0] == tabVal[1][1] && tabVal[1][1] == tabVal[1][2] && tabVal[1][2] != NONE_PLAYER) {
+						p.x = i;
+						p.y = j;
+					} else if (tabVal[2][0] == tabVal[2][1] && tabVal[2][1] == tabVal[2][2] && tabVal[2][2] != NONE_PLAYER) {
+						p.x = i;
+						p.y = j;
+					} else if (tabVal[0][0] == tabVal[1][0] && tabVal[1][0] == tabVal[2][0] && tabVal[2][0] != NONE_PLAYER) {
+						p.x = i;
+						p.y = j;
+					} else if (tabVal[0][1] == tabVal[1][1] && tabVal[1][1] == tabVal[2][1] && tabVal[2][1] != NONE_PLAYER) {
+						p.x = i;
+						p.y = j;
+					} else if (tabVal[0][2] == tabVal[1][2] && tabVal[1][2] == tabVal[2][2] && tabVal[2][2] != NONE_PLAYER) {
+						p.x = i;
+						p.y = j;
+					} else if (tabVal[0][0] == tabVal[1][1] && tabVal[1][1] == tabVal[2][2] && tabVal[2][2] != NONE_PLAYER) {
+						p.x = i;
+						p.y = j;
+					} else if (tabVal[2][0] == tabVal[1][1] && tabVal[1][1] == tabVal[0][2] && tabVal[0][2] != NONE_PLAYER) {
+						p.x = i;
+						p.y = j;
+					}
+
+					if (p.x == -1 && p.y == -1) {
+						tabVal[i][j] = BLUE_PLAYER;
+
+						if (tabVal[0][0] == tabVal[0][1] && tabVal[0][1] == tabVal[0][2] && tabVal[0][2] != NONE_PLAYER) {
+							p.x = i;
+							p.y = j;
+						} else if (tabVal[1][0] == tabVal[1][1] && tabVal[1][1] == tabVal[1][2] && tabVal[1][2] != NONE_PLAYER) {
+							p.x = i;
+							p.y = j;
+						} else if (tabVal[2][0] == tabVal[2][1] && tabVal[2][1] == tabVal[2][2] && tabVal[2][2] != NONE_PLAYER) {
+							p.x = i;
+							p.y = j;
+						} else if (tabVal[0][0] == tabVal[1][0] && tabVal[1][0] == tabVal[2][0] && tabVal[2][0] != NONE_PLAYER) {
+							p.x = i;
+							p.y = j;
+						} else if (tabVal[0][1] == tabVal[1][1] && tabVal[1][1] == tabVal[2][1] && tabVal[2][1] != NONE_PLAYER) {
+							p.x = i;
+							p.y = j;
+						} else if (tabVal[0][2] == tabVal[1][2] && tabVal[1][2] == tabVal[2][2] && tabVal[2][2] != NONE_PLAYER) {
+							p.x = i;
+							p.y = j;
+						} else if (tabVal[0][0] == tabVal[1][1] && tabVal[1][1] == tabVal[2][2] && tabVal[2][2] != NONE_PLAYER) {
+							p.x = i;
+							p.y = j;
+						} else if (tabVal[2][0] == tabVal[1][1] && tabVal[1][1] == tabVal[0][2] && tabVal[0][2] != NONE_PLAYER) {
+							p.x = i;
+							p.y = j;
+						}
+					}
+					tabVal[i][j] = NONE_PLAYER;
+				}
+			}
+		}
+
+		return p;
 	}
 
 	private void startBluetooth() {
@@ -469,7 +792,7 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 		}
 		tabIB[i][j].setImageDrawable(d);
 		tabIB[i][j].setEnabled(false);
-		this.checkWinner(i, j, true);
+		this.checkWinner(i, j, true, false);
 	}
 
 	@SuppressWarnings("deprecation")
@@ -803,37 +1126,37 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 						tabVal[i][j] = RED_PLAYER;
 						displayNextTurn();
 					}
-					if (m != null) {
+					if (m != null && getSupportActionBar().getSelectedNavigationIndex() != 1) {
 						m.getItem(0).setVisible(true);
 					}
 					tabIB[i][j].setImageDrawable(d);
 					tabIB[i][j].setEnabled(false);
 					annulerList.add(i + "," + j);
 					menu.invalidate();
-					this.checkWinner(i, j, false);
+					this.checkWinner(i, j, false, false);
 
 				}
 			}
 		}
 	}
 
-	private void checkWinner(int i, int j, boolean fromBT) {
+	private void checkWinner(int i, int j, boolean fromBT, boolean fromMulti) {
 		if (tabVal[0][0] == tabVal[0][1] && tabVal[0][1] == tabVal[0][2] && tabVal[0][2] != NONE_PLAYER)
-			congratsWinner(tabVal[0][0], fromBT);
+			congratsWinner(tabVal[0][0], fromBT, fromMulti);
 		else if (tabVal[1][0] == tabVal[1][1] && tabVal[1][1] == tabVal[1][2] && tabVal[1][2] != NONE_PLAYER)
-			congratsWinner(tabVal[1][0], fromBT);
+			congratsWinner(tabVal[1][0], fromBT, fromMulti);
 		else if (tabVal[2][0] == tabVal[2][1] && tabVal[2][1] == tabVal[2][2] && tabVal[2][2] != NONE_PLAYER)
-			congratsWinner(tabVal[2][0], fromBT);
+			congratsWinner(tabVal[2][0], fromBT, fromMulti);
 		else if (tabVal[0][0] == tabVal[1][0] && tabVal[1][0] == tabVal[2][0] && tabVal[2][0] != NONE_PLAYER)
-			congratsWinner(tabVal[0][0], fromBT);
+			congratsWinner(tabVal[0][0], fromBT, fromMulti);
 		else if (tabVal[0][1] == tabVal[1][1] && tabVal[1][1] == tabVal[2][1] && tabVal[2][1] != NONE_PLAYER)
-			congratsWinner(tabVal[0][1], fromBT);
+			congratsWinner(tabVal[0][1], fromBT, fromMulti);
 		else if (tabVal[0][2] == tabVal[1][2] && tabVal[1][2] == tabVal[2][2] && tabVal[2][2] != NONE_PLAYER)
-			congratsWinner(tabVal[0][2], fromBT);
+			congratsWinner(tabVal[0][2], fromBT, fromMulti);
 		else if (tabVal[0][0] == tabVal[1][1] && tabVal[1][1] == tabVal[2][2] && tabVal[2][2] != NONE_PLAYER)
-			congratsWinner(tabVal[0][0], fromBT);
+			congratsWinner(tabVal[0][0], fromBT, fromMulti);
 		else if (tabVal[2][0] == tabVal[1][1] && tabVal[1][1] == tabVal[0][2] && tabVal[0][2] != NONE_PLAYER)
-			congratsWinner(tabVal[2][0], fromBT);
+			congratsWinner(tabVal[2][0], fromBT, fromMulti);
 		else {
 			boolean equal = true;
 			for (int x = 0; x < 3; x++) {
@@ -846,12 +1169,12 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 			}
 
 			if (equal) {
-				congratsWinner(NONE_PLAYER, fromBT);
+				congratsWinner(NONE_PLAYER, fromBT, fromMulti);
 			}
 		}
 	}
 
-	private void congratsWinner(int winner, final boolean fromBT) {
+	private void congratsWinner(int winner, final boolean fromBT, final boolean fromMulti) {
 		nbGame++;
 		if (!fromBT) {
 			playerText.setText(R.string.over);
@@ -898,6 +1221,8 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 
 				if (fromBT)
 					;
+				else if (fromMulti)
+					createNewGameAI();
 				else
 					createNewGame();
 			}
@@ -1189,7 +1514,7 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 			final AbMenu item = data.get(position);
 			if (item != null) {
 				((android.widget.TextView) v.findViewById(R.id.textViewSpinner)).setText(item.title);
-				((android.widget.TextView) v.findViewById(R.id.textViewSpinner)).setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16 );
+				((android.widget.TextView) v.findViewById(R.id.textViewSpinner)).setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
 				((ImageView) v.findViewById(R.id.imageViewSpinner)).setImageResource(item.icon);
 			}
 			return v;
@@ -1197,19 +1522,17 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 
 		@Override
 		public int getCount() {
-			// TODO Auto-generated method stub
 			return data.size();
 		}
 
 		@Override
 		public Object getItem(int position) {
-			// TODO Auto-generated method stub
 			return null;
 		}
 
 		@Override
 		public long getItemId(int position) {
-			// TODO Auto-generated method stub
+
 			return 0;
 		}
 	}

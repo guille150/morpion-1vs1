@@ -62,7 +62,7 @@
     <string name="deletegame">Delete this game ?</string>
     <string name="previous">Previous</string>
     <string name="next">Next</string>
-    <string name="m1">Game</string>
+    <string name="m1">Via same phone</string>
     <string name="m2">History</string>
     <string name="m3">Help</string>
     <string name="empty"></string>
@@ -115,9 +115,9 @@
 	<string name="s28">Primary color</string>
 	<string name="s29">Secondary coolor</string>
 	<string name="s30">c</string>
-	<string name="s31"></string>
-	<string name="s32"></string>
-	<string name="s33"></string>
+	<string name="s31">Against AI</string>
+	<string name="s32">Welcome !</string>
+	<string name="s33">This application allows you to play by yoursel against the AI or with a partner, on the same phone of via Bluetooth. You can switch the game mode with the navigation list. By default you are on the 2 players mode on the same device.</string>
 	<string name="s34"></string>
 	<string name="s35"></string>
 	<string name="s36"></string>
