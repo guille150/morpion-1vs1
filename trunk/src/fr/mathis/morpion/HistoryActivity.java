@@ -1,5 +1,7 @@
 package fr.mathis.morpion;
 
+import static com.nineoldandroids.view.ViewPropertyAnimator.animate;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,6 +25,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.preference.PreferenceManager;
+import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -58,6 +61,8 @@ import com.michaelpardo.android.widget.chartview.ChartView;
 import com.michaelpardo.android.widget.chartview.LabelAdapter;
 import com.michaelpardo.android.widget.chartview.LinearSeries;
 import com.michaelpardo.android.widget.chartview.LinearSeries.LinearPoint;
+import com.nineoldandroids.animation.Animator;
+import com.nineoldandroids.animation.AnimatorListenerAdapter;
 import com.slidingmenu.lib.SlidingMenu;
 
 import fr.mathis.morpion.tools.ColorHolder;
@@ -87,6 +92,7 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 	private SlidingMenu menu;
 	Timer timer;
 	ShowcaseView sv;
+	int displayWidth = 2000;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -124,6 +130,11 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 		menu.setFadeDegree(0.35f);
 		menu.attachToActivity(this, SlidingMenu.SLIDING_WINDOW);
 		menu.setMenu(isDark ? R.layout.menudark : R.layout.menu);
+
+		DisplayMetrics metrics = new DisplayMetrics();
+		getWindowManager().getDefaultDisplay().getMetrics(metrics);
+
+		displayWidth = metrics.widthPixels;
 	}
 
 	public void createList() {
@@ -141,50 +152,12 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 		mUndoBarController = new UndoBarController(findViewById(R.id.undobar), this);
 
 		listItem = new ArrayList<HashMap<String, String>>();
-		HashMap<String, String> map = new HashMap<String, String>();
-
 		Cursor c = ToolsBDD.getInstance(this).getAllParties();
 		if (c == null || c.getCount() == 0) {
 			share = getString(R.string.sharetry);
 		} else {
-			share = getString(R.string.app_name) + " - https://play.google.com/store/apps/details?id=fr.mathis.morpion - ";
-			int win = 0;
-			int lost = 0;
-			int equal = 0;
-			c.moveToFirst();
-			for (int i = 0; i < c.getCount(); i++) {
-				int n = c.getInt(1);
-				if (n == MainActivity.BLUE_PLAYER) {
-					map = new HashMap<String, String>();
-					map.put("titre", "N°" + c.getInt(0) + " - " + getString(R.string.win));
-					map.put("description", getString(R.string.winb));
-					map.put("img", String.valueOf(ColorHolder.getInstance(this).getDrawable(MainActivity.BLUE_PLAYER)));
-					win++;
-				} else if (n == MainActivity.RED_PLAYER) {
-					map = new HashMap<String, String>();
-					map.put("titre", "N°" + c.getInt(0) + " - " + getString(R.string.loose));
-					map.put("description", getString(R.string.winr));
-					map.put("img", String.valueOf(ColorHolder.getInstance(this).getDrawable(MainActivity.RED_PLAYER)));
-					lost++;
-				} else {
-					map = new HashMap<String, String>();
-					map.put("titre", "N°" + c.getInt(0) + " - " + getString(R.string.equal));
-					map.put("description", getString(R.string.equaltry));
-					map.put("img", String.valueOf(R.drawable.ic_launcher));
-					equal++;
-				}
-				map.put("winner", n + "");
-				map.put("disposition", c.getString(2));
-				listItem.add(map);
-				c.moveToNext();
-			}
-			share += (win + lost + equal) + " " + getString(R.string.share1);
-			share += " " + win + " " + getString(R.string.share2);
-			share += " " + lost + " " + getString(R.string.share3);
+			reloadItems();
 		}
-
-		mSchedule = new MyAdapter(this.getBaseContext(), listItem, R.layout.itemlistviewcustom, new String[] { "img", "titre", "description" }, new int[] { R.id.img, R.id.titre, R.id.description });
-		lv.setAdapter(mSchedule);
 		lv.setOnItemLongClickListener(this);
 		lv.setOnItemClickListener(this);
 		lv.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
@@ -213,6 +186,51 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 			});
 
 		}
+	}
+
+	public void reloadItems() {
+		listItem = new ArrayList<HashMap<String, String>>();
+		HashMap<String, String> map = new HashMap<String, String>();
+
+		Cursor c = ToolsBDD.getInstance(this).getAllParties();
+		if (c == null || c.getCount() == 0) {
+			share = getString(R.string.sharetry);
+		} else {
+
+			share = getString(R.string.app_name) + " - https://play.google.com/store/apps/details?id=fr.mathis.morpion - ";
+			int win = 0;
+			int lost = 0;
+			int equal = 0;
+			c.moveToFirst();
+			for (int i = 0; i < c.getCount(); i++) {
+				int n = c.getInt(1);
+				if (n == MainActivity.BLUE_PLAYER) {
+					map = new HashMap<String, String>();
+					map.put("titre", ""+getString(R.string.win));
+					win++;
+				} else if (n == MainActivity.RED_PLAYER) {
+					map = new HashMap<String, String>();
+					map.put("titre", ""+getString(R.string.loose));
+					lost++;
+				} else {
+					map = new HashMap<String, String>();
+					map.put("titre", "" + getString(R.string.equal));
+					equal++;
+				}
+				map.put("num", "N°"+c.getInt(0));
+				map.put("description", getString(R.string.s34).replace(":win", win + "").replace(":loose", lost + "").replace(":tie", equal + ""));
+				map.put("winner", n + "");
+				map.put("disposition", c.getString(2));
+				listItem.add(map);
+				c.moveToNext();
+			}
+			share += (win + lost + equal) + " " + getString(R.string.share1);
+			share += " " + win + " " + getString(R.string.share2);
+			share += " " + lost + " " + getString(R.string.share3);
+		}
+
+		mSchedule = new MyAdapter(this.getBaseContext(), listItem, R.layout.itemlistviewcustom, new String[] {"titre", "description", "num" }, new int[] { R.id.titre, R.id.description, R.id.num});
+		lv.setAdapter(mSchedule);
 	}
 
 	class Async extends AsyncTask<Void, Void, Void> {
@@ -299,7 +317,7 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 			setSwypeListener();
 			@SuppressWarnings("unchecked")
 			HashMap<String, String> map = (HashMap<String, String>) lv.getItemAtPosition(arg2);
-			String s = map.get("titre");
+			String s = map.get("num");
 			String winner = map.get("winner");
 			currentId = Integer.parseInt(s.split("N°")[1].split(" ")[0]);
 
@@ -309,7 +327,7 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 			Bundle b = null;
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
 
-				View view = arg1.findViewById(R.id.img);
+				View view = arg1.findViewById(R.id.gameView1);
 
 				Bitmap bitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(), Bitmap.Config.ARGB_8888);
 				if (winner.compareTo("" + MainActivity.BLUE_PLAYER) == 0) {
@@ -422,7 +440,7 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 
 			@SuppressWarnings("unchecked")
 			HashMap<String, String> map = (HashMap<String, String>) item;
-			String s = map.get("titre");
+			String s = map.get("num");
 			int id = Integer.parseInt(s.split("N°")[1].split(" ")[0]);
 			ToolsBDD.getInstance(getApplicationContext()).removePartie(id);
 
@@ -439,6 +457,26 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
 			View v = super.getView(position, convertView, parent);
+			
+			String resultat = listItem.get(position).get("disposition");
+			int[][] val = new int[3][3];
+			int tooker = 0;
+			for (int i = 0; i < 3; i++) {
+				for (int j = 0; j < 3; j++) {
+					val[i][j] = Integer.parseInt(resultat.split(",")[tooker]);
+					tooker++;
+				}
+			}
+
+			GameView gv = (GameView) v.findViewById(R.id.gameView1);
+			gv.setMode(GameView.MODE_NOT_INTERACTIVE);
+			gv.setAlignement(GameView.STYLE_CENTER_HORIZONTAL);
+			gv.setDark(isDark);
+			gv.setStrikeWidth(1);
+			gv.setDark(isDark);
+			gv.setShowWinner(true);
+			gv.setValues(val, MainActivity.BLUE_PLAYER);
+			
 			CheckBox cb = (CheckBox) v.findViewById(R.id.checkBox1);
 			final int posid = position;
 			cb.setOnCheckedChangeListener(new OnCheckedChangeListener() {
@@ -546,7 +584,7 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 			final AbMenu item = data.get(position);
 			if (item != null) {
 				((android.widget.TextView) v.findViewById(R.id.textViewSpinner)).setText(item.title);
-				((android.widget.TextView) v.findViewById(R.id.textViewSpinner)).setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16 );
+				((android.widget.TextView) v.findViewById(R.id.textViewSpinner)).setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
 				((ImageView) v.findViewById(R.id.imageViewSpinner)).setImageResource(item.icon);
 			}
 			return v;
@@ -571,6 +609,59 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 		}
 	}
 
+	public void animateToRight(final int pos, final boolean reload) {
+
+		int firstPosition = lv.getFirstVisiblePosition() - lv.getHeaderViewsCount();
+		int wantedChild = pos - firstPosition;
+
+		if (wantedChild < 0 || wantedChild >= lv.getChildCount()) {
+
+		} else {
+			final View wanted = lv.getChildAt(wantedChild);
+			animate(wanted).translationX(displayWidth).alpha(0).setDuration(400).setListener(new AnimatorListenerAdapter() {
+				@Override
+				public void onAnimationEnd(Animator animation) {
+
+					animate(wanted).translationX(0).alpha(1).setDuration(50).setListener(new AnimatorListenerAdapter() {
+						@Override
+						public void onAnimationEnd(Animator animation) {
+
+						}
+					});
+				}
+			});
+		}
+
+		if (reload) {
+			new AsyncReload().execute();
+		}
+	}
+
+	class AsyncReload extends AsyncTask<Void, Void, Void> {
+
+		@Override
+		protected Void doInBackground(Void... params) {
+			try {
+				Thread.sleep(400);
+			}
+			catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(Void result) {
+			reloadItems();
+			mSchedule.notifyDataSetChanged();
+			if (mActionMode != null) {
+				mActionMode.finish();
+			}
+			super.onPostExecute(result);
+		}
+
+	}
+
 	private ActionMode.Callback mActionModeCallback = new ActionMode.Callback() {
 
 		// Called when the action mode is created; startActionMode() was called
@@ -593,16 +684,15 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 		public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
 			switch (item.getItemId()) {
 			case 50:
+				boolean relaod = true;
 				for (int num : pos) {
 					HashMap<String, String> map = (HashMap<String, String>) listItem.get(num);
-					String s = map.get("titre");
+					String s = map.get("num");
 					currentId = Integer.parseInt(s.split("N°")[1].split(" ")[0]);
 					ToolsBDD.getInstance(getApplicationContext()).removePartie(HistoryActivity.currentId);
+					animateToRight(num, relaod);
+					relaod = false;
 				}
-
-				Intent intent = new Intent(HistoryActivity.this, HistoryActivity.class);
-				startActivity(intent);
-				finish();
 
 				return true;
 			default:
@@ -817,19 +907,19 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 			int n = saveWinner;
 			if (n == MainActivity.BLUE_PLAYER) {
 				map = new HashMap<String, String>();
-				map.put("titre", "N°" + saveId + " - " + getString(R.string.win));
-				map.put("description", getString(R.string.winb));
-				map.put("img", String.valueOf(ColorHolder.getInstance(this).getDrawable(MainActivity.BLUE_PLAYER)));
+				map.put("titre", ""+ getString(R.string.win));
+				map.put("description", getString(R.string.s35));
+				map.put("num","N°"+saveId);
 			} else if (n == MainActivity.RED_PLAYER) {
 				map = new HashMap<String, String>();
-				map.put("titre", "N°" + saveId + " - " + getString(R.string.loose));
-				map.put("description", getString(R.string.winr));
-				map.put("img", String.valueOf(ColorHolder.getInstance(this).getDrawable(MainActivity.RED_PLAYER)));
+				map.put("titre", ""+getString(R.string.loose));
+				map.put("description", getString(R.string.s35));
+				map.put("num","N°"+saveId);
 			} else {
 				map = new HashMap<String, String>();
-				map.put("titre", "N°" + saveId + " - " + getString(R.string.equal));
-				map.put("description", getString(R.string.equaltry));
-				map.put("img", String.valueOf(R.drawable.ic_launcher));
+				map.put("titre", ""+getString(R.string.equal));
+				map.put("description", getString(R.string.s35));
+				map.put("num","N°"+saveId);
 			}
 
 			map.put("winner", n + "");
@@ -843,9 +933,9 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 	private int findCorrectPlace(HashMap<String, String> map) {
 
 		int res = 0;
-		int toinsertid = Integer.parseInt(map.get("titre").split("N°")[1].split(" ")[0]);
+		int toinsertid = Integer.parseInt(map.get("num").split("N°")[1].split(" ")[0]);
 		for (res = 0; res < listItem.size(); res++) {
-			String titleCurrent = listItem.get(res).get("titre");
+			String titleCurrent = listItem.get(res).get("num");
 			int currentid = Integer.parseInt(titleCurrent.split("N°")[1].split(" ")[0]);
 			if (toinsertid <= currentid) {
 				break;

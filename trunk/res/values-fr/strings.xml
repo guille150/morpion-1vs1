@@ -18,7 +18,7 @@
     <string name="aide3">Pourquoi toutes les parties ne sont-elles pas sauvegardées ?</string>
     <string name="aide4">Parce que vous n\'avez pas encore trouvé la page des paramètres. Vous pouvez y choisir de garder en mémoire les égalités ou non.</string>
     <string name="aide5">Puis-je jouer seul au Morpion ?</string>
-    <string name="aide6">Non, pas avec cette application. Pour deux raisons, la première est que jouer contre un ordinateur est peu interessant une fois la technique trouvée. Deuxièmement, avec l\'historique disponible il est beaucoup plus interessant de jouer avec un ami et de comparer vos scores après une vingtaine de fois.</string>
+    <string name="aide6">Oui, une intelligence artificielle peut jouer contre vous. Il faut sélectionner l\'option \'contre l\'IA\' dans le menu de navigation</string>
     <string name="aide7">Ai-je la possibilité de proposer des améliorations ?</string>
     <string name="aide8">Bien sûr. Les commentaires sur l\'android market sont là pour ça.</string>
     <string name="aide9">Qui a developpé cette application ?</string>
@@ -50,8 +50,8 @@
     <string name="sure">Voulez-vous supprimer l\'historique ?</string>
     <string name="resume">Résumé n°</string>
     <string name="game">Partie n°</string>
-    <string name="blue">C\'est à votre tour</string>
-    <string name="red">C\'est à votre adversaire</string>
+    <string name="blue">Tour : X</string>
+    <string name="red">Tour : O</string>
     <string name="over">Terminé</string>
     <string name="saved">Partie sauvegardée dans l\'historique</string>
     <string name="ctrlz">Annuler</string>
@@ -100,7 +100,7 @@
 	<string name="s14">Périphériques enregistrés</string>
 	<string name="s15">Nouveaux périphériques</string>
 	<string name="s16">Scanner le réseau</string>
-	<string name="s17">Le plus rapide commence la partie</string>
+	<string name="s17">Tour : ?</string>
 	<string name="s18">Comment vous connecter avec votre partenaire ?</string>
 	<string name="s19">1. Activer le bluetooth</string>
 	<string name="s20">Le bouton ci dessous vous permet de forcer votre téléphone à être visible pendant quelques minutes pour l\'étape suivante.</string>
@@ -115,9 +115,9 @@
 	<string name="s29">Couleur secondaire</string>
 	<string name="s30"></string>
 	<string name="s31">Contre l\'IA</string>
-	<string name="s32">Bienvenu !</string>
+	<string name="s32">Bienvenue !</string>
 	<string name="s33">Cette application vous permet de jouer seul contre l\'IA ou à deux joueurs, sur le même téléphone ou par Bluetooth. Pour passer d\'un mode de jeu à l\'autre, utilisez la liste de navigation. Par défaut vous êtes sur le jeu à deux joueurs sur le même téléphone.</string>
-	<string name="s34"></string>
-	<string name="s35"></string>
+	<string name="s34">Victoire : :win - Défaite : :loose - Egalité : :tie</string>
+	<string name="s35">Partie restaurée.</string>
 	<string name="s36"></string>
 </resources>

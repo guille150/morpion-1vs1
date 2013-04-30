@@ -44,10 +44,12 @@ public class BluetoothChatService {
 
 	// Name for the SDP record when creating server socket
 	private static final String NAME_SECURE = "BluetoothChatSecure";
+	@SuppressWarnings("unused")
 	private static final String NAME_INSECURE = "BluetoothChatInsecure";
 
 	// Unique UUID for this application
 	private static final UUID MY_UUID_SECURE = UUID.fromString("a133c210-9340-11e2-9e96-0800200c9a66");
+	@SuppressWarnings("unused")
 	private static final UUID MY_UUID_INSECURE = UUID.fromString("a133c210-9340-11e2-9e96-0800200c9a66");
 
 	// Member fields
