@@ -23,7 +23,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Display;
@@ -61,6 +60,7 @@ import com.slidingmenu.lib.SlidingMenu;
 import com.slidingmenu.lib.SlidingMenu.OnClosedListener;
 import com.slidingmenu.lib.SlidingMenu.OnOpenedListener;
 
+import fr.mathis.morpion.GameView.GameHandler;
 import fr.mathis.morpion.tools.ColorHolder;
 import fr.mathis.morpion.tools.StateHolder;
 import fr.mathis.morpion.tools.ToolsBDD;
@@ -94,6 +94,7 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 	MenuItem miPref;
 	private ShowcaseView sv2;
 	Activity a;
+	GameView gv;
 	protected ShowcaseView sv3;
 	protected BluetoothAdapter mBluetoothAdapter;
 	private BluetoothChatService mChatService;
@@ -157,7 +158,6 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 			alertDialog.setCancelable(false);
 			alertDialog.setTitle(getString(R.string.s32));
 			alertDialog.setMessage(getString(R.string.s33));
-
 			alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, "OK", new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int which) {
 
@@ -264,6 +264,16 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 				menu.toggle(true);
 			}
 		}
+		int itemId = item.getItemId();
+		switch (itemId) {
+		case android.R.id.home:
+			if (isMenuOpen) {
+				menu.toggle(true);
+			} else {
+				menu.toggle(true);
+			}
+			break;
+		}
 
 		return super.onMenuItemSelected(featureId, item);
 	}
@@ -324,87 +334,120 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 		return false;
 	}
 
-	@SuppressWarnings("deprecation")
 	private void createNewGameAI() {
-		setContentView(R.layout.game);
+		setContentView(isDark ? R.layout.game_aidark : R.layout.game_ai);
 
 		nbGame = ToolsBDD.getInstance(this).getNbPartieNumber() + 1;
 		TextView tv1 = (TextView) findViewById(R.id.welcomeGame);
 		tv1.setText(getString(R.string.game) + nbGame);
 
-		Display display = getWindowManager().getDefaultDisplay();
-		DisplayMetrics metrics = new DisplayMetrics();
-		getWindowManager().getDefaultDisplay().getMetrics(metrics);
+		gv = (GameView) findViewById(R.id.gameView1);
+		gv.setValues(null, BLUE_PLAYER);
+		gv.setMode(GameView.MODE_INTERACTIVE);
+		gv.setDark(isDark);
+		gv.setAlignement(GameView.STYLE_TOP_VERTICAL_CENTER_HORIZONTAL);
+		gv.invalidate();
 
-		w = metrics.widthPixels;
-		if (metrics.heightPixels < w)
-			w = metrics.heightPixels;
-		int ratio = 5;
-
-		if (android.os.Build.VERSION.SDK_INT > Build.VERSION_CODES.ECLAIR_MR1) {
-			if (display.getRotation() == Surface.ROTATION_0)
-				ratio = 3;
-		} else {
-			if (display.getOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
-				ratio = 3;
-		}
+		// Display display = getWindowManager().getDefaultDisplay();
+		// DisplayMetrics metrics = new DisplayMetrics();
+		// getWindowManager().getDefaultDisplay().getMetrics(metrics);
+		//
+		// w = metrics.widthPixels;
+		// if (metrics.heightPixels < w)
+		// w = metrics.heightPixels;
+		// int ratio = 5;
+		//
+		// if (android.os.Build.VERSION.SDK_INT >
+		// Build.VERSION_CODES.ECLAIR_MR1) {
+		// if (display.getRotation() == Surface.ROTATION_0)
+		// ratio = 3;
+		// } else {
+		// if (display.getOrientation() ==
+		// ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
+		// ratio = 3;
+		// }
 
 		playerText = (TextView) findViewById(R.id.playerText);
 		annulerList = new ArrayList<String>();
-		tabIB = new ImageButton[3][3];
-		tabVal = new int[3][3];
-
-		tabIB[0][0] = (ImageButton) findViewById(R.id.imageButton1);
-		tabIB[0][1] = (ImageButton) findViewById(R.id.imageButton2);
-		tabIB[0][2] = (ImageButton) findViewById(R.id.imageButton3);
-		tabIB[1][0] = (ImageButton) findViewById(R.id.imageButton4);
-		tabIB[1][1] = (ImageButton) findViewById(R.id.imageButton5);
-		tabIB[1][2] = (ImageButton) findViewById(R.id.imageButton6);
-		tabIB[2][0] = (ImageButton) findViewById(R.id.imageButton7);
-		tabIB[2][1] = (ImageButton) findViewById(R.id.imageButton8);
-		tabIB[2][2] = (ImageButton) findViewById(R.id.imageButton9);
+		// tabIB = new ImageButton[3][3];
+		// tabVal = new int[3][3];
+		//
+		// tabIB[0][0] = (ImageButton) findViewById(R.id.imageButton1);
+		// tabIB[0][1] = (ImageButton) findViewById(R.id.imageButton2);
+		// tabIB[0][2] = (ImageButton) findViewById(R.id.imageButton3);
+		// tabIB[1][0] = (ImageButton) findViewById(R.id.imageButton4);
+		// tabIB[1][1] = (ImageButton) findViewById(R.id.imageButton5);
+		// tabIB[1][2] = (ImageButton) findViewById(R.id.imageButton6);
+		// tabIB[2][0] = (ImageButton) findViewById(R.id.imageButton7);
+		// tabIB[2][1] = (ImageButton) findViewById(R.id.imageButton8);
+		// tabIB[2][2] = (ImageButton) findViewById(R.id.imageButton9);
 
 		for (int i = 0; i < 3; i++) {
 			for (int j = 0; j < 3; j++) {
-				tabIB[i][j].setMinimumWidth((w) / ratio);
-				tabIB[i][j].setMinimumHeight((w) / ratio);
-				tabIB[i][j].setMaxWidth((w) / ratio);
-				tabIB[i][j].setMaxHeight((w) / ratio);
-
-				tabIB[i][j].setOnClickListener(new OnClickListener() {
-
-					@Override
-					public void onClick(View v) {
-
-						for (int i = 0; i < 3; i++) {
-							for (int j = 0; j < 3; j++) {
-								if (v.getId() == tabIB[i][j].getId()) {
-									Drawable d = getResources().getDrawable(ColorHolder.getInstance(getApplicationContext()).getDrawable(turn));
-									if (turn == BLUE_PLAYER) {
-										tabVal[i][j] = BLUE_PLAYER;
-										makeTheAIPlay(i, j);
-									} else {
-										tabVal[i][j] = RED_PLAYER;
-										makeTheAIPlay(i, j);
-									}
-									if (m != null) {
-										m.getItem(0).setVisible(true);
-										menu.invalidate();
-									}
-									tabIB[i][j].setImageDrawable(d);
-									tabIB[i][j].setEnabled(false);
-									annulerList.add(i + "," + j);
-									menu.invalidate();
-									checkWinner(i, j, false, true);
-
-								}
-							}
-						}
-					}
-				});
+				// tabIB[i][j].setMinimumWidth((w) / ratio);
+				// tabIB[i][j].setMinimumHeight((w) / ratio);
+				// tabIB[i][j].setMaxWidth((w) / ratio);
+				// tabIB[i][j].setMaxHeight((w) / ratio);
+				//
+				// tabIB[i][j].setOnClickListener(new OnClickListener() {
+				//
+				// @Override
+				// public void onClick(View v) {
+				//
+				// for (int i = 0; i < 3; i++) {
+				// for (int j = 0; j < 3; j++) {
+				// if (v.getId() == tabIB[i][j].getId()) {
+				// Drawable d =
+				// getResources().getDrawable(ColorHolder.getInstance(getApplicationContext()).getDrawable(turn));
+				// if (turn == BLUE_PLAYER) {
+				// tabVal[i][j] = BLUE_PLAYER;
+				// makeTheAIPlay(i, j);
+				// } else {
+				// tabVal[i][j] = RED_PLAYER;
+				// makeTheAIPlay(i, j);
+				// }
+				// if (m != null) {
+				// m.getItem(0).setVisible(true);
+				// menu.invalidate();
+				// }
+				// tabIB[i][j].setImageDrawable(d);
+				// tabIB[i][j].setEnabled(false);
+				// annulerList.add(i + "," + j);
+				// menu.invalidate();
+				// checkWinner(i, j, false, true);
+				//
+				// }
+				// }
+				// }
+				// }
+				// });
 				tabVal[i][j] = NONE_PLAYER;
 			}
 		}
+
+		gv.setDelegate(new GameHandler() {
+			@Override
+			public void handleTurn(int i, int j) {
+				if (turn == BLUE_PLAYER) {
+					tabVal[i][j] = BLUE_PLAYER;
+					gv.setValues(tabVal, BLUE_PLAYER);
+					gv.invalidate();
+					makeTheAIPlay(i, j);
+				} else {
+					tabVal[i][j] = RED_PLAYER;
+					gv.setValues(tabVal, BLUE_PLAYER);
+					gv.invalidate();
+					makeTheAIPlay(i, j);
+				}
+				if (m != null) {
+					m.getItem(0).setVisible(true);
+					menu.invalidate();
+				}
+				menu.invalidate();
+				checkWinner(i, j, false, true);
+
+			}
+		});
 
 		if (nbGame % 2 != 0) {
 			computerStarted = true;
@@ -419,9 +462,9 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 
 			displayNextTurn();
 			displayNextTurn();
-
 		}
 
+		gv.setValues(tabVal, turn);
 		if (m != null) {
 			m.getItem(0).setVisible(false);
 			menu.invalidate();
@@ -476,7 +519,11 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 			}
 
 			if (numberOfTurn() == 2 && i == -1 && j == -1) {
-				if (tabVal[0][2] == NONE_PLAYER) {
+
+				if (tabVal[0][1] == BLUE_PLAYER && tabVal[1][0] == BLUE_PLAYER && tabVal[1][1] == NONE_PLAYER) {
+					i = 1;
+					j = 1;
+				} else if (tabVal[0][2] == NONE_PLAYER) {
 					i = 0;
 					j = 2;
 				} else if (tabVal[2][2] == NONE_PLAYER) {
@@ -515,10 +562,13 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 		}
 
 		if (tabVal[i][j] == NONE_PLAYER) {
-			Drawable d = getResources().getDrawable(ColorHolder.getInstance(this).getDrawable(RED_PLAYER));
+			// Drawable d =
+			// getResources().getDrawable(ColorHolder.getInstance(this).getDrawable(RED_PLAYER));
 			tabVal[i][j] = RED_PLAYER;
-			tabIB[i][j].setImageDrawable(d);
-			tabIB[i][j].setEnabled(false);
+			gv.setValues(tabVal, BLUE_PLAYER);
+			gv.invalidate();
+			// tabIB[i][j].setImageDrawable(d);
+			// tabIB[i][j].setEnabled(false);
 		}
 	}
 
@@ -553,39 +603,49 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 		p.x = -1;
 		p.y = -1;
 
+		boolean isToPreventVictory = true;
+
 		for (int i = 0; i < 3; i++) {
 			for (int j = 0; j < 3; j++) {
-				if (tabVal[i][j] == NONE_PLAYER && p.x == -1 && p.y == -1) {
+				if (tabVal[i][j] == NONE_PLAYER && isToPreventVictory) {
 
 					tabVal[i][j] = RED_PLAYER;
 
 					if (tabVal[0][0] == tabVal[0][1] && tabVal[0][1] == tabVal[0][2] && tabVal[0][2] != NONE_PLAYER) {
 						p.x = i;
 						p.y = j;
+						isToPreventVictory = false;
 					} else if (tabVal[1][0] == tabVal[1][1] && tabVal[1][1] == tabVal[1][2] && tabVal[1][2] != NONE_PLAYER) {
 						p.x = i;
 						p.y = j;
+						isToPreventVictory = false;
 					} else if (tabVal[2][0] == tabVal[2][1] && tabVal[2][1] == tabVal[2][2] && tabVal[2][2] != NONE_PLAYER) {
 						p.x = i;
 						p.y = j;
+						isToPreventVictory = false;
 					} else if (tabVal[0][0] == tabVal[1][0] && tabVal[1][0] == tabVal[2][0] && tabVal[2][0] != NONE_PLAYER) {
 						p.x = i;
 						p.y = j;
+						isToPreventVictory = false;
 					} else if (tabVal[0][1] == tabVal[1][1] && tabVal[1][1] == tabVal[2][1] && tabVal[2][1] != NONE_PLAYER) {
 						p.x = i;
 						p.y = j;
+						isToPreventVictory = false;
 					} else if (tabVal[0][2] == tabVal[1][2] && tabVal[1][2] == tabVal[2][2] && tabVal[2][2] != NONE_PLAYER) {
 						p.x = i;
 						p.y = j;
+						isToPreventVictory = false;
 					} else if (tabVal[0][0] == tabVal[1][1] && tabVal[1][1] == tabVal[2][2] && tabVal[2][2] != NONE_PLAYER) {
 						p.x = i;
 						p.y = j;
+						isToPreventVictory = false;
 					} else if (tabVal[2][0] == tabVal[1][1] && tabVal[1][1] == tabVal[0][2] && tabVal[0][2] != NONE_PLAYER) {
 						p.x = i;
 						p.y = j;
+						isToPreventVictory = false;
 					}
 
-					if (p.x == -1 && p.y == -1) {
+					if (p.x == -1 && p.y == -1 && isToPreventVictory) {
 						tabVal[i][j] = BLUE_PLAYER;
 
 						if (tabVal[0][0] == tabVal[0][1] && tabVal[0][1] == tabVal[0][2] && tabVal[0][2] != NONE_PLAYER) {
@@ -782,83 +842,95 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 
 		displayNextTurn();
 
-		Drawable d;
+		// Drawable d;
 		if (isMyTurn) {
-			d = getResources().getDrawable(ColorHolder.getInstance(this).getDrawable(MainActivity.BLUE_PLAYER));
+			// d =
+			// getResources().getDrawable(ColorHolder.getInstance(this).getDrawable(MainActivity.BLUE_PLAYER));
 			tabVal[i][j] = BLUE_PLAYER;
 		} else {
-			d = getResources().getDrawable(ColorHolder.getInstance(this).getDrawable(MainActivity.RED_PLAYER));
+			// d =
+			// getResources().getDrawable(ColorHolder.getInstance(this).getDrawable(MainActivity.RED_PLAYER));
 			tabVal[i][j] = RED_PLAYER;
 		}
-		tabIB[i][j].setImageDrawable(d);
-		tabIB[i][j].setEnabled(false);
+		// tabIB[i][j].setImageDrawable(d);
+		// tabIB[i][j].setEnabled(false);
+		if (gv != null)
+			gv.setValues(tabVal, turn);
 		this.checkWinner(i, j, true, false);
 	}
 
-	@SuppressWarnings("deprecation")
 	private void createNewMuliGame() {
-		setContentView(R.layout.game);
+		setContentView(isDark ? R.layout.game_aidark : R.layout.game_ai);
 
 		nbGame = ToolsBDD.getInstance(this).getNbPartieNumber() + 1;
 		TextView tv1 = (TextView) findViewById(R.id.welcomeGame);
 		tv1.setText(getString(R.string.game) + nbGame);
 
-		Display display = getWindowManager().getDefaultDisplay();
-		DisplayMetrics metrics = new DisplayMetrics();
-		getWindowManager().getDefaultDisplay().getMetrics(metrics);
+		gv = (GameView) findViewById(R.id.gameView1);
+		gv.setValues(null, BLUE_PLAYER);
+		gv.setMode(GameView.MODE_INTERACTIVE);
+		gv.setDark(isDark);
+		gv.setAlignement(GameView.STYLE_TOP_VERTICAL_CENTER_HORIZONTAL);
+		gv.invalidate();
 
-		w = metrics.widthPixels;
-		if (metrics.heightPixels < w)
-			w = metrics.heightPixels;
-		int ratio = 5;
-
-		if (android.os.Build.VERSION.SDK_INT > Build.VERSION_CODES.ECLAIR_MR1) {
-			if (display.getRotation() == Surface.ROTATION_0)
-				ratio = 3;
-		} else {
-			if (display.getOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
-				ratio = 3;
-		}
+		// Display display = getWindowManager().getDefaultDisplay();
+		// DisplayMetrics metrics = new DisplayMetrics();
+		// getWindowManager().getDefaultDisplay().getMetrics(metrics);
+		//
+		// w = metrics.widthPixels;
+		// if (metrics.heightPixels < w)
+		// w = metrics.heightPixels;
+		// int ratio = 5;
+		//
+		// if (android.os.Build.VERSION.SDK_INT >
+		// Build.VERSION_CODES.ECLAIR_MR1) {
+		// if (display.getRotation() == Surface.ROTATION_0)
+		// ratio = 3;
+		// } else {
+		// if (display.getOrientation() ==
+		// ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
+		// ratio = 3;
+		// }
 
 		playerText = (TextView) findViewById(R.id.playerText);
 		annulerList = new ArrayList<String>();
 		tabIB = new ImageButton[3][3];
 		tabVal = new int[3][3];
 
-		tabIB[0][0] = (ImageButton) findViewById(R.id.imageButton1);
-		tabIB[0][1] = (ImageButton) findViewById(R.id.imageButton2);
-		tabIB[0][2] = (ImageButton) findViewById(R.id.imageButton3);
-		tabIB[1][0] = (ImageButton) findViewById(R.id.imageButton4);
-		tabIB[1][1] = (ImageButton) findViewById(R.id.imageButton5);
-		tabIB[1][2] = (ImageButton) findViewById(R.id.imageButton6);
-		tabIB[2][0] = (ImageButton) findViewById(R.id.imageButton7);
-		tabIB[2][1] = (ImageButton) findViewById(R.id.imageButton8);
-		tabIB[2][2] = (ImageButton) findViewById(R.id.imageButton9);
+		// tabIB[0][0] = (ImageButton) findViewById(R.id.imageButton1);
+		// tabIB[0][1] = (ImageButton) findViewById(R.id.imageButton2);
+		// tabIB[0][2] = (ImageButton) findViewById(R.id.imageButton3);
+		// tabIB[1][0] = (ImageButton) findViewById(R.id.imageButton4);
+		// tabIB[1][1] = (ImageButton) findViewById(R.id.imageButton5);
+		// tabIB[1][2] = (ImageButton) findViewById(R.id.imageButton6);
+		// tabIB[2][0] = (ImageButton) findViewById(R.id.imageButton7);
+		// tabIB[2][1] = (ImageButton) findViewById(R.id.imageButton8);
+		// tabIB[2][2] = (ImageButton) findViewById(R.id.imageButton9);
 
 		for (int i = 0; i < 3; i++) {
 			for (int j = 0; j < 3; j++) {
-				tabIB[i][j].setMinimumWidth((w) / ratio);
-				tabIB[i][j].setMinimumHeight((w) / ratio);
-				tabIB[i][j].setMaxWidth((w) / ratio);
-				tabIB[i][j].setMaxHeight((w) / ratio);
+				// tabIB[i][j].setMinimumWidth((w) / ratio);
+				// tabIB[i][j].setMinimumHeight((w) / ratio);
+				// tabIB[i][j].setMaxWidth((w) / ratio);
+				// tabIB[i][j].setMaxHeight((w) / ratio);
 
-				tabIB[i][j].setOnClickListener(new OnClickListener() {
-
-					@Override
-					public void onClick(View v) {
-
-						if (!amILatestPlayerMulti)
-							for (int i = 0; i < 3; i++) {
-								for (int j = 0; j < 3; j++) {
-									if (v.getId() == tabIB[i][j].getId()) {
-										String messageToSend = "";
-										messageToSend = "newturn/" + i + "/" + j;
-										sendMessage(messageToSend);
-									}
-								}
-							}
-					}
-				});
+				// tabIB[i][j].setOnClickListener(new OnClickListener() {
+				//
+				// @Override
+				// public void onClick(View v) {
+				//
+				// if (!amILatestPlayerMulti)
+				// for (int i = 0; i < 3; i++) {
+				// for (int j = 0; j < 3; j++) {
+				// if (v.getId() == tabIB[i][j].getId()) {
+				// String messageToSend = "";
+				// messageToSend = "newturn/" + i + "/" + j;
+				// sendMessage(messageToSend);
+				// }
+				// }
+				// }
+				// }
+				// });
 				tabVal[i][j] = NONE_PLAYER;
 			}
 		}
@@ -889,6 +961,16 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 		}
 
 		firstIsPlayed = true;
+
+		gv.setDelegate(new GameHandler() {
+
+			@Override
+			public void handleTurn(int i, int j) {
+				String messageToSend = "";
+				messageToSend = "newturn/" + i + "/" + j;
+				sendMessage(messageToSend);
+			}
+		});
 	}
 
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -932,11 +1014,10 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 		}
 
 	}
-
+	
 	@SuppressLint("NewApi")
-	@SuppressWarnings("deprecation")
 	public void createNewGame() {
-		setContentView(R.layout.game);
+		setContentView(isDark ? R.layout.game_aidark : R.layout.game_ai);
 
 		cbSaveEqual = (CheckBox) findViewById(R.id.checkBoxSaveEqual);
 		cbTheme = (CheckBox) findViewById(R.id.checkBoxSelectTheme);
@@ -994,49 +1075,112 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 		TextView tv1 = (TextView) findViewById(R.id.welcomeGame);
 		tv1.setText(getString(R.string.game) + nbGame);
 
-		Display display = getWindowManager().getDefaultDisplay();
-		DisplayMetrics metrics = new DisplayMetrics();
-		getWindowManager().getDefaultDisplay().getMetrics(metrics);
+		gv = (GameView) findViewById(R.id.gameView1);
+		gv.setValues(null, BLUE_PLAYER);
+		gv.setMode(GameView.MODE_INTERACTIVE);
+		gv.setDark(isDark);
+		gv.setAlignement(GameView.STYLE_TOP_VERTICAL_CENTER_HORIZONTAL);
+		gv.invalidate();
+		gv.invalidate();
+		
+		
+//		SPenEventLibrary mSPenEventLibrary = new SPenEventLibrary();
+//		SPenHoverListener mSPenHoverListener = new SPenHoverListener() {
+//
+//		    @Override           
+//		    public boolean onHover(View view, MotionEvent event) {
+//		        switch (event.getAction()) {
+//		        case MotionEvent.ACTION_HOVER_ENTER:
+//		            Toast.makeText(getApplicationContext(), "amazing !", Toast.LENGTH_SHORT).show();
+//		            return true;
+//		        case MotionEvent.ACTION_HOVER_EXIT:
+//		        	 Toast.makeText(getApplicationContext(), "less amazing !", Toast.LENGTH_SHORT).show();
+//		            return true;
+//		        default:
+//		            return false;
+//		        }
+//		    }
+//
+//			@Override
+//			public void onHoverButtonDown(View arg0, MotionEvent arg1) {
+//				 Toast.makeText(getApplicationContext(), "down !", Toast.LENGTH_SHORT).show();
+//			}
+//
+//			@Override
+//			public void onHoverButtonUp(View arg0, MotionEvent arg1) {
+//				 Toast.makeText(getApplicationContext(), "up !", Toast.LENGTH_SHORT).show();
+//			}
+//		};
+//		
+//		mSPenEventLibrary.setSPenHoverListener(tv1, mSPenHoverListener);
+		
 
-		w = metrics.widthPixels;
-		if (metrics.heightPixels < w)
-			w = metrics.heightPixels;
-		int ratio = 5;
-
-		if (android.os.Build.VERSION.SDK_INT > Build.VERSION_CODES.ECLAIR_MR1) {
-			if (display.getRotation() == Surface.ROTATION_0)
-				ratio = 3;
-		} else {
-			if (display.getOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
-				ratio = 3;
-		}
+		// Display display = getWindowManager().getDefaultDisplay();
+		// DisplayMetrics metrics = new DisplayMetrics();
+		// getWindowManager().getDefaultDilay().getMetrics(metrics);
+		//
+		// w = metrics.widthPixels;
+		// if (metrics.heightPixels < w)
+		// w = metrics.heightPixels;
+		// int ratio = 5;
+		//
+		// if (android.os.Build.VERSION.SDK_INT >
+		// Build.VERSION_CODES.ECLAIR_MR1) {
+		// if (display.getRotation() == Surface.ROTATION_0)
+		// ratio = 3;
+		// } else {
+		// if (display.getOrientation() ==
+		// ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
+		// ratio = 3;
+		// }
 
 		playerText = (TextView) findViewById(R.id.playerText);
 		annulerList = new ArrayList<String>();
 		tabIB = new ImageButton[3][3];
 		tabVal = new int[3][3];
 
-		tabIB[0][0] = (ImageButton) findViewById(R.id.imageButton1);
-		tabIB[0][1] = (ImageButton) findViewById(R.id.imageButton2);
-		tabIB[0][2] = (ImageButton) findViewById(R.id.imageButton3);
-		tabIB[1][0] = (ImageButton) findViewById(R.id.imageButton4);
-		tabIB[1][1] = (ImageButton) findViewById(R.id.imageButton5);
-		tabIB[1][2] = (ImageButton) findViewById(R.id.imageButton6);
-		tabIB[2][0] = (ImageButton) findViewById(R.id.imageButton7);
-		tabIB[2][1] = (ImageButton) findViewById(R.id.imageButton8);
-		tabIB[2][2] = (ImageButton) findViewById(R.id.imageButton9);
+		// tabIB[0][0] = (ImageButton) findViewById(R.id.imageButton1);
+		// tabIB[0][1] = (ImageButton) findViewById(R.id.imageButton2);
+		// tabIB[0][2] = (ImageButton) findViewById(R.id.imageButton3);
+		// tabIB[1][0] = (ImageButton) findViewById(R.id.imageButton4);
+		// tabIB[1][1] = (ImageButton) findViewById(R.id.imageButton5);
+		// tabIB[1][2] = (ImageButton) findViewById(R.id.imageButton6);
+		// tabIB[2][0] = (ImageButton) findViewById(R.id.imageButton7);
+		// tabIB[2][1] = (ImageButton) findViewById(R.id.imageButton8);
+		// tabIB[2][2] = (ImageButton) findViewById(R.id.imageButton9);
 
 		for (int i = 0; i < 3; i++) {
 			for (int j = 0; j < 3; j++) {
-				tabIB[i][j].setMinimumWidth((w) / ratio);
-				tabIB[i][j].setMinimumHeight((w) / ratio);
-				tabIB[i][j].setMaxWidth((w) / ratio);
-				tabIB[i][j].setMaxHeight((w) / ratio);
-
-				tabIB[i][j].setOnClickListener(this);
+				// tabIB[i][j].setMinimumWidth((w) / ratio);
+				// tabIB[i][j].setMinimumHeight((w) / ratio);
+				// tabIB[i][j].setMaxWidth((w) / ratio);
+				// tabIB[i][j].setMaxHeight((w) / ratio);
+				//
+				// tabIB[i][j].setOnClickListener(this);
 				tabVal[i][j] = NONE_PLAYER;
 			}
 		}
+
+		gv.setDelegate(new GameHandler() {
+			@Override
+			public void handleTurn(int i, int j) {
+				if (turn == BLUE_PLAYER) {
+					tabVal[i][j] = BLUE_PLAYER;
+					displayNextTurn();
+					gv.setValues(tabVal, turn);
+				} else {
+					tabVal[i][j] = RED_PLAYER;
+					displayNextTurn();
+					gv.setValues(tabVal, turn);
+				}
+				if (m != null && getSupportActionBar().getSelectedNavigationIndex() != 1) {
+					m.getItem(0).setVisible(true);
+				}
+				menu.invalidate();
+				checkWinner(i, j, false, false);
+
+			}
+		});
 
 		if (nbGame % 2 != 0) {
 			turn = RED_PLAYER;
@@ -1045,7 +1189,7 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 		}
 
 		displayNextTurn();
-
+		gv.setValues(tabVal, turn);
 		if (m != null) {
 			m.getItem(0).setVisible(false);
 		}
@@ -1054,11 +1198,16 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 	}
 
 	private void updateField() {
-		for (int i = 0; i < 3; i++) {
-			for (int j = 0; j < 3; j++) {
-				if (tabVal[i][j] != NONE_PLAYER)
-					tabIB[i][j].setImageDrawable(getResources().getDrawable(ColorHolder.getInstance(this).getDrawable(tabVal[i][j])));
-			}
+		// for (int i = 0; i < 3; i++) {
+		// for (int j = 0; j < 3; j++) {
+		// if (tabVal[i][j] != NONE_PLAYER)
+		// tabIB[i][j].setImageDrawable(getResources().getDrawable(ColorHolder.getInstance(this).getDrawable(tabVal[i][j])));
+		// }
+		// }
+
+		if (gv != null) {
+			gv.loadcolors();
+			gv.invalidate();
 		}
 
 		playerText.setTextColor(Color.parseColor(ColorHolder.getInstance(this).getColor(turn)));
@@ -1178,7 +1327,10 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 		nbGame++;
 		if (!fromBT) {
 			playerText.setText(R.string.over);
-			playerText.setTextColor(Color.WHITE);
+			if (isDark)
+				playerText.setTextColor(Color.WHITE);
+			else
+				playerText.setTextColor(Color.DKGRAY);
 		}
 		AlertDialog alertDialog = new AlertDialog.Builder(this).create();
 		alertDialog.setCancelable(false);
@@ -1261,30 +1413,30 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 		if (getSupportActionBar().getSelectedNavigationIndex() == 0) {
 			Display display = getWindowManager().getDefaultDisplay();
 
-			int ratio = 5;
+//			int ratio = 5;
 
 			if (android.os.Build.VERSION.SDK_INT > Build.VERSION_CODES.ECLAIR_MR1) {
 				if (display.getRotation() == Surface.ROTATION_0) {
-					ratio = 3;
+//					ratio = 3;
 					isLandscape = false;
 				}
 			} else {
 				if (display.getOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
-					ratio = 3;
+//					ratio = 3;
 					isLandscape = false;
 				}
 			}
 
-			for (int i = 0; i < 3; i++) {
-				for (int j = 0; j < 3; j++) {
-					tabIB[i][j].setMinimumHeight(w / ratio);
-					tabIB[i][j].setMaxHeight(w / ratio);
-					tabIB[i][j].setMinimumWidth(w / ratio);
-					tabIB[i][j].setMaxWidth(w / ratio);
-				}
-			}
-
-			recalculateSize();
+			// for (int i = 0; i < 3; i++) {
+			// for (int j = 0; j < 3; j++) {
+			// tabIB[i][j].setMinimumHeight(w / ratio);
+			// tabIB[i][j].setMaxHeight(w / ratio);
+			// tabIB[i][j].setMinimumWidth(w / ratio);
+			// tabIB[i][j].setMaxWidth(w / ratio);
+			// }
+			// }
+			//
+			// recalculateSize();
 		}
 		if (sv != null)
 			sv.hide();
