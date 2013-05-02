@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
@@ -18,30 +19,22 @@ import android.util.DisplayMetrics;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.MenuItem;
+import com.astuetz.viewpager.extensions.PagerSlidingTabStrip;
 import com.slidingmenu.lib.SlidingMenu;
-import com.viewpagerindicator.UnderlinePageIndicator;
 
+import fr.mathis.morpion.tools.ColorHolder;
 import fr.mathis.morpion.tools.ToolsBDD;
 
 public class VisuPagerActivity extends SherlockFragmentActivity implements OnPageChangeListener {
-	/**
-	 * The number of pages (wizard steps) to show in this demo.
-	 */
+
 	private static int NUM_PAGES = 10;
 	private ArrayList<Integer> indexs;
-
-	/**
-	 * The pager widget, which handles animation and allows swiping horizontally
-	 * to access previous and next wizard steps.
-	 */
 	private ViewPager mPager;
-
-	/**
-	 * The pager adapter, which provides the pages to the view pager widget.
-	 */
 	private PagerAdapter mPagerAdapter;
 	boolean isDark;
 	private SlidingMenu menu;
+	PagerSlidingTabStrip tabs;
+	private String defaultColor = "#666666";
 
 	public static float convertDpToPixel(float dp, Context context) {
 		Resources resources = context.getResources();
@@ -49,21 +42,19 @@ public class VisuPagerActivity extends SherlockFragmentActivity implements OnPag
 		float px = dp * (metrics.densityDpi / 160f);
 		return px;
 	}
-	
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
+
 		SharedPreferences mgr = PreferenceManager.getDefaultSharedPreferences(this);
 		isDark = mgr.getBoolean("isDark", false);
-		
-		if(isDark)
-		{
-			//super.setTheme(R.style.AppThemeDark);
+
+		if (isDark) {
 			setTheme(R.style.AppThemeDark);
 		}
 		initiActivity();
-		
+
 		menu = new SlidingMenu(this);
 		menu.setMode(SlidingMenu.LEFT);
 		menu.setTouchModeAbove(SlidingMenu.TOUCHMODE_NONE);
@@ -77,19 +68,22 @@ public class VisuPagerActivity extends SherlockFragmentActivity implements OnPag
 	}
 
 	private void initiActivity() {
-		setContentView(R.layout.visupage);
+		
+		setContentView(isDark ? R.layout.visupagedark : R.layout.visupage);
 		NUM_PAGES = ToolsBDD.getInstance(this).getNbPartie();
 		indexs = new ArrayList<Integer>();
-		
+
 		mPager = (ViewPager) findViewById(R.id.pager);
 		mPagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
 		mPager.setAdapter(mPagerAdapter);
-		mPager.setPageMargin((int)convertDpToPixel(9,this));
+		mPager.setPageMargin((int) convertDpToPixel(9, this));
 		mPager.setPageMarginDrawable(isDark ? R.drawable.lineblue : R.drawable.linegraypager);
-		UnderlinePageIndicator titleIndicator = (UnderlinePageIndicator) findViewById(R.id.indicator);
-		titleIndicator.setViewPager(mPager);
 
-		int premsIndex = this.getIntent().getIntExtra("id",0);
+		tabs = (PagerSlidingTabStrip) findViewById(R.id.tabs);
+		tabs.setViewPager(mPager);
+		tabs.setOnPageChangeListener(this);
+
+		int premsIndex = this.getIntent().getIntExtra("id", 0);
 		int pos = 0;
 		Cursor c = ToolsBDD.getInstance(getApplicationContext()).getAllParties();
 		c.moveToFirst();
@@ -101,31 +95,24 @@ public class VisuPagerActivity extends SherlockFragmentActivity implements OnPag
 
 		mPager.setCurrentItem(pos);
 		indexs.add(pos);
-		getSupportActionBar().setTitle(getString(R.string.resume) + premsIndex);
-		int n = ToolsBDD.getInstance(this).getWinner(premsIndex);
-		if (n == MainActivity.BLUE_PLAYER) {
-			getSupportActionBar().setSubtitle(R.string.win);
-		} else if (n == MainActivity.RED_PLAYER) {
-			getSupportActionBar().setSubtitle(R.string.loose);
-		} else {
-			getSupportActionBar().setSubtitle(R.string.equal);
-		}
+	}
 
-		titleIndicator.setOnPageChangeListener(this);
+	private void changeColor(int newColor) {
+		tabs.setIndicatorColor(newColor);
 	}
 
 	@Override
 	public void onBackPressed() {
-	  if(indexs.size()>1) {
-		  mPager.setCurrentItem(indexs.get(indexs.size()-2));
-		  indexs.remove(indexs.size()-1);
-		  if(indexs.size()>1)
-			  indexs.remove(indexs.size()-1);
-	  } else {
-	    super.onBackPressed(); 
-	  }
+		if (indexs.size() > 1) {
+			mPager.setCurrentItem(indexs.get(indexs.size() - 2));
+			indexs.remove(indexs.size() - 1);
+			if (indexs.size() > 1)
+				indexs.remove(indexs.size() - 1);
+		} else {
+			super.onBackPressed();
+		}
 	}
-	
+
 	public boolean onMenuItemSelected(int featureId, MenuItem item) {
 
 		int itemId = item.getItemId();
@@ -143,8 +130,30 @@ public class VisuPagerActivity extends SherlockFragmentActivity implements OnPag
 		}
 
 		@Override
-		public Fragment getItem(int position) {
+		public CharSequence getPageTitle(int position) {
+			int id = 0;
+			Cursor c = ToolsBDD.getInstance(getApplicationContext()).getAllParties();
+			c.moveToFirst();
+			for (int i = 0; i < c.getCount(); i++) {
+				if (i == position)
+					id = c.getInt(0);
+				c.moveToNext();
+			}
+			String s = id +" - ";
+			int n = ToolsBDD.getInstance(getApplicationContext()).getWinner(id);
+			if (n == MainActivity.BLUE_PLAYER) {
+				s += getString(R.string.win);
+			} else if (n == MainActivity.RED_PLAYER) {
+				s += getString(R.string.loose);
+			} else {
+				s += getString(R.string.equal);
+			}
+			
+			return s;
+		}
 
+		@Override
+		public Fragment getItem(int position) {
 			int id = 0;
 			Cursor c = ToolsBDD.getInstance(getApplicationContext()).getAllParties();
 			c.moveToFirst();
@@ -165,7 +174,6 @@ public class VisuPagerActivity extends SherlockFragmentActivity implements OnPag
 
 	@Override
 	public void onPageScrollStateChanged(int arg0) {
-		// TODO Auto-generated method stub
 
 	}
 
@@ -186,16 +194,13 @@ public class VisuPagerActivity extends SherlockFragmentActivity implements OnPag
 			c.moveToNext();
 		}
 
-		getSupportActionBar().setTitle(getString(R.string.resume) + id);
 		int n = ToolsBDD.getInstance(this).getWinner(id);
-		if (n == MainActivity.BLUE_PLAYER) {
-			getSupportActionBar().setSubtitle(R.string.win);
-		} else if (n == MainActivity.RED_PLAYER) {
-			getSupportActionBar().setSubtitle(R.string.loose);
-		} else {
-			getSupportActionBar().setSubtitle(R.string.equal);
-		}
 
+		if (n != MainActivity.NONE_PLAYER)
+			changeColor(Color.parseColor(ColorHolder.getInstance(getApplicationContext()).getColor(n)));
+		else {
+			changeColor(Color.parseColor(defaultColor + ""));
+		}
 	}
 
 }
