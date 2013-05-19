@@ -20,7 +20,6 @@ import android.util.DisplayMetrics;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.MenuItem;
 import com.astuetz.viewpager.extensions.PagerSlidingTabStrip;
-import com.slidingmenu.lib.SlidingMenu;
 
 import fr.mathis.morpion.tools.ColorHolder;
 import fr.mathis.morpion.tools.ToolsBDD;
@@ -32,7 +31,6 @@ public class VisuPagerActivity extends SherlockFragmentActivity implements OnPag
 	private ViewPager mPager;
 	private PagerAdapter mPagerAdapter;
 	boolean isDark;
-	private SlidingMenu menu;
 	PagerSlidingTabStrip tabs;
 	private String defaultColor = "#666666";
 
@@ -45,26 +43,16 @@ public class VisuPagerActivity extends SherlockFragmentActivity implements OnPag
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-
 		SharedPreferences mgr = PreferenceManager.getDefaultSharedPreferences(this);
 		isDark = mgr.getBoolean("isDark", false);
 
 		if (isDark) {
 			setTheme(R.style.AppThemeDark);
 		}
+		super.onCreate(savedInstanceState);
+
+
 		initiActivity();
-
-		menu = new SlidingMenu(this);
-		menu.setMode(SlidingMenu.LEFT);
-		menu.setTouchModeAbove(SlidingMenu.TOUCHMODE_NONE);
-		menu.setShadowWidthRes(R.dimen.shadow_width);
-		menu.setShadowDrawable(R.drawable.shadow);
-		menu.setBehindOffsetRes(R.dimen.slidingmenu_offset);
-		menu.setFadeDegree(0.35f);
-		menu.attachToActivity(this, SlidingMenu.SLIDING_WINDOW);
-		menu.setMenu(isDark ? R.layout.menudark : R.layout.menu);
-
 	}
 
 	private void initiActivity() {

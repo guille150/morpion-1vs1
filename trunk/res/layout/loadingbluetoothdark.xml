@@ -110,9 +110,9 @@
         android:layout_width="300dp"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        android:background="#eee"
+        android:background="#111"
         android:choiceMode="singleChoice"
-        android:divider="@drawable/linegraylight"
+        android:divider="@drawable/linegraylightdark"
         android:dividerHeight="1dp" />
 
 </android.support.v4.widget.DrawerLayout>

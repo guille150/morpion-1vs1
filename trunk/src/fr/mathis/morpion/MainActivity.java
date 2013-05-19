@@ -1,7 +1,6 @@
 package fr.mathis.morpion;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -14,6 +13,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
@@ -23,8 +23,11 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.DrawerLayout.DrawerListener;
+import android.util.DisplayMetrics;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.Surface;
@@ -34,31 +37,19 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
 import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
-import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.ScrollView;
-import android.widget.Spinner;
-import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.app.ActionBar.OnNavigationListener;
 import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
-import com.github.espiandev.showcaseview.ShowcaseView;
-import com.github.espiandev.showcaseview.ShowcaseView.OnShowcaseEventListener;
-import com.slidingmenu.lib.SlidingMenu;
-import com.slidingmenu.lib.SlidingMenu.OnClosedListener;
-import com.slidingmenu.lib.SlidingMenu.OnOpenedListener;
 
 import fr.mathis.morpion.GameView.GameHandler;
 import fr.mathis.morpion.tools.ColorHolder;
@@ -66,39 +57,12 @@ import fr.mathis.morpion.tools.StateHolder;
 import fr.mathis.morpion.tools.ToolsBDD;
 
 @SuppressLint("HandlerLeak")
-public class MainActivity extends SherlockActivity implements OnNavigationListener, OnClickListener, OnCheckedChangeListener, OnOpenedListener, OnClosedListener {
+public class MainActivity extends SherlockActivity implements OnClickListener, OnItemClickListener {
 
 	public static final int RED_PLAYER = 4;
 	public static final int BLUE_PLAYER = 3;
 	public static final int NONE_PLAYER = 5;
 
-	TextView playerText;
-	ImageButton[][] tabIB;
-	int[][] tabVal;
-	int turn = BLUE_PLAYER;
-	int nbGame;
-	int w;
-	ArrayList<String> annulerList;
-	Menu m;
-	SlidingMenu menu;
-	boolean isMenuOpen = false;
-	boolean amILatestPlayerMulti = false;
-	boolean firstIsPlayed = false;
-	boolean computerStarted = false;
-	CheckBox cbSaveEqual;
-	CheckBox cbTheme;
-	Spinner spBlue;
-	Spinner spRed;
-	boolean isDark;
-	private ShowcaseView sv;
-	MenuItem miPref;
-	private ShowcaseView sv2;
-	Activity a;
-	GameView gv;
-	protected ShowcaseView sv3;
-	protected BluetoothAdapter mBluetoothAdapter;
-	private BluetoothChatService mChatService;
-	private StringBuffer mOutStringBuffer;
 	public static final int REQUEST_BT = 6;
 	public static final int MESSAGE_STATE_CHANGE = 1;
 	public static final int MESSAGE_READ = 2;
@@ -110,84 +74,52 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 	public static final String TOAST = "toast";
 
 	private static final int REQUEST_CONNECT_DEVICE_INSECURE = 2;
+	private static final int REQUEST_PREF = 7;
+
+	ArrayList<NavigationItem> navItems;
+	private int activeNavItem = 0;
+	private DrawerLayout mDrawerLayout;
+	private ListView mDrawerList;
+	TextView playerText;
+	ImageButton[][] tabIB;
+	int[][] tabVal;
+	int turn = BLUE_PLAYER;
+	int nbGame;
+	int w;
+	Menu m;
+	boolean isMenuOpen = false;
+	boolean amILatestPlayerMulti = false;
+	boolean firstIsPlayed = false;
+	boolean computerStarted = false;
+	boolean isDark;
+	boolean shouldRestartBeVisible = false;
+	MenuItem miPref;
+	Activity a;
+	GameView gv;
+	protected BluetoothAdapter mBluetoothAdapter;
+	private BluetoothChatService mChatService;
+	private StringBuffer mOutStringBuffer;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-
 		SharedPreferences mgr = PreferenceManager.getDefaultSharedPreferences(this);
 		isDark = mgr.getBoolean("isDark", false);
 
 		if (isDark)
 			super.setTheme(R.style.AppThemeDark);
+		super.onCreate(savedInstanceState);
 
-		Context context = getSupportActionBar().getThemedContext();
 
-		ArrayList<AbMenu> data = new ArrayList<AbMenu>();
-		data.add(new AbMenu(isDark ? R.drawable.ic_action_spinner_partiemultidark : R.drawable.ic_action_spinner_partiemulti, getString(R.string.m1), 1));
-		data.add(new AbMenu(isDark ? R.drawable.ic_action_spinner_partiemultidark : R.drawable.ic_action_spinner_partiemulti, getString(R.string.m8), 2));
-		data.add(new AbMenu(isDark ? R.drawable.ic_action_spinner_partiedark : R.drawable.ic_action_spinner_partie, getString(R.string.s31), 5));
-		data.add(new AbMenu(isDark ? R.drawable.ic_action_spinner_savedark : R.drawable.ic_action_spinner_save, getString(R.string.m2), 3));
-		data.add(new AbMenu(isDark ? R.drawable.ic_action_spinner_partiehelpdark : R.drawable.ic_action_spinner_partiehelp, getString(R.string.m3), 4));
 
-		AbMenuAdapter adapter = new AbMenuAdapter(context, R.layout.ab_spinner_item, data);
+		getSupportActionBar().setDisplayShowTitleEnabled(true);
+		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-		getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
-		getSupportActionBar().setListNavigationCallbacks(adapter, this);
-
-		getSupportActionBar().setDisplayShowTitleEnabled(false);
-
-		// configure the SlidingMenu
-		menu = new SlidingMenu(this);
-		menu.setMode(SlidingMenu.LEFT);
-		menu.setTouchModeAbove(SlidingMenu.TOUCHMODE_MARGIN);
-		menu.setShadowWidthRes(R.dimen.shadow_width);
-		menu.setShadowDrawable(R.drawable.shadow);
-		menu.setBehindOffsetRes(R.dimen.slidingmenu_offset);
-		menu.setFadeDegree(0.35f);
-		menu.attachToActivity(this, SlidingMenu.SLIDING_WINDOW);
-		menu.setMenu(isDark ? R.layout.menudark : R.layout.menu);
-		menu.setOnOpenedListener(this);
-		menu.setOnClosedListener(this);
-		// this method is called by the action bar
-		// createNewGame();
 		a = this;
 
-		if (!StateHolder.GetMemorizedValue("showwelcome", this)) {
-			AlertDialog alertDialog = new AlertDialog.Builder(this).create();
-			alertDialog.setCancelable(false);
-			alertDialog.setTitle(getString(R.string.s32));
-			alertDialog.setMessage(getString(R.string.s33));
-			alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, "OK", new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int which) {
-
-					StateHolder.MemorizeValue("showwelcome", true, getApplicationContext());
-					if (!StateHolder.GetMemorizedValue("showpref", getApplicationContext())) {
-						if (miPref != null) {
-							ShowcaseView.ConfigOptions co = new ShowcaseView.ConfigOptions();
-							co.hideOnClickOutside = true;
-							sv = ShowcaseView.insertShowcaseViewWithType(ShowcaseView.ITEM_ACTION_ITEM, miPref.getItemId(), a, R.string.sc3, R.string.sc5, co);
-							sv.setOnShowcaseEventListener(new OnShowcaseEventListener() {
-
-								@Override
-								public void onShowcaseViewShow(ShowcaseView showcaseView) {
-
-								}
-
-								@Override
-								public void onShowcaseViewHide(ShowcaseView showcaseView) {
-									sv = null;
-								}
-							});
-						} else {
-							new Async().execute();
-						}
-					}
-				}
-			});
-			alertDialog.show();
+		createNewGame();
+		if (!StateHolder.GetMemorizedValue("showwelcomedrawer", this)) {
+			new Async().execute();
 		}
-
 	}
 
 	class Async extends AsyncTask<Void, Void, Void> {
@@ -195,9 +127,10 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 		@Override
 		protected Void doInBackground(Void... params) {
 			try {
-				Thread.sleep(1500);
+				Thread.sleep(1000);
 			}
 			catch (InterruptedException e) {
+				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			return null;
@@ -205,22 +138,172 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 
 		@Override
 		protected void onPostExecute(Void result) {
-			ShowcaseView.ConfigOptions co = new ShowcaseView.ConfigOptions();
-			co.hideOnClickOutside = true;
-			sv = ShowcaseView.insertShowcaseViewWithType(ShowcaseView.ITEM_ACTION_ITEM, miPref.getItemId(), a, R.string.sc3, R.string.sc5, co);
-			sv.setOnShowcaseEventListener(new OnShowcaseEventListener() {
-
-				@Override
-				public void onShowcaseViewShow(ShowcaseView showcaseView) {
-
-				}
-
-				@Override
-				public void onShowcaseViewHide(ShowcaseView showcaseView) {
-					sv = null;
-				}
-			});
+			mDrawerLayout.openDrawer(GravityCompat.START);
+			StateHolder.MemorizeValue("showwelcomedrawer", true, getApplicationContext());
+			super.onPostExecute(result);
 		}
+	}
+
+	private void initDrawer() {
+		mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+		mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
+		mDrawerList = (ListView) findViewById(R.id.left_drawer);
+		navItems = new ArrayList<MainActivity.NavigationItem>();
+
+		navItems.add(new NavigationItem(isDark ? R.drawable.ic_action_spinner_partiemultidark : R.drawable.ic_action_spinner_partiemulti, getString(R.string.m1), 0));
+		navItems.add(new NavigationItem(isDark ? R.drawable.ic_action_spinner_partiemultidark : R.drawable.ic_action_spinner_partiemulti, getString(R.string.m8), 0));
+		navItems.add(new NavigationItem(isDark ? R.drawable.ic_action_spinner_partiedark : R.drawable.ic_action_spinner_partie, getString(R.string.s31), 0));
+		navItems.add(new NavigationItem(isDark ? R.drawable.ic_action_spinner_savedark : R.drawable.ic_action_spinner_save, getString(R.string.m2), 0));
+		navItems.add(new NavigationItem(isDark ? R.drawable.ic_action_spinner_partiehelpdark : R.drawable.ic_action_spinner_partiehelp, getString(R.string.m3), 0));
+
+		NavigationAdapter navAdapter = new NavigationAdapter(a, navItems);
+		mDrawerList.setAdapter(navAdapter);
+		mDrawerLayout.setDrawerListener(new DrawerListener() {
+
+			@Override
+			public void onDrawerStateChanged(int arg0) {
+
+			}
+
+			@Override
+			public void onDrawerSlide(View arg0, float arg1) {
+
+			}
+
+			@Override
+			public void onDrawerOpened(View arg0) {
+				shouldRestartBeVisible = m.getItem(0).isVisible();
+				showOpenedIcon();
+			}
+
+			@Override
+			public void onDrawerClosed(View arg0) {
+				showClosedIcon();
+			}
+		});
+		mDrawerList.setOnItemClickListener(this);
+		showClosedIcon();
+	}
+
+	@Override
+	public void onItemClick(AdapterView<?> arg0, View arg1, int pos, long arg3) {
+		boolean forseFirst = false;
+		if (pos == 0) {
+			getSupportActionBar().setIcon(R.drawable.two_player);
+			getSupportActionBar().setIcon(R.drawable.ic_launcher);
+			createNewGame();
+		}
+		if (pos == 3) {
+			getSupportActionBar().setIcon(R.drawable.ic_launcher);
+			if (0 != ToolsBDD.getInstance(this).getNbPartie()) {
+				Intent intent = new Intent(MainActivity.this, HistoryActivity.class);
+				startActivityForResult(intent, 0);
+			} else {
+				Toast.makeText(this, R.string.nohistory, Toast.LENGTH_SHORT).show();
+				onItemClick(null, null, 0, 0);
+				forseFirst = true;
+			}
+		}
+		if (pos == 4) {
+			getSupportActionBar().setIcon(R.drawable.ic_launcher);
+			setContentView(isDark ? R.layout.helpdark : R.layout.help);
+			initDrawer();
+			if (m != null) {
+				m.getItem(0).setVisible(false);
+			}
+		} else if (pos == 1) {
+			getSupportActionBar().setIcon(R.drawable.two_player);
+			startBluetooth();
+		} else if (pos == 2) {
+			getSupportActionBar().setIcon(R.drawable.ic_launcher);
+			createNewGameAI();
+		}
+		if (pos != 1 && !forseFirst) {
+			activeNavItem = pos;
+			mDrawerList.invalidate();
+		}
+	}
+
+	public class NavigationItem {
+		public int icon;
+		public String title;
+		public int nbNews;
+
+		public NavigationItem(int icon, String title, int nbNews) {
+			super();
+			this.icon = icon;
+			this.title = title;
+			this.nbNews = nbNews;
+		}
+	}
+
+	public class NavigationAdapter extends BaseAdapter {
+
+		Context context;
+		ArrayList<NavigationItem> data;
+		LayoutInflater inflater;
+
+		public NavigationAdapter(Context a, ArrayList<NavigationItem> data) {
+			this.data = data;
+			inflater = (LayoutInflater) a.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			this.context = a;
+		}
+
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent) {
+			View v = inflater.inflate(R.layout.navigation_item, null);
+			final NavigationItem item = data.get(position);
+			if (item != null) {
+				((android.widget.TextView) v.findViewById(R.id.nav_title)).setText(item.title);
+				((android.widget.TextView) v.findViewById(R.id.nav_title)).setCompoundDrawablesWithIntrinsicBounds(getResources().getDrawable(item.icon), null, null, null);
+				((android.widget.TextView) v.findViewById(R.id.nav_title)).setCompoundDrawablePadding((int) convertDpToPixel(16.0f, getApplicationContext()));
+				if (activeNavItem == position)
+					v.setBackgroundColor(isDark ? Color.parseColor("#33B5E5") : Color.parseColor("#D3D3D3"));
+			}
+			return v;
+		}
+
+		@Override
+		public int getCount() {
+			return data.size();
+		}
+
+		@Override
+		public Object getItem(int position) {
+			return null;
+		}
+
+		@Override
+		public long getItemId(int position) {
+			return 0;
+		}
+	}
+
+	public static float convertDpToPixel(float dp, Context context) {
+		Resources resources = context.getResources();
+		DisplayMetrics metrics = resources.getDisplayMetrics();
+		float px = dp * (metrics.densityDpi / 160f);
+		return px;
+	}
+
+	private void showClosedIcon() {
+		int upId = Resources.getSystem().getIdentifier("up", "id", "android");
+		if (upId > 0) {
+			ImageView up = (ImageView) findViewById(upId);
+			up.setImageResource(isDark ? R.drawable.ic_drawerdark : R.drawable.ic_drawer);
+		}
+		if (m != null)
+			m.getItem(0).setVisible(shouldRestartBeVisible);
+	}
+
+	private void showOpenedIcon() {
+		int upId = Resources.getSystem().getIdentifier("up", "id", "android");
+		if (upId > 0) {
+			ImageView up = (ImageView) findViewById(upId);
+			up.setImageResource(isDark ? R.drawable.ic_drawersmalldark : R.drawable.ic_drawersmall);
+		}
+		if (m != null)
+			m.getItem(0).setVisible(false);
 	}
 
 	@Override
@@ -238,39 +321,28 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 	public boolean onMenuItemSelected(int featureId, MenuItem item) {
 
 		if (item.getTitle().toString().compareTo(getString(R.string.restart)) == 0) {
-			if (getSupportActionBar().getSelectedNavigationIndex() == 0)
+			if (activeNavItem == 0)
 				createNewGame();
-			else if (getSupportActionBar().getSelectedNavigationIndex() == 1) {
+			else if (activeNavItem == 1) {
 
 			} else {
 				createNewGameAI();
 			}
 		}
-		if (item.getTitle().toString().compareTo(getString(R.string.ctrlz)) == 0) {
-			annuler();
-			if (annulerList.size() == 0) {
-				m.getItem(0).setVisible(false);
-			}
-		}
+
 		if (item.getTitle().toString().compareTo(getString(R.string.menupref)) == 0) {
-			if (sv != null) {
-				sv.hide();
-				sv = null;
-				StateHolder.MemorizeValue("showpref", true, this);
-			}
-			if (isMenuOpen) {
-				menu.toggle(true);
-			} else {
-				menu.toggle(true);
-			}
+			Intent prefIntent = new Intent(this, PreferencesActivity.class);
+			startActivityForResult(prefIntent, REQUEST_PREF);
 		}
+
 		int itemId = item.getItemId();
 		switch (itemId) {
 		case android.R.id.home:
-			if (isMenuOpen) {
-				menu.toggle(true);
+
+			if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
+				mDrawerLayout.closeDrawer(GravityCompat.START);
 			} else {
-				menu.toggle(true);
+				mDrawerLayout.openDrawer(GravityCompat.START);
 			}
 			break;
 		}
@@ -278,65 +350,9 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 		return super.onMenuItemSelected(featureId, item);
 	}
 
-	@Override
-	public void onBackPressed() {
-
-		if (sv != null) {
-			sv.hide();
-			sv = null;
-		} else if (sv2 != null) {
-			sv2.hide();
-			sv2 = null;
-		} else {
-
-			if (isMenuOpen) {
-				menu.toggle(true);
-			} else {
-				super.onBackPressed();
-			}
-		}
-	}
-
-	@Override
-	public boolean onNavigationItemSelected(int itemPosition, long itemId) {
-
-		if (itemPosition == 0) {
-			getSupportActionBar().setIcon(R.drawable.two_player);
-			getSupportActionBar().setIcon(R.drawable.ic_launcher);
-			createNewGame();
-		}
-		if (itemPosition == 3) {
-			getSupportActionBar().setIcon(R.drawable.ic_launcher);
-			if (0 != ToolsBDD.getInstance(this).getNbPartie()) {
-				Intent intent = new Intent(MainActivity.this, HistoryActivity.class);
-				startActivityForResult(intent, 0);
-
-			} else {
-				Toast.makeText(this, R.string.nohistory, Toast.LENGTH_SHORT).show();
-				getSupportActionBar().setSelectedNavigationItem(0);
-			}
-		}
-		if (itemPosition == 4) {
-			getSupportActionBar().setIcon(R.drawable.ic_launcher);
-			setContentView(R.layout.help);
-
-			if (m != null) {
-				m.getItem(0).setVisible(false);
-			}
-			menu.invalidate();
-		} else if (itemPosition == 1) {
-			getSupportActionBar().setIcon(R.drawable.two_player);
-			startBluetooth();
-		} else if (itemPosition == 2) {
-			getSupportActionBar().setIcon(R.drawable.ic_launcher);
-			createNewGameAI();
-		}
-		return false;
-	}
-
 	private void createNewGameAI() {
 		setContentView(isDark ? R.layout.game_aidark : R.layout.game_ai);
-
+		initDrawer();
 		nbGame = ToolsBDD.getInstance(this).getNbPartieNumber() + 1;
 		TextView tv1 = (TextView) findViewById(R.id.welcomeGame);
 		tv1.setText(getString(R.string.game) + nbGame);
@@ -348,79 +364,10 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 		gv.setAlignement(GameView.STYLE_TOP_VERTICAL_CENTER_HORIZONTAL);
 		gv.invalidate();
 
-		// Display display = getWindowManager().getDefaultDisplay();
-		// DisplayMetrics metrics = new DisplayMetrics();
-		// getWindowManager().getDefaultDisplay().getMetrics(metrics);
-		//
-		// w = metrics.widthPixels;
-		// if (metrics.heightPixels < w)
-		// w = metrics.heightPixels;
-		// int ratio = 5;
-		//
-		// if (android.os.Build.VERSION.SDK_INT >
-		// Build.VERSION_CODES.ECLAIR_MR1) {
-		// if (display.getRotation() == Surface.ROTATION_0)
-		// ratio = 3;
-		// } else {
-		// if (display.getOrientation() ==
-		// ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
-		// ratio = 3;
-		// }
-
 		playerText = (TextView) findViewById(R.id.playerText);
-		annulerList = new ArrayList<String>();
-		// tabIB = new ImageButton[3][3];
-		// tabVal = new int[3][3];
-		//
-		// tabIB[0][0] = (ImageButton) findViewById(R.id.imageButton1);
-		// tabIB[0][1] = (ImageButton) findViewById(R.id.imageButton2);
-		// tabIB[0][2] = (ImageButton) findViewById(R.id.imageButton3);
-		// tabIB[1][0] = (ImageButton) findViewById(R.id.imageButton4);
-		// tabIB[1][1] = (ImageButton) findViewById(R.id.imageButton5);
-		// tabIB[1][2] = (ImageButton) findViewById(R.id.imageButton6);
-		// tabIB[2][0] = (ImageButton) findViewById(R.id.imageButton7);
-		// tabIB[2][1] = (ImageButton) findViewById(R.id.imageButton8);
-		// tabIB[2][2] = (ImageButton) findViewById(R.id.imageButton9);
 
 		for (int i = 0; i < 3; i++) {
 			for (int j = 0; j < 3; j++) {
-				// tabIB[i][j].setMinimumWidth((w) / ratio);
-				// tabIB[i][j].setMinimumHeight((w) / ratio);
-				// tabIB[i][j].setMaxWidth((w) / ratio);
-				// tabIB[i][j].setMaxHeight((w) / ratio);
-				//
-				// tabIB[i][j].setOnClickListener(new OnClickListener() {
-				//
-				// @Override
-				// public void onClick(View v) {
-				//
-				// for (int i = 0; i < 3; i++) {
-				// for (int j = 0; j < 3; j++) {
-				// if (v.getId() == tabIB[i][j].getId()) {
-				// Drawable d =
-				// getResources().getDrawable(ColorHolder.getInstance(getApplicationContext()).getDrawable(turn));
-				// if (turn == BLUE_PLAYER) {
-				// tabVal[i][j] = BLUE_PLAYER;
-				// makeTheAIPlay(i, j);
-				// } else {
-				// tabVal[i][j] = RED_PLAYER;
-				// makeTheAIPlay(i, j);
-				// }
-				// if (m != null) {
-				// m.getItem(0).setVisible(true);
-				// menu.invalidate();
-				// }
-				// tabIB[i][j].setImageDrawable(d);
-				// tabIB[i][j].setEnabled(false);
-				// annulerList.add(i + "," + j);
-				// menu.invalidate();
-				// checkWinner(i, j, false, true);
-				//
-				// }
-				// }
-				// }
-				// }
-				// });
 				tabVal[i][j] = NONE_PLAYER;
 			}
 		}
@@ -441,9 +388,7 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 				}
 				if (m != null) {
 					m.getItem(0).setVisible(true);
-					menu.invalidate();
 				}
-				menu.invalidate();
 				checkWinner(i, j, false, true);
 
 			}
@@ -467,7 +412,6 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 		gv.setValues(tabVal, turn);
 		if (m != null) {
 			m.getItem(0).setVisible(false);
-			menu.invalidate();
 		}
 
 	}
@@ -543,10 +487,38 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 
 			if (numberOfTurn() == 1 && i == -1 && j == -1) {
 				if (tabVal[1][1] == RED_PLAYER) {
-					if (tabVal[2][1] == NONE_PLAYER) {
+
+					if (tabVal[0][1] == BLUE_PLAYER && tabVal[1][0] == BLUE_PLAYER) {
+						i = 0;
+						j = 0;
+					}
+
+					else if (tabVal[2][1] == BLUE_PLAYER && tabVal[1][2] == BLUE_PLAYER) {
+						i = 2;
+						j = 2;
+					}
+
+					else if (tabVal[1][0] == BLUE_PLAYER && tabVal[2][1] == BLUE_PLAYER) {
+						i = 2;
+						j = 0;
+					}
+
+					else if (tabVal[0][1] == BLUE_PLAYER && tabVal[1][2] == BLUE_PLAYER) {
+						i = 0;
+						j = 2;
+					}
+
+					else if ((tabVal[0][1] == BLUE_PLAYER && tabVal[2][0] == BLUE_PLAYER) || (tabVal[0][1] == BLUE_PLAYER && tabVal[2][2] == BLUE_PLAYER)) {
+						i = 1;
+						j = 2;
+					}
+
+					else if (tabVal[2][1] == NONE_PLAYER) {
 						i = 2;
 						j = 1;
-					} else if (tabVal[1][2] == NONE_PLAYER) {
+					}
+
+					else if (tabVal[1][2] == NONE_PLAYER) {
 						i = 1;
 						j = 2;
 					}
@@ -555,20 +527,16 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 
 		}
 
-		if (i == -1 && j == -1) {
+		if ((i == -1 && j == -1) || (tabVal[i][j] != NONE_PLAYER)) {
 			p = findRandomPlace();
 			i = p.x;
 			j = p.y;
 		}
 
 		if (tabVal[i][j] == NONE_PLAYER) {
-			// Drawable d =
-			// getResources().getDrawable(ColorHolder.getInstance(this).getDrawable(RED_PLAYER));
 			tabVal[i][j] = RED_PLAYER;
 			gv.setValues(tabVal, BLUE_PLAYER);
 			gv.invalidate();
-			// tabIB[i][j].setImageDrawable(d);
-			// tabIB[i][j].setEnabled(false);
 		}
 	}
 
@@ -688,18 +656,20 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 		// If the adapter is null, then Bluetooth is not supported
 		if (mBluetoothAdapter == null) {
 			Toast.makeText(this, R.string.s1s, Toast.LENGTH_LONG).show();
-			getSupportActionBar().setSelectedNavigationItem(0);
+			onItemClick(null, null, 0, 0);
 			return;
 		}
 
 		if (!mBluetoothAdapter.isEnabled()) {
-			getSupportActionBar().setSelectedNavigationItem(0);
+			onItemClick(null, null, 0, 0);
 			Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
 			startActivityForResult(enableIntent, REQUEST_BT);
 		} else {
 
-			setContentView(R.layout.loadingbluetooth);
-
+			setContentView(isDark ? R.layout.loadingbluetoothdark : R.layout.loadingbluetooth);
+			initDrawer();
+			activeNavItem = 1;
+			mDrawerList.invalidate();
 			// Initialize the BluetoothChatService to perform bluetooth
 			// connections
 			mChatService = new BluetoothChatService(this, mHandler);
@@ -842,18 +812,12 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 
 		displayNextTurn();
 
-		// Drawable d;
 		if (isMyTurn) {
-			// d =
-			// getResources().getDrawable(ColorHolder.getInstance(this).getDrawable(MainActivity.BLUE_PLAYER));
 			tabVal[i][j] = BLUE_PLAYER;
 		} else {
-			// d =
-			// getResources().getDrawable(ColorHolder.getInstance(this).getDrawable(MainActivity.RED_PLAYER));
 			tabVal[i][j] = RED_PLAYER;
 		}
-		// tabIB[i][j].setImageDrawable(d);
-		// tabIB[i][j].setEnabled(false);
+
 		if (gv != null)
 			gv.setValues(tabVal, turn);
 		this.checkWinner(i, j, true, false);
@@ -861,7 +825,7 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 
 	private void createNewMuliGame() {
 		setContentView(isDark ? R.layout.game_aidark : R.layout.game_ai);
-
+		initDrawer();
 		nbGame = ToolsBDD.getInstance(this).getNbPartieNumber() + 1;
 		TextView tv1 = (TextView) findViewById(R.id.welcomeGame);
 		tv1.setText(getString(R.string.game) + nbGame);
@@ -873,64 +837,12 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 		gv.setAlignement(GameView.STYLE_TOP_VERTICAL_CENTER_HORIZONTAL);
 		gv.invalidate();
 
-		// Display display = getWindowManager().getDefaultDisplay();
-		// DisplayMetrics metrics = new DisplayMetrics();
-		// getWindowManager().getDefaultDisplay().getMetrics(metrics);
-		//
-		// w = metrics.widthPixels;
-		// if (metrics.heightPixels < w)
-		// w = metrics.heightPixels;
-		// int ratio = 5;
-		//
-		// if (android.os.Build.VERSION.SDK_INT >
-		// Build.VERSION_CODES.ECLAIR_MR1) {
-		// if (display.getRotation() == Surface.ROTATION_0)
-		// ratio = 3;
-		// } else {
-		// if (display.getOrientation() ==
-		// ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
-		// ratio = 3;
-		// }
-
 		playerText = (TextView) findViewById(R.id.playerText);
-		annulerList = new ArrayList<String>();
 		tabIB = new ImageButton[3][3];
 		tabVal = new int[3][3];
 
-		// tabIB[0][0] = (ImageButton) findViewById(R.id.imageButton1);
-		// tabIB[0][1] = (ImageButton) findViewById(R.id.imageButton2);
-		// tabIB[0][2] = (ImageButton) findViewById(R.id.imageButton3);
-		// tabIB[1][0] = (ImageButton) findViewById(R.id.imageButton4);
-		// tabIB[1][1] = (ImageButton) findViewById(R.id.imageButton5);
-		// tabIB[1][2] = (ImageButton) findViewById(R.id.imageButton6);
-		// tabIB[2][0] = (ImageButton) findViewById(R.id.imageButton7);
-		// tabIB[2][1] = (ImageButton) findViewById(R.id.imageButton8);
-		// tabIB[2][2] = (ImageButton) findViewById(R.id.imageButton9);
-
 		for (int i = 0; i < 3; i++) {
 			for (int j = 0; j < 3; j++) {
-				// tabIB[i][j].setMinimumWidth((w) / ratio);
-				// tabIB[i][j].setMinimumHeight((w) / ratio);
-				// tabIB[i][j].setMaxWidth((w) / ratio);
-				// tabIB[i][j].setMaxHeight((w) / ratio);
-
-				// tabIB[i][j].setOnClickListener(new OnClickListener() {
-				//
-				// @Override
-				// public void onClick(View v) {
-				//
-				// if (!amILatestPlayerMulti)
-				// for (int i = 0; i < 3; i++) {
-				// for (int j = 0; j < 3; j++) {
-				// if (v.getId() == tabIB[i][j].getId()) {
-				// String messageToSend = "";
-				// messageToSend = "newturn/" + i + "/" + j;
-				// sendMessage(messageToSend);
-				// }
-				// }
-				// }
-				// }
-				// });
 				tabVal[i][j] = NONE_PLAYER;
 			}
 		}
@@ -950,8 +862,6 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 			m.getItem(0).setVisible(false);
 		}
 
-		menu.invalidate();
-
 		if (firstIsPlayed) {
 			if (amILatestPlayerMulti == true)
 				turn = BLUE_PLAYER;
@@ -966,9 +876,11 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 
 			@Override
 			public void handleTurn(int i, int j) {
-				String messageToSend = "";
-				messageToSend = "newturn/" + i + "/" + j;
-				sendMessage(messageToSend);
+				if (!amILatestPlayerMulti) {
+					String messageToSend = "";
+					messageToSend = "newturn/" + i + "/" + j;
+					sendMessage(messageToSend);
+				}
 			}
 		});
 	}
@@ -976,9 +888,6 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
 		switch (requestCode) {
-		case 0:
-			getSupportActionBar().setSelectedNavigationItem(0);
-			break;
 		case REQUEST_CONNECT_DEVICE_INSECURE:
 			if (resultCode == Activity.RESULT_OK) {
 				connectDevice(data, false);
@@ -986,9 +895,17 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 			break;
 		case REQUEST_BT:
 			if (resultCode == Activity.RESULT_OK) {
-				getSupportActionBar().setSelectedNavigationItem(1);
+				onItemClick(null, null, 1, 0);
 			}
 
+			break;
+		case REQUEST_PREF:
+			if (resultCode == RESULT_OK) {
+				finish();
+				startActivity(getIntent());
+			} else {
+				updateField();
+			}
 			break;
 		}
 	}
@@ -1014,62 +931,13 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 		}
 
 	}
-	
+
 	@SuppressLint("NewApi")
 	public void createNewGame() {
 		setContentView(isDark ? R.layout.game_aidark : R.layout.game_ai);
-
-		cbSaveEqual = (CheckBox) findViewById(R.id.checkBoxSaveEqual);
-		cbTheme = (CheckBox) findViewById(R.id.checkBoxSelectTheme);
-		spBlue = (Spinner) findViewById(R.id.spinner1);
-		spRed = (Spinner) findViewById(R.id.spinner2);
+		initDrawer();
 		SharedPreferences mgr = PreferenceManager.getDefaultSharedPreferences(this);
-		final boolean save = mgr.getBoolean("save", true);
 		final boolean isDark = mgr.getBoolean("isDark", false);
-		if (save) {
-			cbSaveEqual.setChecked(true);
-		}
-
-		if (isDark)
-			cbTheme.setChecked(true);
-
-		spBlue.setAdapter(new MySpinnerAdapter(this, ColorHolder.getAllColor()));
-		spBlue.setOnItemSelectedListener(new OnItemSelectedListener() {
-
-			@Override
-			public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-				ColorHolder.getInstance(getApplicationContext()).save(BLUE_PLAYER, arg2);
-				updateField();
-			}
-
-			@Override
-			public void onNothingSelected(AdapterView<?> arg0) {
-				ColorHolder.getInstance(getApplicationContext()).save(BLUE_PLAYER, 0);
-				updateField();
-			}
-		});
-		spBlue.setSelection(ColorHolder.getInstance(getApplicationContext()).getColorIndex(BLUE_PLAYER));
-
-		spRed.setAdapter(new MySpinnerAdapter(this, ColorHolder.getAllColor()));
-		spRed.setOnItemSelectedListener(new OnItemSelectedListener() {
-
-			@Override
-			public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-				ColorHolder.getInstance(getApplicationContext()).save(RED_PLAYER, arg2);
-				updateField();
-			}
-
-			@Override
-			public void onNothingSelected(AdapterView<?> arg0) {
-				ColorHolder.getInstance(getApplicationContext()).save(RED_PLAYER, 9);
-				updateField();
-			}
-
-		});
-		spRed.setSelection(ColorHolder.getInstance(getApplicationContext()).getColorIndex(RED_PLAYER));
-
-		cbSaveEqual.setOnCheckedChangeListener(this);
-		cbTheme.setOnCheckedChangeListener(this);
 
 		nbGame = ToolsBDD.getInstance(this).getNbPartieNumber() + 1;
 		TextView tv1 = (TextView) findViewById(R.id.welcomeGame);
@@ -1082,81 +950,13 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 		gv.setAlignement(GameView.STYLE_TOP_VERTICAL_CENTER_HORIZONTAL);
 		gv.invalidate();
 		gv.invalidate();
-		
-		
-//		SPenEventLibrary mSPenEventLibrary = new SPenEventLibrary();
-//		SPenHoverListener mSPenHoverListener = new SPenHoverListener() {
-//
-//		    @Override           
-//		    public boolean onHover(View view, MotionEvent event) {
-//		        switch (event.getAction()) {
-//		        case MotionEvent.ACTION_HOVER_ENTER:
-//		            Toast.makeText(getApplicationContext(), "amazing !", Toast.LENGTH_SHORT).show();
-//		            return true;
-//		        case MotionEvent.ACTION_HOVER_EXIT:
-//		        	 Toast.makeText(getApplicationContext(), "less amazing !", Toast.LENGTH_SHORT).show();
-//		            return true;
-//		        default:
-//		            return false;
-//		        }
-//		    }
-//
-//			@Override
-//			public void onHoverButtonDown(View arg0, MotionEvent arg1) {
-//				 Toast.makeText(getApplicationContext(), "down !", Toast.LENGTH_SHORT).show();
-//			}
-//
-//			@Override
-//			public void onHoverButtonUp(View arg0, MotionEvent arg1) {
-//				 Toast.makeText(getApplicationContext(), "up !", Toast.LENGTH_SHORT).show();
-//			}
-//		};
-//		
-//		mSPenEventLibrary.setSPenHoverListener(tv1, mSPenHoverListener);
-		
-
-		// Display display = getWindowManager().getDefaultDisplay();
-		// DisplayMetrics metrics = new DisplayMetrics();
-		// getWindowManager().getDefaultDilay().getMetrics(metrics);
-		//
-		// w = metrics.widthPixels;
-		// if (metrics.heightPixels < w)
-		// w = metrics.heightPixels;
-		// int ratio = 5;
-		//
-		// if (android.os.Build.VERSION.SDK_INT >
-		// Build.VERSION_CODES.ECLAIR_MR1) {
-		// if (display.getRotation() == Surface.ROTATION_0)
-		// ratio = 3;
-		// } else {
-		// if (display.getOrientation() ==
-		// ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
-		// ratio = 3;
-		// }
 
 		playerText = (TextView) findViewById(R.id.playerText);
-		annulerList = new ArrayList<String>();
 		tabIB = new ImageButton[3][3];
 		tabVal = new int[3][3];
 
-		// tabIB[0][0] = (ImageButton) findViewById(R.id.imageButton1);
-		// tabIB[0][1] = (ImageButton) findViewById(R.id.imageButton2);
-		// tabIB[0][2] = (ImageButton) findViewById(R.id.imageButton3);
-		// tabIB[1][0] = (ImageButton) findViewById(R.id.imageButton4);
-		// tabIB[1][1] = (ImageButton) findViewById(R.id.imageButton5);
-		// tabIB[1][2] = (ImageButton) findViewById(R.id.imageButton6);
-		// tabIB[2][0] = (ImageButton) findViewById(R.id.imageButton7);
-		// tabIB[2][1] = (ImageButton) findViewById(R.id.imageButton8);
-		// tabIB[2][2] = (ImageButton) findViewById(R.id.imageButton9);
-
 		for (int i = 0; i < 3; i++) {
 			for (int j = 0; j < 3; j++) {
-				// tabIB[i][j].setMinimumWidth((w) / ratio);
-				// tabIB[i][j].setMinimumHeight((w) / ratio);
-				// tabIB[i][j].setMaxWidth((w) / ratio);
-				// tabIB[i][j].setMaxHeight((w) / ratio);
-				//
-				// tabIB[i][j].setOnClickListener(this);
 				tabVal[i][j] = NONE_PLAYER;
 			}
 		}
@@ -1173,10 +973,9 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 					displayNextTurn();
 					gv.setValues(tabVal, turn);
 				}
-				if (m != null && getSupportActionBar().getSelectedNavigationIndex() != 1) {
+				if (m != null && activeNavItem != 1) {
 					m.getItem(0).setVisible(true);
 				}
-				menu.invalidate();
 				checkWinner(i, j, false, false);
 
 			}
@@ -1194,24 +993,15 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 			m.getItem(0).setVisible(false);
 		}
 
-		menu.invalidate();
 	}
 
 	private void updateField() {
-		// for (int i = 0; i < 3; i++) {
-		// for (int j = 0; j < 3; j++) {
-		// if (tabVal[i][j] != NONE_PLAYER)
-		// tabIB[i][j].setImageDrawable(getResources().getDrawable(ColorHolder.getInstance(this).getDrawable(tabVal[i][j])));
-		// }
-		// }
-
 		if (gv != null) {
 			gv.loadcolors();
 			gv.invalidate();
 		}
 
 		playerText.setTextColor(Color.parseColor(ColorHolder.getInstance(this).getColor(turn)));
-
 	}
 
 	public void recalculateSize() {
@@ -1275,13 +1065,11 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 						tabVal[i][j] = RED_PLAYER;
 						displayNextTurn();
 					}
-					if (m != null && getSupportActionBar().getSelectedNavigationIndex() != 1) {
+					if (m != null && activeNavItem != 1) {
 						m.getItem(0).setVisible(true);
 					}
 					tabIB[i][j].setImageDrawable(d);
 					tabIB[i][j].setEnabled(false);
-					annulerList.add(i + "," + j);
-					menu.invalidate();
 					this.checkWinner(i, j, false, false);
 
 				}
@@ -1382,148 +1170,10 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 		alertDialog.show();
 	}
 
-	private void annuler() {
-		if (annulerList.size() > 0) {
-			int x, y;
-			x = Integer.parseInt(annulerList.get(annulerList.size() - 1).split(",")[0]);
-			y = Integer.parseInt(annulerList.get(annulerList.size() - 1).split(",")[1]);
-			annulerList.remove(annulerList.size() - 1);
-
-			tabVal[x][y] = NONE_PLAYER;
-			tabIB[x][y].setImageDrawable(null);
-			tabIB[x][y].setEnabled(true);
-			if (turn == BLUE_PLAYER) {
-				turn = RED_PLAYER;
-				playerText.setText(getString(R.string.red));
-				playerText.setTextColor(Color.RED);
-			} else {
-				turn = BLUE_PLAYER;
-				playerText.setText(getString(R.string.blue));
-				playerText.setTextColor(Color.rgb(0, 148, 255));
-			}
-		}
-	}
-
-	@SuppressWarnings("deprecation")
 	@SuppressLint("NewApi")
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
 		super.onConfigurationChanged(newConfig);
-		boolean isLandscape = true;
-		if (getSupportActionBar().getSelectedNavigationIndex() == 0) {
-			Display display = getWindowManager().getDefaultDisplay();
-
-//			int ratio = 5;
-
-			if (android.os.Build.VERSION.SDK_INT > Build.VERSION_CODES.ECLAIR_MR1) {
-				if (display.getRotation() == Surface.ROTATION_0) {
-//					ratio = 3;
-					isLandscape = false;
-				}
-			} else {
-				if (display.getOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
-//					ratio = 3;
-					isLandscape = false;
-				}
-			}
-
-			// for (int i = 0; i < 3; i++) {
-			// for (int j = 0; j < 3; j++) {
-			// tabIB[i][j].setMinimumHeight(w / ratio);
-			// tabIB[i][j].setMaxHeight(w / ratio);
-			// tabIB[i][j].setMinimumWidth(w / ratio);
-			// tabIB[i][j].setMaxWidth(w / ratio);
-			// }
-			// }
-			//
-			// recalculateSize();
-		}
-		if (sv != null)
-			sv.hide();
-		if (!StateHolder.GetMemorizedValue("showpref", this)) {
-			ShowcaseView.ConfigOptions co = new ShowcaseView.ConfigOptions();
-			co.hideOnClickOutside = true;
-			sv = ShowcaseView.insertShowcaseViewWithType(ShowcaseView.ITEM_ACTION_ITEM, miPref.getItemId(), this, "", isLandscape ? "" : "", co);
-			sv.setOnShowcaseEventListener(new OnShowcaseEventListener() {
-
-				@Override
-				public void onShowcaseViewShow(ShowcaseView showcaseView) {
-				}
-
-				@Override
-				public void onShowcaseViewHide(ShowcaseView showcaseView) {
-					sv = null;
-				}
-			});
-		}
-		if (sv2 != null)
-			sv2.hide();
-		if (isMenuOpen && !StateHolder.GetMemorizedValue("changedtheme", this)) {
-			ShowcaseView.ConfigOptions co = new ShowcaseView.ConfigOptions();
-			co.hideOnClickOutside = true;
-			sv2 = ShowcaseView.insertShowcaseView(R.id.checkBoxSelectTheme, this, "", "", co);
-			sv2.setOnShowcaseEventListener(new OnShowcaseEventListener() {
-
-				@Override
-				public void onShowcaseViewShow(ShowcaseView showcaseView) {
-				}
-
-				@Override
-				public void onShowcaseViewHide(ShowcaseView showcaseView) {
-					sv2 = null;
-				}
-			});
-		}
-	}
-
-	@Override
-	public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-		if (buttonView.getId() == R.id.checkBoxSaveEqual) {
-			SharedPreferences mgr = PreferenceManager.getDefaultSharedPreferences(this);
-			SharedPreferences.Editor editor = mgr.edit();
-			editor.putBoolean("save", isChecked);
-			editor.commit();
-		}
-
-		if (buttonView.getId() == R.id.checkBoxSelectTheme) {
-			SharedPreferences mgr = PreferenceManager.getDefaultSharedPreferences(this);
-			SharedPreferences.Editor editor = mgr.edit();
-			editor.putBoolean("isDark", isChecked);
-			editor.commit();
-			finish();
-			startActivity(getIntent());
-			StateHolder.MemorizeValue("changedtheme", true, getApplicationContext());
-		}
-	}
-
-	@Override
-	public void onOpened() {
-		isMenuOpen = true;
-		getSupportActionBar().setHomeButtonEnabled(true);
-		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-		if (!StateHolder.GetMemorizedValue("changedtheme", this)) {
-			ShowcaseView.ConfigOptions co = new ShowcaseView.ConfigOptions();
-			co.hideOnClickOutside = true;
-			sv2 = ShowcaseView.insertShowcaseView(R.id.checkBoxSelectTheme, this, R.string.sc3, R.string.sc4, co);
-			sv2.setOnShowcaseEventListener(new OnShowcaseEventListener() {
-				@Override
-				public void onShowcaseViewShow(ShowcaseView showcaseView) {
-				}
-
-				@Override
-				public void onShowcaseViewHide(ShowcaseView showcaseView) {
-					sv2 = null;
-				}
-			});
-		}
-	}
-
-	@Override
-	public void onClosed() {
-		isMenuOpen = false;
-		getSupportActionBar().setHomeButtonEnabled(false);
-		getSupportActionBar().setDisplayHomeAsUpEnabled(false);
 	}
 
 	@Override
@@ -1560,132 +1210,4 @@ public class MainActivity extends SherlockActivity implements OnNavigationListen
 			mChatService.stop();
 	}
 
-	public class MySpinnerAdapter extends BaseAdapter implements SpinnerAdapter {
-		private Activity activity;
-		private List<String> list_bsl;
-
-		public MySpinnerAdapter(Activity activity, List<String> list_bsl) {
-			this.activity = activity;
-			this.list_bsl = list_bsl;
-		}
-
-		public int getCount() {
-			return list_bsl.size();
-		}
-
-		public Object getItem(int position) {
-			return list_bsl.get(position);
-		}
-
-		public long getItemId(int position) {
-			return list_bsl.hashCode();
-		}
-
-		public View getView(int position, View convertView, ViewGroup parent) {
-
-			View spinView;
-			if (convertView == null) {
-				LayoutInflater inflater = activity.getLayoutInflater();
-				spinView = inflater.inflate(R.layout.item_spinner_color, null);
-			} else {
-				spinView = convertView;
-			}
-			LinearLayout layout = (LinearLayout) spinView;
-			layout.setBackgroundColor(Color.parseColor((String) getItem(position)));
-			return spinView;
-		}
-
-		@Override
-		public View getDropDownView(int position, View convertView, ViewGroup parent) {
-			View spinView;
-			if (convertView == null) {
-				LayoutInflater inflater = activity.getLayoutInflater();
-				spinView = inflater.inflate(R.layout.item_spinner_color, null);
-			} else {
-				spinView = convertView;
-			}
-			LinearLayout layout = (LinearLayout) spinView;
-			layout.setBackgroundColor(Color.parseColor((String) getItem(position)));
-			return spinView;
-		}
-	}
-
-	public class AbMenu {
-		public int icon;
-		public String title;
-		public int id;
-
-		public AbMenu() {
-			super();
-		}
-
-		public AbMenu(int icon, String title, int id) {
-			super();
-			this.icon = icon;
-			this.title = title;
-			this.id = id;
-		}
-	}
-
-	public class AbMenuAdapter extends BaseAdapter implements SpinnerAdapter {
-
-		Context context;
-		int layoutResourceId;
-		ArrayList<AbMenu> data;
-		LayoutInflater inflater;
-
-		public AbMenuAdapter(Context a, int textViewResourceId, ArrayList<AbMenu> data) {
-			// super(a, textViewResourceId, data);
-			this.data = data;
-			inflater = (LayoutInflater) a.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			this.context = a;
-			this.layoutResourceId = textViewResourceId;
-
-		}
-
-		@Override
-		public View getView(int position, View convertView, ViewGroup parent) {
-			View v = convertView;
-			if (v == null) {
-				v = inflater.inflate(layoutResourceId, null);
-			}
-			final AbMenu item = data.get(position);
-			if (item != null) {
-				((android.widget.TextView) v.findViewById(R.id.textViewSpinner)).setText(item.title);
-				((ImageView) v.findViewById(R.id.imageViewSpinner)).setImageResource(item.icon);
-			}
-			return v;
-		}
-
-		@Override
-		public View getDropDownView(int position, View convertView, ViewGroup parent) {
-			View v = convertView;
-			if (v == null) {
-				v = inflater.inflate(layoutResourceId, null);
-			}
-			final AbMenu item = data.get(position);
-			if (item != null) {
-				((android.widget.TextView) v.findViewById(R.id.textViewSpinner)).setText(item.title);
-				((android.widget.TextView) v.findViewById(R.id.textViewSpinner)).setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
-				((ImageView) v.findViewById(R.id.imageViewSpinner)).setImageResource(item.icon);
-			}
-			return v;
-		}
-
-		@Override
-		public int getCount() {
-			return data.size();
-		}
-
-		@Override
-		public Object getItem(int position) {
-			return null;
-		}
-
-		@Override
-		public long getItemId(int position) {
-
-			return 0;
-		}
-	}
 }
