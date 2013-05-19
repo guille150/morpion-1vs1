@@ -1,12 +1,12 @@
 package fr.mathis.morpion;
 
-import static com.nineoldandroids.view.ViewPropertyAnimator.animate;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
+
+import static com.nineoldandroids.view.ViewPropertyAnimator.animate;
 
 import android.annotation.SuppressLint;
 import android.app.ActivityOptions;
@@ -50,9 +50,6 @@ import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.ActionMode;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
-import com.fima.cardsui.objects.Card;
-import com.fima.cardsui.objects.Card.OnCardSwiped;
-import com.fima.cardsui.views.CardUI;
 import com.github.espiandev.showcaseview.ShowcaseView;
 import com.github.espiandev.showcaseview.ShowcaseView.OnShowcaseEventListener;
 import com.haarman.listviewanimations.ArrayAdapter;
@@ -66,7 +63,6 @@ import com.michaelpardo.android.widget.chartview.LinearSeries;
 import com.michaelpardo.android.widget.chartview.LinearSeries.LinearPoint;
 import com.nineoldandroids.animation.Animator;
 import com.nineoldandroids.animation.AnimatorListenerAdapter;
-import com.slidingmenu.lib.SlidingMenu;
 
 import fr.mathis.morpion.tools.ColorHolder;
 import fr.mathis.morpion.tools.StateHolder;
@@ -75,7 +71,7 @@ import fr.mathis.morpion.tools.ToolsBDD;
 import fr.mathis.morpion.tools.UndoBarController;
 import fr.mathis.morpion.tools.UndoBarController.UndoListener;
 
-public class HistoryActivity extends SherlockActivity implements OnItemLongClickListener, OnItemClickListener, OnNavigationListener, OnCardSwiped, UndoListener, OnDismissCallback {
+public class HistoryActivity extends SherlockActivity implements OnItemLongClickListener, OnItemClickListener, OnNavigationListener, UndoListener, OnDismissCallback {
 
 	static final int MENU_RESET = 0;
 	static final int MENU_SHARE = 2;
@@ -88,11 +84,9 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 	String share;
 	MyAdapter mSchedule;
 	ActionMode mActionMode;
-	CardUI cards;
 	ChartView chartView;
 	private UndoBarController mUndoBarController;
 	public boolean isDark;
-	private SlidingMenu menu;
 	Timer timer;
 	ShowcaseView sv;
 	int displayWidth = 2000;
@@ -102,13 +96,14 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-
 		SharedPreferences mgr = PreferenceManager.getDefaultSharedPreferences(this);
 		isDark = mgr.getBoolean("isDark", false);
 
 		if (isDark)
 			super.setTheme(R.style.AppThemeDark);
+		super.onCreate(savedInstanceState);
+
+
 
 		Context context = getSupportActionBar().getThemedContext();
 
@@ -127,16 +122,6 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 		getSupportActionBar().setDisplayShowTitleEnabled(false);
 		setContentView(isDark ? R.layout.listviewcustomdark : R.layout.listviewcustom);
 
-		menu = new SlidingMenu(this);
-		menu.setMode(SlidingMenu.LEFT);
-		menu.setTouchModeAbove(SlidingMenu.TOUCHMODE_NONE);
-		menu.setShadowWidthRes(R.dimen.shadow_width);
-		menu.setShadowDrawable(R.drawable.shadow);
-		menu.setBehindOffsetRes(R.dimen.slidingmenu_offset);
-		menu.setFadeDegree(0.35f);
-		menu.attachToActivity(this, SlidingMenu.SLIDING_WINDOW);
-		menu.setMenu(isDark ? R.layout.menudark : R.layout.menu);
-
 		DisplayMetrics metrics = new DisplayMetrics();
 		getWindowManager().getDefaultDisplay().getMetrics(metrics);
 
@@ -147,10 +132,6 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 
 		lv = (ListView) findViewById(R.id.listviewperso);
 		lv.setVisibility(View.VISIBLE);
-		cards = (CardUI) findViewById(R.id.cardsview);
-		if (!isDark)
-			cards.setBackgroundResource(R.color.abs__background_holo_light);
-		cards.setVisibility(View.GONE);
 
 		listViewcards = (ListView) findViewById(R.id.listviewcards);
 		listViewcards.setVisibility(View.GONE);
@@ -747,7 +728,6 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 
 	private void createChart() {
 		lv.setVisibility(View.GONE);
-		cards.setVisibility(View.GONE);
 		listViewcards.setVisibility(View.GONE);
 		chartView.setVisibility(View.VISIBLE);
 		chartView.setGridLineColor(isDark ? Color.rgb(19, 133, 173) : Color.BLACK);
@@ -991,19 +971,6 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 			tv.setText(textViewTitle);
 
 			return view;
-		}
-	}
-
-	@Override
-	public void onCardSwiped(Card card, View layout) {
-		if (card instanceof CardGame) {
-			int id = ((CardGame) card).get_id();
-			ToolsBDD.getInstance(getApplicationContext()).removePartie(id);
-			saveId = id;
-			saveWinner = ((CardGame) card).get_winner();
-			saveDisposition = ((CardGame) card).get_disposition();
-			saveFromCards = true;
-			mUndoBarController.showUndoBar(false, getString(R.string.undobar_sample_message), null);
 		}
 	}
 
