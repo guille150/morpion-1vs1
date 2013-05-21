@@ -11,39 +11,35 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
+import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v4.widget.DrawerLayout.DrawerListener;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.Display;
+import android.view.ActionProvider;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
-import android.view.Surface;
+import android.view.SubMenu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
-import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -76,7 +72,9 @@ public class MainActivity extends SherlockActivity implements OnClickListener, O
 	private static final int REQUEST_CONNECT_DEVICE_INSECURE = 2;
 	private static final int REQUEST_PREF = 7;
 
+	private ActionBarDrawerToggle mDrawerToggle;
 	ArrayList<NavigationItem> navItems;
+	NavigationAdapter navAdapter;
 	private int activeNavItem = 0;
 	private DrawerLayout mDrawerLayout;
 	private ListView mDrawerList;
@@ -93,12 +91,14 @@ public class MainActivity extends SherlockActivity implements OnClickListener, O
 	boolean computerStarted = false;
 	boolean isDark;
 	boolean shouldRestartBeVisible = false;
+	boolean initdone = false;
 	MenuItem miPref;
 	Activity a;
 	GameView gv;
 	protected BluetoothAdapter mBluetoothAdapter;
 	private BluetoothChatService mChatService;
 	private StringBuffer mOutStringBuffer;
+	LinearLayout container;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -109,15 +109,15 @@ public class MainActivity extends SherlockActivity implements OnClickListener, O
 			super.setTheme(R.style.AppThemeDark);
 		super.onCreate(savedInstanceState);
 
-
-
 		getSupportActionBar().setDisplayShowTitleEnabled(true);
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
 		a = this;
-
+		setContentView(isDark ? R.layout.main_layout_dark : R.layout.main_layout);
+		container = (LinearLayout) findViewById(R.id.container);
+		initDrawer();
 		createNewGame();
-		if (!StateHolder.GetMemorizedValue("showwelcomedrawer", this)) {
+		if (!StateHolder.GetMemorizedValue("showwelcomedrawer", this) || android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
 			new Async().execute();
 		}
 	}
@@ -130,7 +130,6 @@ public class MainActivity extends SherlockActivity implements OnClickListener, O
 				Thread.sleep(1000);
 			}
 			catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			return null;
@@ -156,42 +155,34 @@ public class MainActivity extends SherlockActivity implements OnClickListener, O
 		navItems.add(new NavigationItem(isDark ? R.drawable.ic_action_spinner_savedark : R.drawable.ic_action_spinner_save, getString(R.string.m2), 0));
 		navItems.add(new NavigationItem(isDark ? R.drawable.ic_action_spinner_partiehelpdark : R.drawable.ic_action_spinner_partiehelp, getString(R.string.m3), 0));
 
-		NavigationAdapter navAdapter = new NavigationAdapter(a, navItems);
+		navAdapter = new NavigationAdapter(a, navItems);
 		mDrawerList.setAdapter(navAdapter);
-		mDrawerLayout.setDrawerListener(new DrawerListener() {
 
-			@Override
-			public void onDrawerStateChanged(int arg0) {
+		mDrawerList.setOnItemClickListener(this);
+		showClosedIcon();
 
+		mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close) {
+			public void onDrawerClosed(View view) {
+				supportInvalidateOptionsMenu();
+				showClosedIcon();
 			}
 
-			@Override
-			public void onDrawerSlide(View arg0, float arg1) {
-
-			}
-
-			@Override
-			public void onDrawerOpened(View arg0) {
+			public void onDrawerOpened(View drawerView) {
+				supportInvalidateOptionsMenu();
 				shouldRestartBeVisible = m.getItem(0).isVisible();
 				showOpenedIcon();
 			}
-
-			@Override
-			public void onDrawerClosed(View arg0) {
-				showClosedIcon();
-			}
-		});
-		mDrawerList.setOnItemClickListener(this);
-		showClosedIcon();
+		};
+		mDrawerLayout.setDrawerListener(mDrawerToggle);
 	}
 
 	@Override
 	public void onItemClick(AdapterView<?> arg0, View arg1, int pos, long arg3) {
 		boolean forseFirst = false;
 		if (pos == 0) {
-			getSupportActionBar().setIcon(R.drawable.two_player);
 			getSupportActionBar().setIcon(R.drawable.ic_launcher);
 			createNewGame();
+
 		}
 		if (pos == 3) {
 			getSupportActionBar().setIcon(R.drawable.ic_launcher);
@@ -206,8 +197,10 @@ public class MainActivity extends SherlockActivity implements OnClickListener, O
 		}
 		if (pos == 4) {
 			getSupportActionBar().setIcon(R.drawable.ic_launcher);
-			setContentView(isDark ? R.layout.helpdark : R.layout.help);
-			initDrawer();
+			View child = getLayoutInflater().inflate(isDark ? R.layout.helpdark : R.layout.help, null);
+			container.removeAllViews();
+			container.addView(child);
+
 			if (m != null) {
 				m.getItem(0).setVisible(false);
 			}
@@ -219,8 +212,11 @@ public class MainActivity extends SherlockActivity implements OnClickListener, O
 			createNewGameAI();
 		}
 		if (pos != 1 && !forseFirst) {
-			activeNavItem = pos;
-			mDrawerList.invalidate();
+			if (pos != 3) {
+				activeNavItem = pos;
+				navAdapter.notifyDataSetChanged();
+			}
+			mDrawerLayout.closeDrawer(GravityCompat.START);
 		}
 	}
 
@@ -287,23 +283,26 @@ public class MainActivity extends SherlockActivity implements OnClickListener, O
 	}
 
 	private void showClosedIcon() {
-		int upId = Resources.getSystem().getIdentifier("up", "id", "android");
-		if (upId > 0) {
-			ImageView up = (ImageView) findViewById(upId);
-			up.setImageResource(isDark ? R.drawable.ic_drawerdark : R.drawable.ic_drawer);
+		if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+			getSupportActionBar().setDisplayHomeAsUpEnabled(false);
 		}
 		if (m != null)
 			m.getItem(0).setVisible(shouldRestartBeVisible);
 	}
 
 	private void showOpenedIcon() {
-		int upId = Resources.getSystem().getIdentifier("up", "id", "android");
-		if (upId > 0) {
-			ImageView up = (ImageView) findViewById(upId);
-			up.setImageResource(isDark ? R.drawable.ic_drawersmalldark : R.drawable.ic_drawersmall);
+		if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+			getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		}
 		if (m != null)
 			m.getItem(0).setVisible(false);
+	}
+
+	@Override
+	protected void onPostCreate(Bundle savedInstanceState) {
+		super.onPostCreate(savedInstanceState);
+		// Sync the toggle state after onRestoreInstanceState has occurred.
+		mDrawerToggle.syncState();
 	}
 
 	@Override
@@ -320,6 +319,10 @@ public class MainActivity extends SherlockActivity implements OnClickListener, O
 	@Override
 	public boolean onMenuItemSelected(int featureId, MenuItem item) {
 
+		if (mDrawerToggle.onOptionsItemSelected(getMenuItem(item))) {
+			return true;
+		}
+
 		if (item.getTitle().toString().compareTo(getString(R.string.restart)) == 0) {
 			if (activeNavItem == 0)
 				createNewGame();
@@ -335,24 +338,14 @@ public class MainActivity extends SherlockActivity implements OnClickListener, O
 			startActivityForResult(prefIntent, REQUEST_PREF);
 		}
 
-		int itemId = item.getItemId();
-		switch (itemId) {
-		case android.R.id.home:
-
-			if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
-				mDrawerLayout.closeDrawer(GravityCompat.START);
-			} else {
-				mDrawerLayout.openDrawer(GravityCompat.START);
-			}
-			break;
-		}
-
 		return super.onMenuItemSelected(featureId, item);
 	}
 
 	private void createNewGameAI() {
-		setContentView(isDark ? R.layout.game_aidark : R.layout.game_ai);
-		initDrawer();
+		View child = getLayoutInflater().inflate(isDark ? R.layout.game_aidark : R.layout.game_ai, null);
+		container.removeAllViews();
+		container.addView(child);
+
 		nbGame = ToolsBDD.getInstance(this).getNbPartieNumber() + 1;
 		TextView tv1 = (TextView) findViewById(R.id.welcomeGame);
 		tv1.setText(getString(R.string.game) + nbGame);
@@ -665,11 +658,13 @@ public class MainActivity extends SherlockActivity implements OnClickListener, O
 			Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
 			startActivityForResult(enableIntent, REQUEST_BT);
 		} else {
+			View child = getLayoutInflater().inflate(isDark ? R.layout.loadingbluetoothdark : R.layout.loadingbluetooth, null);
 
-			setContentView(isDark ? R.layout.loadingbluetoothdark : R.layout.loadingbluetooth);
-			initDrawer();
+			container.removeAllViews();
+			container.addView(child);
 			activeNavItem = 1;
-			mDrawerList.invalidate();
+			navAdapter.notifyDataSetChanged();
+			mDrawerLayout.closeDrawer(GravityCompat.START);
 			// Initialize the BluetoothChatService to perform bluetooth
 			// connections
 			mChatService = new BluetoothChatService(this, mHandler);
@@ -824,8 +819,11 @@ public class MainActivity extends SherlockActivity implements OnClickListener, O
 	}
 
 	private void createNewMuliGame() {
-		setContentView(isDark ? R.layout.game_aidark : R.layout.game_ai);
-		initDrawer();
+		View child = getLayoutInflater().inflate(isDark ? R.layout.game_aidark : R.layout.game_ai, null);
+
+		container.removeAllViews();
+		container.addView(child);
+
 		nbGame = ToolsBDD.getInstance(this).getNbPartieNumber() + 1;
 		TextView tv1 = (TextView) findViewById(R.id.welcomeGame);
 		tv1.setText(getString(R.string.game) + nbGame);
@@ -934,8 +932,10 @@ public class MainActivity extends SherlockActivity implements OnClickListener, O
 
 	@SuppressLint("NewApi")
 	public void createNewGame() {
-		setContentView(isDark ? R.layout.game_aidark : R.layout.game_ai);
-		initDrawer();
+		View child = getLayoutInflater().inflate(isDark ? R.layout.game_aidark : R.layout.game_ai, null);
+
+		container.removeAllViews();
+		container.addView(child);
 		SharedPreferences mgr = PreferenceManager.getDefaultSharedPreferences(this);
 		final boolean isDark = mgr.getBoolean("isDark", false);
 
@@ -1002,54 +1002,6 @@ public class MainActivity extends SherlockActivity implements OnClickListener, O
 		}
 
 		playerText.setTextColor(Color.parseColor(ColorHolder.getInstance(this).getColor(turn)));
-	}
-
-	public void recalculateSize() {
-		final ScrollView sc = (ScrollView) findViewById(R.id.layoutswipe);
-		ViewTreeObserver vto = sc.getViewTreeObserver();
-		final Display display = getWindowManager().getDefaultDisplay();
-		vto.addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
-
-			@SuppressLint("NewApi")
-			@SuppressWarnings("deprecation")
-			@Override
-			public void onGlobalLayout() {
-
-				ViewTreeObserver obs = sc.getViewTreeObserver();
-
-				w = sc.getWidth();
-
-				int h = sc.getHeight() - playerText.getHeight() - (((TextView) findViewById(R.id.welcomeGame)).getHeight());
-
-				if (h < w)
-					w = h;
-				int ratio = 3;
-
-				if (android.os.Build.VERSION.SDK_INT > Build.VERSION_CODES.ECLAIR_MR1) {
-					if (display.getRotation() == Surface.ROTATION_0)
-						ratio = 3;
-				} else {
-					if (display.getOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
-						ratio = 3;
-				}
-
-				for (int i = 0; i < 3; i++) {
-					for (int j = 0; j < 3; j++) {
-						tabIB[i][j].setMinimumWidth((w) / ratio);
-						tabIB[i][j].setMinimumHeight((w) / ratio);
-						tabIB[i][j].setMaxWidth((w) / ratio);
-						tabIB[i][j].setMaxHeight((w) / ratio);
-						tabIB[i][j].invalidate();
-					}
-				}
-
-				if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-					obs.removeOnGlobalLayoutListener(this);
-				} else {
-					obs.removeGlobalOnLayoutListener(this);
-				}
-			}
-		});
 	}
 
 	public void onClick(View view) {
@@ -1174,6 +1126,7 @@ public class MainActivity extends SherlockActivity implements OnClickListener, O
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
 		super.onConfigurationChanged(newConfig);
+		// mDrawerToggle.onConfigurationChanged(newConfig);
 	}
 
 	@Override
@@ -1208,6 +1161,214 @@ public class MainActivity extends SherlockActivity implements OnClickListener, O
 	public void stopService() {
 		if (mChatService != null)
 			mChatService.stop();
+	}
+
+	private android.view.MenuItem getMenuItem(final MenuItem item) {
+		return new android.view.MenuItem() {
+			@Override
+			public int getItemId() {
+				return item.getItemId();
+			}
+
+			public boolean isEnabled() {
+				return true;
+			}
+
+			@Override
+			public boolean collapseActionView() {
+				return false;
+			}
+
+			@Override
+			public boolean expandActionView() {
+				return false;
+			}
+
+			@Override
+			public ActionProvider getActionProvider() {
+				return null;
+			}
+
+			@Override
+			public View getActionView() {
+				return null;
+			}
+
+			@Override
+			public char getAlphabeticShortcut() {
+				return 0;
+			}
+
+			@Override
+			public int getGroupId() {
+				return 0;
+			}
+
+			@Override
+			public Drawable getIcon() {
+				return null;
+			}
+
+			@Override
+			public Intent getIntent() {
+				return null;
+			}
+
+			@Override
+			public ContextMenuInfo getMenuInfo() {
+				return null;
+			}
+
+			@Override
+			public char getNumericShortcut() {
+				return 0;
+			}
+
+			@Override
+			public int getOrder() {
+				return 0;
+			}
+
+			@Override
+			public SubMenu getSubMenu() {
+				return null;
+			}
+
+			@Override
+			public CharSequence getTitle() {
+				return null;
+			}
+
+			@Override
+			public CharSequence getTitleCondensed() {
+				return null;
+			}
+
+			@Override
+			public boolean hasSubMenu() {
+				return false;
+			}
+
+			@Override
+			public boolean isActionViewExpanded() {
+				return false;
+			}
+
+			@Override
+			public boolean isCheckable() {
+				return false;
+			}
+
+			@Override
+			public boolean isChecked() {
+				return false;
+			}
+
+			@Override
+			public boolean isVisible() {
+				return false;
+			}
+
+			@Override
+			public android.view.MenuItem setActionProvider(ActionProvider actionProvider) {
+				return null;
+			}
+
+			@Override
+			public android.view.MenuItem setActionView(View view) {
+				return null;
+			}
+
+			@Override
+			public android.view.MenuItem setActionView(int resId) {
+				return null;
+			}
+
+			@Override
+			public android.view.MenuItem setAlphabeticShortcut(char alphaChar) {
+				return null;
+			}
+
+			@Override
+			public android.view.MenuItem setCheckable(boolean checkable) {
+				return null;
+			}
+
+			@Override
+			public android.view.MenuItem setChecked(boolean checked) {
+				return null;
+			}
+
+			@Override
+			public android.view.MenuItem setEnabled(boolean enabled) {
+				return null;
+			}
+
+			@Override
+			public android.view.MenuItem setIcon(Drawable icon) {
+				return null;
+			}
+
+			@Override
+			public android.view.MenuItem setIcon(int iconRes) {
+				return null;
+			}
+
+			@Override
+			public android.view.MenuItem setIntent(Intent intent) {
+				return null;
+			}
+
+			@Override
+			public android.view.MenuItem setNumericShortcut(char numericChar) {
+				return null;
+			}
+
+			@Override
+			public android.view.MenuItem setOnActionExpandListener(OnActionExpandListener listener) {
+				return null;
+			}
+
+			@Override
+			public android.view.MenuItem setOnMenuItemClickListener(OnMenuItemClickListener menuItemClickListener) {
+				return null;
+			}
+
+			@Override
+			public android.view.MenuItem setShortcut(char numericChar, char alphaChar) {
+				return null;
+			}
+
+			@Override
+			public void setShowAsAction(int actionEnum) {
+
+			}
+
+			@Override
+			public android.view.MenuItem setShowAsActionFlags(int actionEnum) {
+				return null;
+			}
+
+			@Override
+			public android.view.MenuItem setTitle(CharSequence title) {
+				return null;
+			}
+
+			@Override
+			public android.view.MenuItem setTitle(int title) {
+				return null;
+			}
+
+			@Override
+			public android.view.MenuItem setTitleCondensed(CharSequence title) {
+				return null;
+			}
+
+			@Override
+			public android.view.MenuItem setVisible(boolean visible) {
+				return null;
+			}
+		};
 	}
 
 }

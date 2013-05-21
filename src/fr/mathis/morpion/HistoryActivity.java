@@ -207,7 +207,7 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 					map.put("titre", "" + getString(R.string.equal));
 					equal++;
 				}
-				map.put("num", "N°" + c.getInt(0));
+				map.put("num", "N-" + c.getInt(0));
 				map.put("description", getString(R.string.s34).replace(":win", win + "").replace(":loose", lost + "").replace(":tie", equal + ""));
 				map.put("winner", n + "");
 				map.put("disposition", c.getString(2));
@@ -308,7 +308,7 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 			HashMap<String, String> map = (HashMap<String, String>) lv.getItemAtPosition(arg2);
 			String s = map.get("num");
 			String winner = map.get("winner");
-			currentId = Integer.parseInt(s.split("N°")[1].split(" ")[0]);
+			currentId = Integer.parseInt(s.split("N-")[1].split(" ")[0]);
 
 			Intent intent = new Intent(HistoryActivity.this, VisuPagerActivity.class);
 			intent.putExtra("id", HistoryActivity.currentId);
@@ -430,7 +430,7 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 			@SuppressWarnings("unchecked")
 			HashMap<String, String> map = (HashMap<String, String>) item;
 			String s = map.get("num");
-			int id = Integer.parseInt(s.split("N°")[1].split(" ")[0]);
+			int id = Integer.parseInt(s.split("N-")[1].split(" ")[0]);
 			ToolsBDD.getInstance(getApplicationContext()).removePartie(id);
 
 			saveId = id;
@@ -679,7 +679,7 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 				for (int num : pos) {
 					HashMap<String, String> map = (HashMap<String, String>) listItem.get(num);
 					String s = map.get("num");
-					currentId = Integer.parseInt(s.split("N°")[1].split(" ")[0]);
+					currentId = Integer.parseInt(s.split("N-")[1].split(" ")[0]);
 					ToolsBDD.getInstance(getApplicationContext()).removePartie(HistoryActivity.currentId);
 					animateToRight(num, relaod);
 					relaod = false;
@@ -834,7 +834,7 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 		// c.moveToFirst();
 		//
 		// for (int i = 0; i < c.getCount(); i++) {
-		// String v = "N°" + c.getInt(0) + " - ";
+		// String v = "N-" + c.getInt(0) + " - ";
 		// int n = c.getInt(1);
 		// if (n == MainActivity.BLUE_PLAYER) {
 		// v += getString(R.string.win);
@@ -1022,17 +1022,17 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 				map = new HashMap<String, String>();
 				map.put("titre", "" + getString(R.string.win));
 				map.put("description", getString(R.string.s35));
-				map.put("num", "N°" + saveId);
+				map.put("num", "N-" + saveId);
 			} else if (n == MainActivity.RED_PLAYER) {
 				map = new HashMap<String, String>();
 				map.put("titre", "" + getString(R.string.loose));
 				map.put("description", getString(R.string.s35));
-				map.put("num", "N°" + saveId);
+				map.put("num", "N-" + saveId);
 			} else {
 				map = new HashMap<String, String>();
 				map.put("titre", "" + getString(R.string.equal));
 				map.put("description", getString(R.string.s35));
-				map.put("num", "N°" + saveId);
+				map.put("num", "N-" + saveId);
 			}
 
 			map.put("winner", n + "");
@@ -1046,10 +1046,10 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 	private int findCorrectPlace(HashMap<String, String> map) {
 
 		int res = 0;
-		int toinsertid = Integer.parseInt(map.get("num").split("N°")[1].split(" ")[0]);
+		int toinsertid = Integer.parseInt(map.get("num").split("N-")[1].split(" ")[0]);
 		for (res = 0; res < listItem.size(); res++) {
 			String titleCurrent = listItem.get(res).get("num");
-			int currentid = Integer.parseInt(titleCurrent.split("N°")[1].split(" ")[0]);
+			int currentid = Integer.parseInt(titleCurrent.split("N-")[1].split(" ")[0]);
 			if (toinsertid <= currentid) {
 				break;
 			}
