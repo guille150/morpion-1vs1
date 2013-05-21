@@ -111,27 +111,9 @@ public class VisuFragment extends SherlockFragment {
 		getSherlockActivity().getSupportActionBar().setHomeButtonEnabled(true);
 		getSherlockActivity().getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-//		v = inflater.inflate(R.layout.visu, null, false);
 		v = inflater.inflate(R.layout.visu2, null);
 		String resultat = ToolsBDD.getInstance(getActivity()).getResultat(id);
-//		Display display = getActivity().getWindowManager().getDefaultDisplay();
-//
-//		DisplayMetrics metrics = new DisplayMetrics();
-//		getActivity().getWindowManager().getDefaultDisplay().getMetrics(metrics);
-//
-//		w = metrics.widthPixels;
-//		if ((metrics.heightPixels) < w)
-//			w = (metrics.heightPixels);
-//		int ratio = 5;
-//
-//		if (android.os.Build.VERSION.SDK_INT > Build.VERSION_CODES.ECLAIR_MR1) {
-//			if (display.getRotation() == Surface.ROTATION_0)
-//				ratio = 3;
-//		} else {
-//			if (display.getOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
-//				ratio = 3;
-//		}
-//
+
 		int[][] val = new int[3][3];
 		int tooker = 0;
 		for (int i = 0; i < 3; i++) {
@@ -152,80 +134,9 @@ public class VisuFragment extends SherlockFragment {
 		gv.setAlignement(GameView.STYLE_CENTER_BOTH);
 		gv.setValues(val,MainActivity.BLUE_PLAYER);
 		gv.setShowWinner(true);
-//
-//		tabIB = new ImageButton[3][3];
-//		tabVal = new int[3][3];
-//		tabIB[0][0] = (ImageButton) v.findViewById(R.id.imageButton1);
-//		tabIB[0][1] = (ImageButton) v.findViewById(R.id.imageButton2);
-//		tabIB[0][2] = (ImageButton) v.findViewById(R.id.imageButton3);
-//		tabIB[1][0] = (ImageButton) v.findViewById(R.id.imageButton4);
-//		tabIB[1][1] = (ImageButton) v.findViewById(R.id.imageButton5);
-//		tabIB[1][2] = (ImageButton) v.findViewById(R.id.imageButton6);
-//		tabIB[2][0] = (ImageButton) v.findViewById(R.id.imageButton7);
-//		tabIB[2][1] = (ImageButton) v.findViewById(R.id.imageButton8);
-//		tabIB[2][2] = (ImageButton) v.findViewById(R.id.imageButton9);
-//
-//		for (int i = 0; i < 3; i++) {
-//			for (int j = 0; j < 3; j++) {
-//				tabIB[i][j].setMinimumWidth((w) / ratio);
-//				tabIB[i][j].setMinimumHeight((w) / ratio);
-//				tabIB[i][j].setMaxWidth((w) / ratio);
-//				tabIB[i][j].setMaxHeight((w) / ratio);
-//				tabIB[i][j].setEnabled(false);
-//
-//				if (val[i][j] == MainActivity.BLUE_PLAYER) {
-//					Drawable d = getResources().getDrawable(ColorHolder.getInstance(getActivity()).getDrawable(MainActivity.BLUE_PLAYER));
-//					tabIB[i][j].setImageDrawable(d);
-//					tabVal[i][j] = MainActivity.BLUE_PLAYER;
-//				} else if (val[i][j] == MainActivity.RED_PLAYER) {
-//					Drawable d = getResources().getDrawable(ColorHolder.getInstance(getActivity()).getDrawable(MainActivity.RED_PLAYER));
-//					tabIB[i][j].setImageDrawable(d);
-//					tabVal[i][j] = MainActivity.RED_PLAYER;
-//				} else {
-//					tabVal[i][j] = MainActivity.NONE_PLAYER;
-//				}
-//			}
-//		}
-//		recalculateSize();
-//		checkWinner();
+
 		return v;
 	}
-
-//	private void checkWinner() {
-//		if (tabVal[0][0] == tabVal[0][1] && tabVal[0][1] == tabVal[0][2] && tabVal[0][2] != MainActivity.NONE_PLAYER) {
-//			tabIB[0][0].setBackgroundResource(isDark ? R.drawable.btn_default_normal_holo_dark : R.drawable.btn_default_normal_holo_light);
-//			tabIB[0][1].setBackgroundResource(isDark ? R.drawable.btn_default_normal_holo_dark : R.drawable.btn_default_normal_holo_light);
-//			tabIB[0][2].setBackgroundResource(isDark ? R.drawable.btn_default_normal_holo_dark : R.drawable.btn_default_normal_holo_light);
-//		} else if (tabVal[1][0] == tabVal[1][1] && tabVal[1][1] == tabVal[1][2] && tabVal[1][2] != MainActivity.NONE_PLAYER) {
-//			tabIB[1][0].setBackgroundResource(isDark ? R.drawable.btn_default_normal_holo_dark : R.drawable.btn_default_normal_holo_light);
-//			tabIB[1][1].setBackgroundResource(isDark ? R.drawable.btn_default_normal_holo_dark : R.drawable.btn_default_normal_holo_light);
-//			tabIB[1][2].setBackgroundResource(isDark ? R.drawable.btn_default_normal_holo_dark : R.drawable.btn_default_normal_holo_light);
-//		} else if (tabVal[2][0] == tabVal[2][1] && tabVal[2][1] == tabVal[2][2] && tabVal[2][2] != MainActivity.NONE_PLAYER) {
-//			tabIB[2][0].setBackgroundResource(isDark ? R.drawable.btn_default_normal_holo_dark : R.drawable.btn_default_normal_holo_light);
-//			tabIB[2][1].setBackgroundResource(isDark ? R.drawable.btn_default_normal_holo_dark : R.drawable.btn_default_normal_holo_light);
-//			tabIB[2][2].setBackgroundResource(isDark ? R.drawable.btn_default_normal_holo_dark : R.drawable.btn_default_normal_holo_light);
-//		} else if (tabVal[0][0] == tabVal[1][0] && tabVal[1][0] == tabVal[2][0] && tabVal[2][0] != MainActivity.NONE_PLAYER) {
-//			tabIB[0][0].setBackgroundResource(isDark ? R.drawable.btn_default_normal_holo_dark : R.drawable.btn_default_normal_holo_light);
-//			tabIB[1][0].setBackgroundResource(isDark ? R.drawable.btn_default_normal_holo_dark : R.drawable.btn_default_normal_holo_light);
-//			tabIB[2][0].setBackgroundResource(isDark ? R.drawable.btn_default_normal_holo_dark : R.drawable.btn_default_normal_holo_light);
-//		} else if (tabVal[0][1] == tabVal[1][1] && tabVal[1][1] == tabVal[2][1] && tabVal[2][1] != MainActivity.NONE_PLAYER) {
-//			tabIB[0][1].setBackgroundResource(isDark ? R.drawable.btn_default_normal_holo_dark : R.drawable.btn_default_normal_holo_light);
-//			tabIB[1][1].setBackgroundResource(isDark ? R.drawable.btn_default_normal_holo_dark : R.drawable.btn_default_normal_holo_light);
-//			tabIB[2][1].setBackgroundResource(isDark ? R.drawable.btn_default_normal_holo_dark : R.drawable.btn_default_normal_holo_light);
-//		} else if (tabVal[0][2] == tabVal[1][2] && tabVal[1][2] == tabVal[2][2] && tabVal[2][2] != MainActivity.NONE_PLAYER) {
-//			tabIB[0][2].setBackgroundResource(isDark ? R.drawable.btn_default_normal_holo_dark : R.drawable.btn_default_normal_holo_light);
-//			tabIB[1][2].setBackgroundResource(isDark ? R.drawable.btn_default_normal_holo_dark : R.drawable.btn_default_normal_holo_light);
-//			tabIB[2][2].setBackgroundResource(isDark ? R.drawable.btn_default_normal_holo_dark : R.drawable.btn_default_normal_holo_light);
-//		} else if (tabVal[0][0] == tabVal[1][1] && tabVal[1][1] == tabVal[2][2] && tabVal[2][2] != MainActivity.NONE_PLAYER) {
-//			tabIB[0][0].setBackgroundResource(isDark ? R.drawable.btn_default_normal_holo_dark : R.drawable.btn_default_normal_holo_light);
-//			tabIB[1][1].setBackgroundResource(isDark ? R.drawable.btn_default_normal_holo_dark : R.drawable.btn_default_normal_holo_light);
-//			tabIB[2][2].setBackgroundResource(isDark ? R.drawable.btn_default_normal_holo_dark : R.drawable.btn_default_normal_holo_light);
-//		} else if (tabVal[2][0] == tabVal[1][1] && tabVal[1][1] == tabVal[0][2] && tabVal[0][2] != MainActivity.NONE_PLAYER) {
-//			tabIB[2][0].setBackgroundResource(isDark ? R.drawable.btn_default_normal_holo_dark : R.drawable.btn_default_normal_holo_light);
-//			tabIB[1][1].setBackgroundResource(isDark ? R.drawable.btn_default_normal_holo_dark : R.drawable.btn_default_normal_holo_light);
-//			tabIB[0][2].setBackgroundResource(isDark ? R.drawable.btn_default_normal_holo_dark : R.drawable.btn_default_normal_holo_light);
-//		}
-//	}
 
 	public void recalculateSize() {
 		final ScrollView sc = (ScrollView) v.findViewById(R.id.layoutswipe);

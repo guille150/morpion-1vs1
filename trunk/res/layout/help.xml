@@ -1,139 +1,122 @@
-<android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/drawer_layout"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" >
 
-    <ScrollView
-        xmlns:android="http://schemas.android.com/apk/res/android"
+    <TableLayout
+        android:id="@+id/tableLayout1"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent" >
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp" >
 
-        <TableLayout
-            android:id="@+id/tableLayout1"
-            android:layout_width="fill_parent"
+        <TextView
+            android:id="@+id/helptitle1"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="16dp"
-            android:layout_marginRight="16dp" >
+            android:layout_marginTop="16dp"
+            android:fontFamily="sans-serif-condansed"
+            android:text="@string/aide1"
+            android:textAllCaps="true"
+            android:textSize="20sp" />
 
-            <TextView
-                android:id="@+id/helptitle1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:fontFamily="sans-serif-condansed"
-                android:text="@string/aide1"
-                android:textAllCaps="true"
-                android:textSize="20sp" />
+        <TextView
+            android:id="@+id/helptext1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="32dp"
+            android:fontFamily="sans-serif-light"
+            android:text="@string/aide2"
+            android:textSize="16sp" />
 
-            <TextView
-                android:id="@+id/helptext1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="32dp"
-                android:fontFamily="sans-serif-light"
-                android:text="@string/aide2"
-                android:textSize="16sp" />
+        <TextView
+            android:id="@+id/helptitle2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-condansed"
+            android:text="@string/aide3"
+            android:textAllCaps="true"
+            android:textSize="20sp" />
 
-            <TextView
-                android:id="@+id/helptitle2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="sans-serif-condansed"
-                android:text="@string/aide3"
-                android:textAllCaps="true"
-                android:textSize="20sp" />
+        <TextView
+            android:id="@+id/helptext2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="32dp"
+            android:fontFamily="sans-serif-light"
+            android:text="@string/aide4"
+            android:textSize="16sp" />
 
-            <TextView
-                android:id="@+id/helptext2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="32dp"
-                android:fontFamily="sans-serif-light"
-                android:text="@string/aide4"
-                android:textSize="16sp" />
+        <TextView
+            android:id="@+id/helptitle6"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-condansed"
+            android:text="@string/aide11"
+            android:textAllCaps="true"
+            android:textSize="20sp" />
 
-            <TextView
-                android:id="@+id/helptitle6"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="sans-serif-condansed"
-                android:text="@string/aide11"
-                android:textAllCaps="true"
-                android:textSize="20sp" />
+        <TextView
+            android:id="@+id/helptext6"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="32dp"
+            android:fontFamily="sans-serif-light"
+            android:text="@string/aide12"
+            android:textSize="16sp" />
 
-            <TextView
-                android:id="@+id/helptext6"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="32dp"
-                android:fontFamily="sans-serif-light"
-                android:text="@string/aide12"
-                android:textSize="16sp" />
+        <TextView
+            android:id="@+id/helptitle3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-condansed"
+            android:text="@string/aide5"
+            android:textAllCaps="true"
+            android:textSize="20sp" />
 
-            <TextView
-                android:id="@+id/helptitle3"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="sans-serif-condansed"
-                android:text="@string/aide5"
-                android:textAllCaps="true"
-                android:textSize="20sp" />
+        <TextView
+            android:id="@+id/helptext3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="32dp"
+            android:fontFamily="sans-serif-light"
+            android:text="@string/aide6"
+            android:textSize="16sp" />
 
-            <TextView
-                android:id="@+id/helptext3"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="32dp"
-                android:fontFamily="sans-serif-light"
-                android:text="@string/aide6"
-                android:textSize="16sp" />
+        <TextView
+            android:id="@+id/helptitle4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-condansed"
+            android:text="@string/aide7"
+            android:textAllCaps="true"
+            android:textSize="20sp" />
 
-            <TextView
-                android:id="@+id/helptitle4"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="sans-serif-condansed"
-                android:text="@string/aide7"
-                android:textAllCaps="true"
-                android:textSize="20sp" />
+        <TextView
+            android:id="@+id/helptext4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="32dp"
+            android:fontFamily="sans-serif-light"
+            android:text="@string/aide8"
+            android:textSize="16sp" />
 
-            <TextView
-                android:id="@+id/helptext4"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="32dp"
-                android:fontFamily="sans-serif-light"
-                android:text="@string/aide8"
-                android:textSize="16sp" />
+        <TextView
+            android:id="@+id/helptitle5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-condansed"
+            android:text="@string/aide9"
+            android:textAllCaps="true"
+            android:textSize="20sp" />
 
-            <TextView
-                android:id="@+id/helptitle5"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="sans-serif-condansed"
-                android:text="@string/aide9"
-                android:textAllCaps="true"
-                android:textSize="20sp" />
+        <TextView
+            android:id="@+id/helptext5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="32dp"
+            android:fontFamily="sans-serif-light"
+            android:text="@string/aide10"
+            android:textSize="16sp" />
+    </TableLayout>
 
-            <TextView
-                android:id="@+id/helptext5"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="32dp"
-                android:fontFamily="sans-serif-light"
-                android:text="@string/aide10"
-                android:textSize="16sp" />
-        </TableLayout>
-    </ScrollView>
-
-    <ListView
-        android:id="@+id/left_drawer"
-        android:layout_width="300dp"
-        android:layout_height="match_parent"
-        android:layout_gravity="start"
-        android:background="#eee"
-        android:choiceMode="singleChoice"
-        android:divider="@drawable/linegraylight"
-        android:dividerHeight="1dp" />
-
-</android.support.v4.widget.DrawerLayout>
+</ScrollView>

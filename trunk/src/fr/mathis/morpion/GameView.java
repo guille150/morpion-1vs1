@@ -367,7 +367,7 @@ public class GameView extends View {
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 
-		int desiredWidth = (int) GameView.convertDpToPixel(48 * 3, context);
+		int desiredWidth = (int) GameView.convertDpToPixel(500 * 3, context);
 		int desiredHeight = desiredWidth;
 
 		int widthMode = MeasureSpec.getMode(widthMeasureSpec);

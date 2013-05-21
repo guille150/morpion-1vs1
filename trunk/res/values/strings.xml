@@ -121,7 +121,6 @@
 	<string name="s34">Victory : :win - Loose: :loose - Equality: :tie</string>
 	<string name="s35">Game restored.</string>
 	<string name="s36"></string>
-	
-	
-	
+	<string name="drawer_open">Open drawer</string>
+	<string name="drawer_close">Close drawer</string>
 </resources>
