@@ -37,6 +37,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -98,7 +99,7 @@ public class MainActivity extends SherlockActivity implements OnClickListener, O
 	protected BluetoothAdapter mBluetoothAdapter;
 	private BluetoothChatService mChatService;
 	private StringBuffer mOutStringBuffer;
-	LinearLayout container;
+	FrameLayout container;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -114,7 +115,7 @@ public class MainActivity extends SherlockActivity implements OnClickListener, O
 
 		a = this;
 		setContentView(isDark ? R.layout.main_layout_dark : R.layout.main_layout);
-		container = (LinearLayout) findViewById(R.id.container);
+		container = (FrameLayout) findViewById(R.id.container);
 		initDrawer();
 		createNewGame();
 		if (!StateHolder.GetMemorizedValue("showwelcomedrawer", this) || android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
