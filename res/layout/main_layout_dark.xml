@@ -3,11 +3,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
-    <LinearLayout android:id="@+id/container"
+    <FrameLayout android:id="@+id/container"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:orientation="vertical" >
-    </LinearLayout>
+        android:layout_height="fill_parent">
+    </FrameLayout>
 
     <ListView
         android:id="@+id/left_drawer"

@@ -29,8 +29,10 @@ import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
@@ -38,6 +40,7 @@ import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.PopupWindow;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -71,7 +74,7 @@ import fr.mathis.morpion.tools.ToolsBDD;
 import fr.mathis.morpion.tools.UndoBarController;
 import fr.mathis.morpion.tools.UndoBarController.UndoListener;
 
-public class HistoryActivity extends SherlockActivity implements OnItemLongClickListener, OnItemClickListener, OnNavigationListener, UndoListener, OnDismissCallback {
+public class HistoryActivity extends SherlockActivity implements OnItemLongClickListener, OnItemClickListener, OnNavigationListener, UndoListener, OnDismissCallback, HoverHandler {
 
 	static final int MENU_RESET = 0;
 	static final int MENU_SHARE = 2;
@@ -93,6 +96,7 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 	ListView listViewcards;
 	GoogleCardsAdapter mGoogleCardsAdapter;
 	ArrayList<Integer> items;
+	PopupWindow popoup;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -102,8 +106,6 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 		if (isDark)
 			super.setTheme(R.style.AppThemeDark);
 		super.onCreate(savedInstanceState);
-
-
 
 		Context context = getSupportActionBar().getThemedContext();
 
@@ -207,7 +209,7 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 					map.put("titre", "" + getString(R.string.equal));
 					equal++;
 				}
-				map.put("num", "N-" + c.getInt(0));
+				map.put("num", "N°" + c.getInt(0));
 				map.put("description", getString(R.string.s34).replace(":win", win + "").replace(":loose", lost + "").replace(":tie", equal + ""));
 				map.put("winner", n + "");
 				map.put("disposition", c.getString(2));
@@ -308,7 +310,7 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 			HashMap<String, String> map = (HashMap<String, String>) lv.getItemAtPosition(arg2);
 			String s = map.get("num");
 			String winner = map.get("winner");
-			currentId = Integer.parseInt(s.split("N-")[1].split(" ")[0]);
+			currentId = Integer.parseInt(s.split("N°")[1].split(" ")[0]);
 
 			Intent intent = new Intent(HistoryActivity.this, VisuPagerActivity.class);
 			intent.putExtra("id", HistoryActivity.currentId);
@@ -430,7 +432,7 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 			@SuppressWarnings("unchecked")
 			HashMap<String, String> map = (HashMap<String, String>) item;
 			String s = map.get("num");
-			int id = Integer.parseInt(s.split("N-")[1].split(" ")[0]);
+			int id = Integer.parseInt(s.split("N°")[1].split(" ")[0]);
 			ToolsBDD.getInstance(getApplicationContext()).removePartie(id);
 
 			saveId = id;
@@ -446,7 +448,6 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
 			View v = super.getView(position, convertView, parent);
-
 			String resultat = listItem.get(position).get("disposition");
 			int[][] val = new int[3][3];
 			int tooker = 0;
@@ -470,6 +471,8 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 			gv.setDark(isDark);
 			gv.setShowWinner(true);
 			gv.setValues(val, MainActivity.BLUE_PLAYER);
+
+			gv.setHoverHandler(HistoryActivity.this);
 
 			CheckBox cb = (CheckBox) v.findViewById(R.id.checkBox1);
 			final int posid = position;
@@ -679,7 +682,7 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 				for (int num : pos) {
 					HashMap<String, String> map = (HashMap<String, String>) listItem.get(num);
 					String s = map.get("num");
-					currentId = Integer.parseInt(s.split("N-")[1].split(" ")[0]);
+					currentId = Integer.parseInt(s.split("N°")[1].split(" ")[0]);
 					ToolsBDD.getInstance(getApplicationContext()).removePartie(HistoryActivity.currentId);
 					animateToRight(num, relaod);
 					relaod = false;
@@ -771,101 +774,7 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 		chartView.addSeries(seriesGreen);
 	}
 
-	public static class ValueLabelAdapter extends LabelAdapter {
-		public enum LabelOrientation {
-			HORIZONTAL, VERTICAL
-		}
-
-		private Context mContext;
-		private LabelOrientation mOrientation;
-
-		public ValueLabelAdapter(Context context, LabelOrientation orientation) {
-			mContext = context;
-			mOrientation = orientation;
-		}
-
-		@Override
-		public View getView(int position, View convertView, ViewGroup parent) {
-			TextView labelTextView;
-			if (convertView == null) {
-				convertView = new TextView(mContext);
-			}
-
-			labelTextView = (TextView) convertView;
-
-			int gravity = Gravity.CENTER;
-			if (mOrientation == LabelOrientation.VERTICAL) {
-				if (position == 0) {
-					gravity = Gravity.BOTTOM | Gravity.RIGHT;
-				} else if (position == getCount() - 1) {
-					gravity = Gravity.TOP | Gravity.RIGHT;
-				} else {
-					gravity = Gravity.CENTER | Gravity.RIGHT;
-				}
-			} else if (mOrientation == LabelOrientation.HORIZONTAL) {
-				if (position == 0) {
-					gravity = Gravity.CENTER | Gravity.LEFT;
-				} else if (position == getCount() - 1) {
-					gravity = Gravity.CENTER | Gravity.RIGHT;
-				}
-			}
-
-			labelTextView.setGravity(gravity);
-			labelTextView.setPadding(8, 0, 8, 0);
-			labelTextView.setText(String.format("%.1f", getItem(position)));
-
-			return convertView;
-		}
-	}
-
 	public void createCards() {
-		// cards.setSwipeable(true);
-		// cards.setVisibility(View.VISIBLE);
-		//
-		// cards.clearCards();
-		//
-		// lv.setVisibility(View.GONE);
-		// chartView.setVisibility(View.GONE);
-		// Cursor c = ToolsBDD.getInstance(this).getAllParties();
-		//
-		// if (c == null || c.getCount() == 0) {
-		//
-		// } else {
-		// c.moveToFirst();
-		//
-		// for (int i = 0; i < c.getCount(); i++) {
-		// String v = "N-" + c.getInt(0) + " - ";
-		// int n = c.getInt(1);
-		// if (n == MainActivity.BLUE_PLAYER) {
-		// v += getString(R.string.win);
-		// } else if (n == MainActivity.RED_PLAYER) {
-		// v += getString(R.string.loose);
-		// } else {
-		// v += getString(R.string.equal);
-		// }
-		//
-		// CardGame cg = new CardGame(c.getInt(1), c.getString(2), v,
-		// c.getInt(0), getWindowManager().getDefaultDisplay(),
-		// getApplicationContext());
-		// cg.setOnCardSwipedListener(this);
-		// final int idC = c.getInt(0);
-		// cg.setOnClickListener(new OnClickListener() {
-		//
-		// @Override
-		// public void onClick(View v) {
-		// Intent intent = new Intent(HistoryActivity.this,
-		// VisuPagerActivity.class);
-		// intent.putExtra("id", idC);
-		// startActivity(intent);
-		// }
-		// });
-		// cards.addCard(cg);
-		//
-		// c.moveToNext();
-		// }
-		// }
-		//
-		// cards.refresh();
 		listViewcards.setVisibility(View.VISIBLE);
 		chartView.setVisibility(View.GONE);
 		lv.setVisibility(View.GONE);
@@ -1022,17 +931,17 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 				map = new HashMap<String, String>();
 				map.put("titre", "" + getString(R.string.win));
 				map.put("description", getString(R.string.s35));
-				map.put("num", "N-" + saveId);
+				map.put("num", "N°" + saveId);
 			} else if (n == MainActivity.RED_PLAYER) {
 				map = new HashMap<String, String>();
 				map.put("titre", "" + getString(R.string.loose));
 				map.put("description", getString(R.string.s35));
-				map.put("num", "N-" + saveId);
+				map.put("num", "N°" + saveId);
 			} else {
 				map = new HashMap<String, String>();
 				map.put("titre", "" + getString(R.string.equal));
 				map.put("description", getString(R.string.s35));
-				map.put("num", "N-" + saveId);
+				map.put("num", "N°" + saveId);
 			}
 
 			map.put("winner", n + "");
@@ -1046,10 +955,10 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 	private int findCorrectPlace(HashMap<String, String> map) {
 
 		int res = 0;
-		int toinsertid = Integer.parseInt(map.get("num").split("N-")[1].split(" ")[0]);
+		int toinsertid = Integer.parseInt(map.get("num").split("N°")[1].split(" ")[0]);
 		for (res = 0; res < listItem.size(); res++) {
 			String titleCurrent = listItem.get(res).get("num");
-			int currentid = Integer.parseInt(titleCurrent.split("N-")[1].split(" ")[0]);
+			int currentid = Integer.parseInt(titleCurrent.split("N°")[1].split(" ")[0]);
 			if (toinsertid <= currentid) {
 				break;
 			}
@@ -1082,5 +991,42 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 		saveFromCards = true;
 
 		mUndoBarController.showUndoBar(false, getString(R.string.undobar_sample_message), null);
+	}
+
+	@Override
+	public void give(MotionEvent ev, GameView gv) {
+		if (android.os.Build.VERSION.SDK_INT > android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+			if (ev.getAction() == MotionEvent.ACTION_HOVER_ENTER) {
+				if (popoup != null && popoup.isShowing())
+					popoup.dismiss();
+				gv.setHoveredMode(true);
+				View popupView = getLayoutInflater().inflate(isDark ?R.layout.popup_gameviewdark : R.layout.popup_gameview, null);
+				GameView gvPopup = (GameView)popupView.findViewById(R.id.popupGame);
+				gvPopup.setMode(GameView.MODE_NOT_INTERACTIVE);
+				gvPopup.setAlignement(GameView.STYLE_CENTER_HORIZONTAL);
+				gvPopup.setDark(isDark);
+				gvPopup.setStrikeWidth(1);
+				gvPopup.setDark(isDark);
+				gvPopup.setShowWinner(true);
+				gvPopup.setValues(gv.getValues(), MainActivity.BLUE_PLAYER);
+
+				popoup = new PopupWindow(popupView, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+				popoup.setWindowLayoutMode(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+
+				// set window at position
+				int[] xy = new int[2];
+				gv.getLocationOnScreen(xy);
+				popoup.showAtLocation(this.getWindow().getDecorView(), Gravity.LEFT | Gravity.TOP, xy[0] + (int) MainActivity.convertDpToPixel(0, getApplicationContext()) + gv.getWidth(), xy[1] - gv.getHeight() / 2 - getSupportActionBar().getHeight());
+				popoup.update();
+			}
+			if (ev.getAction() == MotionEvent.ACTION_HOVER_MOVE) {
+
+			}
+			if (ev.getAction() == MotionEvent.ACTION_HOVER_EXIT) {
+				if (popoup != null && popoup.isShowing())
+					popoup.dismiss();
+				gv.setHoveredMode(false);
+			}
+		}
 	}
 }

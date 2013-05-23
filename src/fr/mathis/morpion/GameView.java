@@ -47,8 +47,10 @@ public class GameView extends View {
 	float strikeWidth = 2;
 	int nextTurn = MainActivity.BLUE_PLAYER;
 	boolean showWinner = false;
+	boolean isHoveredMode = false;
 
 	GameHandler delegate;
+	HoverHandler handler;
 
 	public GameView(Context context, AttributeSet attrs) {
 		super(context, attrs);
@@ -118,24 +120,23 @@ public class GameView extends View {
 				_paint.setColor(bluepayercolor);
 			else
 				_paint.setColor(redplayercolor);
-			_paint.setAlpha(isDark ? 160 : 80);
+			_paint.setAlpha(isDark ? 80 : 40);
 			int offset = (convertDpToPixel(strikeWidth, context) == 0 ? 1 : convertDpToPixel(strikeWidth, context));
 			canvas.drawRect(new Rect(xOffset + _viewWidth * downI / 3 + (downI == 0 ? 0 : offset), yOffset + _viewHeight * downY / 3 + (downY == 0 ? 0 : offset), xOffset + _viewWidth * (downI + 1) / 3 - (downI == 2 ? 0 : offset), yOffset + _viewHeight * (downY + 1) / 3 - (downY == 2 ? 0 : offset)), _paint);
 			_paint.setAlpha(255);
 		}
 
-		if (showWinner) {
-			
+		if (showWinner && !isHoveredMode) {
+
 			ArrayList<Point> wins = checkWinner();
-			
-			for(Point p : wins)
-			{
+
+			for (Point p : wins) {
 				int res = values[p.x][p.y];
-				
+
 				int v = p.y;
 				p.y = p.x;
 				p.x = v;
-				
+
 				if (res != MainActivity.NONE_PLAYER) {
 					if (res == MainActivity.BLUE_PLAYER)
 						_paint.setColor(bluepayercolor);
@@ -147,8 +148,6 @@ public class GameView extends View {
 					_paint.setAlpha(255);
 				}
 			}
-
-
 		}
 
 		if (values != null) {
@@ -163,6 +162,13 @@ public class GameView extends View {
 				}
 
 			}
+		}
+
+		if (isHoveredMode) {
+			_paint.setColor(Color.parseColor("#33B5E5"));
+			_paint.setAlpha(isDark ? 160 : 80);
+			canvas.drawRect(new Rect(xOffset, yOffset, -xOffset + _viewWidth, -yOffset + _viewHeight), _paint);
+			_paint.setAlpha(255);
 		}
 	}
 
@@ -210,6 +216,10 @@ public class GameView extends View {
 		this.values = values;
 		this.nextTurn = nextTurn;
 		this.invalidate();
+	}
+
+	public int[][] getValues() {
+		return values;
 	}
 
 	public void setMode(int mode) {
@@ -367,7 +377,7 @@ public class GameView extends View {
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 
-		int desiredWidth = (int) GameView.convertDpToPixel(500 * 3, context);
+		int desiredWidth = (int) GameView.convertDpToPixel(48 * 3, context);
 		int desiredHeight = desiredWidth;
 
 		int widthMode = MeasureSpec.getMode(widthMeasureSpec);
@@ -437,4 +447,26 @@ public class GameView extends View {
 		public void handleTurn(int i, int j);
 	}
 
+	public void setHoverHandler(HoverHandler handler) {
+		this.handler = handler;
+	}
+	
+	public boolean isHoveredMode() {
+		return isHoveredMode;
+	}
+
+	public void setHoveredMode(boolean isHoveredMode) {
+		this.isHoveredMode = isHoveredMode;
+		invalidate();
+	}
+
+	@Override
+	public boolean dispatchGenericMotionEvent(MotionEvent ev) {
+		if (handler != null) {
+			handler.give(ev, this);
+			return true;
+		} else
+			return true;
+	}
+	
 }
