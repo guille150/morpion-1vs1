@@ -1,12 +1,12 @@
 package fr.mathis.morpion;
 
+import static com.nineoldandroids.view.ViewPropertyAnimator.animate;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
-
-import static com.nineoldandroids.view.ViewPropertyAnimator.animate;
 
 import android.annotation.SuppressLint;
 import android.app.ActivityOptions;
@@ -40,10 +40,10 @@ import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
-import android.widget.PopupWindow;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.PopupWindow;
 import android.widget.SimpleAdapter;
 import android.widget.Toast;
 
@@ -59,9 +59,7 @@ import com.haarman.listviewanimations.ArrayAdapter;
 import com.haarman.listviewanimations.itemmanipulation.OnDismissCallback;
 import com.haarman.listviewanimations.itemmanipulation.SwipeDismissAdapter;
 import com.haarman.listviewanimations.swinginadapters.prepared.SwingBottomInAnimationAdapter;
-import com.michaelpardo.android.widget.TextView;
 import com.michaelpardo.android.widget.chartview.ChartView;
-import com.michaelpardo.android.widget.chartview.LabelAdapter;
 import com.michaelpardo.android.widget.chartview.LinearSeries;
 import com.michaelpardo.android.widget.chartview.LinearSeries.LinearPoint;
 import com.nineoldandroids.animation.Animator;
@@ -832,8 +830,11 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 				view = LayoutInflater.from(mContext).inflate(isDark ? R.layout.activity_googlecards_carddark : R.layout.activity_googlecards_card, parent, false);
 			}
 
-			android.widget.TextView tv = (android.widget.TextView) view.findViewById(R.id.activity_googlecards_card_textview);
-			tv.setText("Position :" + position);
+			ImageView cercle = (ImageView)view.findViewById(R.id.imageViewcerclewinner);
+			ImageView croix = (ImageView)view.findViewById(R.id.imageViewcroixwinner);
+			
+			cercle.setImageResource(ColorHolder.getInstance(mContext).getDrawable(MainActivity.RED_PLAYER));
+			croix.setImageResource(ColorHolder.getInstance(mContext).getDrawable(MainActivity.BLUE_PLAYER));
 
 			String textViewTitle = "";
 			String result = "";
@@ -844,11 +845,17 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 				if (i == position) {
 					int n = c.getInt(1);
 					if (n == MainActivity.BLUE_PLAYER) {
+						cercle.setVisibility(View.INVISIBLE);
+						croix.setVisibility(View.VISIBLE);
 						textViewTitle = mContext.getString(R.string.win);
 					} else if (n == MainActivity.RED_PLAYER) {
+						cercle.setVisibility(View.VISIBLE);
+						croix.setVisibility(View.INVISIBLE);
 						textViewTitle = mContext.getString(R.string.loose);
 					} else {
 						textViewTitle = mContext.getString(R.string.equal);
+						cercle.setVisibility(View.INVISIBLE);
+						croix.setVisibility(View.INVISIBLE);
 					}
 					textViewTitle = c.getInt(0) + " - " + textViewTitle;
 					result = c.getString(2);
@@ -876,8 +883,6 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 			gv.setAlignement(GameView.STYLE_CENTER_BOTH);
 			gv.setValues(val, MainActivity.BLUE_PLAYER);
 			gv.setShowWinner(true);
-
-			tv.setText(textViewTitle);
 
 			return view;
 		}

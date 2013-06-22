@@ -13,6 +13,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
@@ -35,18 +36,21 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.BaseAdapter;
+import android.widget.BaseExpandableListAdapter;
 import android.widget.Button;
+import android.widget.ExpandableListView;
+import android.widget.ExpandableListView.OnChildClickListener;
+import android.widget.ExpandableListView.OnGroupClickListener;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
+import com.google.android.gms.appstate.AppStateClient;
+import com.google.android.gms.appstate.OnStateLoadedListener;
+import com.google.example.games.basegameutils.BaseGameActivity;
 
 import fr.mathis.morpion.GameView.GameHandler;
 import fr.mathis.morpion.tools.ColorHolder;
@@ -54,7 +58,7 @@ import fr.mathis.morpion.tools.StateHolder;
 import fr.mathis.morpion.tools.ToolsBDD;
 
 @SuppressLint("HandlerLeak")
-public class MainActivity extends SherlockActivity implements OnClickListener, OnItemClickListener {
+public class MainActivity extends BaseGameActivity implements OnClickListener, OnItemClickListener, OnChildClickListener, OnStateLoadedListener {
 
 	public static final int RED_PLAYER = 4;
 	public static final int BLUE_PLAYER = 3;
@@ -67,18 +71,30 @@ public class MainActivity extends SherlockActivity implements OnClickListener, O
 	public static final int MESSAGE_DEVICE_NAME = 4;
 	public static final int MESSAGE_TOAST = 5;
 
+	public static final int SAVE_PREF = 0;
+	public static final int SAVE_HIST_1 = 1;
+	public static final int SAVE_HIST_2 = 2;
+	public static final int SAVE_HIST_3 = 3;
+
+	public static final String SAVE_DELETED = "00";
+	public static final String SAVE_TIE = "01";
+	public static final String SAVE_BLUE_WIN = "10";
+	public static final String SAVE_RED_WIN = "11";
+
 	public static final String DEVICE_NAME = "device_name";
 	public static final String TOAST = "toast";
 
 	private static final int REQUEST_CONNECT_DEVICE_INSECURE = 2;
 	private static final int REQUEST_PREF = 7;
+	private static final int ACTIVITY_HISTORY = 36;
 
 	private ActionBarDrawerToggle mDrawerToggle;
-	ArrayList<NavigationItem> navItems;
+	ArrayList<NavigationSection> navSections;
 	NavigationAdapter navAdapter;
-	private int activeNavItem = 0;
+	private int activeNavSection = 0;
+	private int activeNavChild = 0;
 	private DrawerLayout mDrawerLayout;
-	private ListView mDrawerList;
+	private ExpandableListView mDrawerList;
 	TextView playerText;
 	ImageButton[][] tabIB;
 	int[][] tabVal;
@@ -100,6 +116,13 @@ public class MainActivity extends SherlockActivity implements OnClickListener, O
 	private BluetoothChatService mChatService;
 	private StringBuffer mOutStringBuffer;
 	FrameLayout container;
+
+	boolean firstStartShouldReloadConfig = true;
+	boolean comeBackFromSettingsShouldSave = false;
+
+	public MainActivity() {
+		super(BaseGameActivity.CLIENT_APPSTATE | BaseGameActivity.CLIENT_GAMES);
+	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -147,21 +170,42 @@ public class MainActivity extends SherlockActivity implements OnClickListener, O
 	private void initDrawer() {
 		mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 		mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
-		mDrawerList = (ListView) findViewById(R.id.left_drawer);
-		navItems = new ArrayList<MainActivity.NavigationItem>();
+		mDrawerList = (ExpandableListView) findViewById(R.id.left_drawerlist);
+		findViewById(R.id.sign_in_button).setOnClickListener(this);
+		findViewById(R.id.sign_out_button).setOnClickListener(this);
 
-		navItems.add(new NavigationItem(isDark ? R.drawable.ic_action_spinner_partiemultidark : R.drawable.ic_action_spinner_partiemulti, getString(R.string.m1), 0));
-		navItems.add(new NavigationItem(isDark ? R.drawable.ic_action_spinner_partiemultidark : R.drawable.ic_action_spinner_partiemulti, getString(R.string.m8), 0));
-		navItems.add(new NavigationItem(isDark ? R.drawable.ic_action_spinner_partiedark : R.drawable.ic_action_spinner_partie, getString(R.string.s31), 0));
-		navItems.add(new NavigationItem(isDark ? R.drawable.ic_action_spinner_savedark : R.drawable.ic_action_spinner_save, getString(R.string.m2), 0));
-		navItems.add(new NavigationItem(isDark ? R.drawable.ic_action_spinner_partiehelpdark : R.drawable.ic_action_spinner_partiehelp, getString(R.string.m3), 0));
+		navSections = new ArrayList<MainActivity.NavigationSection>();
 
-		navAdapter = new NavigationAdapter(a, navItems);
+		ArrayList<NavigationItem> n1 = new ArrayList<MainActivity.NavigationItem>();
+		n1.add(new NavigationItem(isDark ? R.drawable.ic_action_spinner_partiemultidark : R.drawable.ic_action_spinner_partiemulti, getString(R.string.m1), 0));
+		n1.add(new NavigationItem(isDark ? R.drawable.ic_action_spinner_partiemultidark : R.drawable.ic_action_spinner_partiemulti, getString(R.string.m8), 0));
+		n1.add(new NavigationItem(isDark ? R.drawable.ic_action_spinner_partiedark : R.drawable.ic_action_spinner_partie, getString(R.string.s31), 0));
+		NavigationSection s1 = new NavigationSection(getString(R.string.s39), n1);
+		navSections.add(s1);
+
+		ArrayList<NavigationItem> n2 = new ArrayList<MainActivity.NavigationItem>();
+		n2.add(new NavigationItem(isDark ? R.drawable.ic_action_spinner_savedark : R.drawable.ic_action_spinner_save, getString(R.string.m2), 0));
+		n2.add(new NavigationItem(isDark ? R.drawable.ic_action_spinner_partiehelpdark : R.drawable.ic_action_spinner_partiehelp, getString(R.string.m3), 0));
+		NavigationSection s2 = new NavigationSection(getString(R.string.s40), n2);
+		navSections.add(s2);
+
+		navAdapter = new NavigationAdapter(a, navSections);
 		mDrawerList.setAdapter(navAdapter);
 
 		mDrawerList.setOnItemClickListener(this);
-		showClosedIcon();
+		mDrawerList.setOnChildClickListener(this);
 
+		for (int i = 0; i < navAdapter.getGroupCount(); i++)
+			mDrawerList.expandGroup(i);
+
+		mDrawerList.setOnGroupClickListener(new OnGroupClickListener() {
+			@Override
+			public boolean onGroupClick(ExpandableListView parent, View v, int groupPosition, long id) {
+				return false;
+			}
+		});
+
+		showClosedIcon();
 		mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close) {
 			public void onDrawerClosed(View view) {
 				supportInvalidateOptionsMenu();
@@ -170,7 +214,6 @@ public class MainActivity extends SherlockActivity implements OnClickListener, O
 
 			public void onDrawerOpened(View drawerView) {
 				supportInvalidateOptionsMenu();
-				shouldRestartBeVisible = m.getItem(0).isVisible();
 				showOpenedIcon();
 			}
 		};
@@ -179,24 +222,29 @@ public class MainActivity extends SherlockActivity implements OnClickListener, O
 
 	@Override
 	public void onItemClick(AdapterView<?> arg0, View arg1, int pos, long arg3) {
+		onChildClick(null, null, 0, pos, 0);
+	}
+
+	@Override
+	public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
 		boolean forseFirst = false;
-		if (pos == 0) {
+		if (groupPosition == 0 && childPosition == 0) {
 			getSupportActionBar().setIcon(R.drawable.ic_launcher);
 			createNewGame();
 
 		}
-		if (pos == 3) {
+		if (groupPosition == 1 && childPosition == 0) {
 			getSupportActionBar().setIcon(R.drawable.ic_launcher);
 			if (0 != ToolsBDD.getInstance(this).getNbPartie()) {
 				Intent intent = new Intent(MainActivity.this, HistoryActivity.class);
-				startActivityForResult(intent, 0);
+				startActivityForResult(intent, ACTIVITY_HISTORY);
 			} else {
 				Toast.makeText(this, R.string.nohistory, Toast.LENGTH_SHORT).show();
 				onItemClick(null, null, 0, 0);
 				forseFirst = true;
 			}
 		}
-		if (pos == 4) {
+		if (groupPosition == 1 && childPosition == 1) {
 			getSupportActionBar().setIcon(R.drawable.ic_launcher);
 			View child = getLayoutInflater().inflate(isDark ? R.layout.helpdark : R.layout.help, null);
 			container.removeAllViews();
@@ -205,19 +253,44 @@ public class MainActivity extends SherlockActivity implements OnClickListener, O
 			if (m != null) {
 				m.getItem(0).setVisible(false);
 			}
-		} else if (pos == 1) {
+		} else if (groupPosition == 0 && childPosition == 1) {
 			getSupportActionBar().setIcon(R.drawable.two_player);
 			startBluetooth();
-		} else if (pos == 2) {
+		} else if (groupPosition == 0 && childPosition == 2) {
 			getSupportActionBar().setIcon(R.drawable.ic_launcher);
 			createNewGameAI();
 		}
-		if (pos != 1 && !forseFirst) {
-			if (pos != 3) {
-				activeNavItem = pos;
+		if (!(groupPosition == 0 && childPosition == 1) && !forseFirst) {
+			if (!(groupPosition == 1 && childPosition == 0) && !(groupPosition == 2 && childPosition == 1) && !(groupPosition == 2 && childPosition == 0)) {
+				activeNavChild = childPosition;
+				activeNavSection = groupPosition;
 				navAdapter.notifyDataSetChanged();
 			}
 			mDrawerLayout.closeDrawer(GravityCompat.START);
+		}
+		if (groupPosition == 2 && childPosition == 0) {
+			if (isSignedIn())
+				startActivityForResult(getGamesClient().getAchievementsIntent(), 0);
+			else
+				Toast.makeText(getApplicationContext(), R.string.s42, Toast.LENGTH_SHORT).show();
+		}
+		if (groupPosition == 2 && childPosition == 1) {
+			if (isSignedIn())
+				startActivityForResult(getGamesClient().getLeaderboardIntent(getString(R.string.leaderboard_most_active)), 0);
+			else
+				Toast.makeText(getApplicationContext(), R.string.s42, Toast.LENGTH_SHORT).show();
+		}
+		return true;
+	}
+
+	public class NavigationSection {
+		public String title;
+		ArrayList<NavigationItem> items;
+
+		public NavigationSection(String title, ArrayList<NavigationItem> items) {
+			super();
+			this.title = title;
+			this.items = items;
 		}
 	}
 
@@ -234,45 +307,77 @@ public class MainActivity extends SherlockActivity implements OnClickListener, O
 		}
 	}
 
-	public class NavigationAdapter extends BaseAdapter {
+	public class NavigationAdapter extends BaseExpandableListAdapter {
 
 		Context context;
-		ArrayList<NavigationItem> data;
+		ArrayList<NavigationSection> data;
 		LayoutInflater inflater;
 
-		public NavigationAdapter(Context a, ArrayList<NavigationItem> data) {
+		public NavigationAdapter(Context a, ArrayList<NavigationSection> data) {
 			this.data = data;
 			inflater = (LayoutInflater) a.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			this.context = a;
 		}
 
 		@Override
-		public View getView(int position, View convertView, ViewGroup parent) {
-			View v = inflater.inflate(R.layout.navigation_item, null);
-			final NavigationItem item = data.get(position);
+		public Object getChild(int arg0, int arg1) {
+			return null;
+		}
+
+		@Override
+		public long getChildId(int groupPosition, int childPosition) {
+			return 0;
+		}
+
+		@Override
+		public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
+			View v = inflater.inflate(isDark ? R.layout.navigation_itemdark : R.layout.navigation_item, null);
+			final NavigationItem item = data.get(groupPosition).items.get(childPosition);
 			if (item != null) {
 				((android.widget.TextView) v.findViewById(R.id.nav_title)).setText(item.title);
 				((android.widget.TextView) v.findViewById(R.id.nav_title)).setCompoundDrawablesWithIntrinsicBounds(getResources().getDrawable(item.icon), null, null, null);
 				((android.widget.TextView) v.findViewById(R.id.nav_title)).setCompoundDrawablePadding((int) convertDpToPixel(16.0f, getApplicationContext()));
-				if (activeNavItem == position)
+				if (activeNavChild == childPosition && activeNavSection == groupPosition)
 					v.setBackgroundColor(isDark ? Color.parseColor("#33B5E5") : Color.parseColor("#D3D3D3"));
 			}
 			return v;
 		}
 
 		@Override
-		public int getCount() {
+		public int getChildrenCount(int groupPosition) {
+			return data.get(groupPosition).items.size();
+		}
+
+		@Override
+		public Object getGroup(int groupPosition) {
+			return data.get(groupPosition);
+		}
+
+		@Override
+		public int getGroupCount() {
 			return data.size();
 		}
 
 		@Override
-		public Object getItem(int position) {
-			return null;
+		public long getGroupId(int groupPosition) {
+			return groupPosition;
 		}
 
 		@Override
-		public long getItemId(int position) {
-			return 0;
+		public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
+			TextView tv = (TextView) inflater.inflate(isDark ? R.layout.navigation_sectiondark : R.layout.navigation_section, null);
+			tv.setText(data.get(groupPosition).title);
+			return tv;
+		}
+
+		@Override
+		public boolean hasStableIds() {
+			return false;
+		}
+
+		@Override
+		public boolean isChildSelectable(int groupPosition, int childPosition) {
+			return true;
 		}
 	}
 
@@ -287,16 +392,40 @@ public class MainActivity extends SherlockActivity implements OnClickListener, O
 		if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
 			getSupportActionBar().setDisplayHomeAsUpEnabled(false);
 		}
-		if (m != null)
-			m.getItem(0).setVisible(shouldRestartBeVisible);
+
+		new ShowMenuAsync().execute();
+
+	}
+
+	class ShowMenuAsync extends AsyncTask<Void, Void, Void> {
+
+		@Override
+		protected Void doInBackground(Void... params) {
+			try {
+				Thread.sleep(100);
+			}
+			catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(Void result) {
+			if (m != null)
+				m.getItem(0).setVisible(shouldRestartBeVisible);
+			super.onPostExecute(result);
+		}
 	}
 
 	private void showOpenedIcon() {
 		if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
 			getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		}
-		if (m != null)
+		shouldRestartBeVisible = m.getItem(0).isVisible();
+		if (m != null) {
 			m.getItem(0).setVisible(false);
+		}
 	}
 
 	@Override
@@ -325,9 +454,9 @@ public class MainActivity extends SherlockActivity implements OnClickListener, O
 		}
 
 		if (item.getTitle().toString().compareTo(getString(R.string.restart)) == 0) {
-			if (activeNavItem == 0)
+			if (activeNavSection == 0 && activeNavChild == 0)
 				createNewGame();
-			else if (activeNavItem == 1) {
+			else if (activeNavSection == 0 && activeNavChild == 1) {
 
 			} else {
 				createNewGameAI();
@@ -663,7 +792,8 @@ public class MainActivity extends SherlockActivity implements OnClickListener, O
 
 			container.removeAllViews();
 			container.addView(child);
-			activeNavItem = 1;
+			activeNavSection = 0;
+			activeNavChild = 1;
 			navAdapter.notifyDataSetChanged();
 			mDrawerLayout.closeDrawer(GravityCompat.START);
 			// Initialize the BluetoothChatService to perform bluetooth
@@ -885,7 +1015,7 @@ public class MainActivity extends SherlockActivity implements OnClickListener, O
 	}
 
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-
+		super.onActivityResult(requestCode, resultCode, data);
 		switch (requestCode) {
 		case REQUEST_CONNECT_DEVICE_INSECURE:
 			if (resultCode == Activity.RESULT_OK) {
@@ -900,11 +1030,16 @@ public class MainActivity extends SherlockActivity implements OnClickListener, O
 			break;
 		case REQUEST_PREF:
 			if (resultCode == RESULT_OK) {
-				finish();
-				startActivity(getIntent());
+				Toast.makeText(getApplicationContext(), R.string.s43, Toast.LENGTH_SHORT).show();
 			} else {
 				updateField();
 			}
+			comeBackFromSettingsShouldSave = true;
+			break;
+		case ACTIVITY_HISTORY:
+			comeBackFromSettingsShouldSave = true;
+			if (isSignedIn())
+				getGamesClient().unlockAchievement(getString(R.string.achievement_history));
 			break;
 		}
 	}
@@ -974,7 +1109,7 @@ public class MainActivity extends SherlockActivity implements OnClickListener, O
 					displayNextTurn();
 					gv.setValues(tabVal, turn);
 				}
-				if (m != null && activeNavItem != 1) {
+				if (m != null && activeNavSection != 0 && activeNavChild != 1) {
 					m.getItem(0).setVisible(true);
 				}
 				checkWinner(i, j, false, false);
@@ -1007,24 +1142,44 @@ public class MainActivity extends SherlockActivity implements OnClickListener, O
 
 	public void onClick(View view) {
 
-		for (int i = 0; i < 3; i++) {
-			for (int j = 0; j < 3; j++) {
-				if (view.getId() == tabIB[i][j].getId()) {
-					Drawable d = getResources().getDrawable(ColorHolder.getInstance(this).getDrawable(turn));
-					if (turn == BLUE_PLAYER) {
-						tabVal[i][j] = BLUE_PLAYER;
-						displayNextTurn();
-					} else {
-						tabVal[i][j] = RED_PLAYER;
-						displayNextTurn();
-					}
-					if (m != null && activeNavItem != 1) {
-						m.getItem(0).setVisible(true);
-					}
-					tabIB[i][j].setImageDrawable(d);
-					tabIB[i][j].setEnabled(false);
-					this.checkWinner(i, j, false, false);
+		if (view.getId() == R.id.sign_in_button) {
+			// start the asynchronous sign in flow
+			beginUserInitiatedSignIn();
+		} else if (view.getId() == R.id.sign_out_button) {
+			// sign out.
+			signOut();
 
+			if (moreOptions)
+				if (navSections.size() > 2) {
+					moreOptions = false;
+					navSections.remove(2);
+				}
+			navAdapter.notifyDataSetChanged();
+
+			// show sign-in button, hide the sign-out button
+			findViewById(R.id.sign_in_button).setVisibility(View.VISIBLE);
+			findViewById(R.id.sign_out_button).setVisibility(View.GONE);
+		} else {
+
+			for (int i = 0; i < 3; i++) {
+				for (int j = 0; j < 3; j++) {
+					if (view.getId() == tabIB[i][j].getId()) {
+						Drawable d = getResources().getDrawable(ColorHolder.getInstance(this).getDrawable(turn));
+						if (turn == BLUE_PLAYER) {
+							tabVal[i][j] = BLUE_PLAYER;
+							displayNextTurn();
+						} else {
+							tabVal[i][j] = RED_PLAYER;
+							displayNextTurn();
+						}
+						if (m != null && activeNavSection != 0 && activeNavChild != 1) {
+							m.getItem(0).setVisible(true);
+						}
+						tabIB[i][j].setImageDrawable(d);
+						tabIB[i][j].setEnabled(false);
+						this.checkWinner(i, j, false, false);
+
+					}
 				}
 			}
 		}
@@ -1065,6 +1220,16 @@ public class MainActivity extends SherlockActivity implements OnClickListener, O
 	}
 
 	private void congratsWinner(int winner, final boolean fromBT, final boolean fromMulti) {
+
+		if (isSignedIn()) {
+			if (tabVal[0][0] == RED_PLAYER && tabVal[0][1] == RED_PLAYER && tabVal[0][2] == BLUE_PLAYER && tabVal[1][0] == BLUE_PLAYER && tabVal[1][1] == BLUE_PLAYER && tabVal[1][2] == RED_PLAYER && tabVal[2][0] == RED_PLAYER && tabVal[2][1] == BLUE_PLAYER && tabVal[2][2] == RED_PLAYER) {
+				getGamesClient().unlockAchievement(getString(R.string.achievement_fan));
+			}
+		}
+		if (isSignedIn()) {
+			getGamesClient().incrementAchievement(getString(R.string.achievement_bored), 1);
+			getGamesClient().incrementAchievement(getString(R.string.achievement_veteran), 1);
+		}
 		nbGame++;
 		if (!fromBT) {
 			playerText.setText(R.string.over);
@@ -1095,6 +1260,9 @@ public class MainActivity extends SherlockActivity implements OnClickListener, O
 			alertDialog.setTitle(R.string.win);
 			alertDialog.setMessage(getString(R.string.winb));
 			ToolsBDD.getInstance(this).insertPartie(BLUE_PLAYER, values);
+			if (isSignedIn()) {
+				getGamesClient().unlockAchievement(getString(R.string.achievement_firstvictort));
+			}
 		} else if (winner == RED_PLAYER) {
 			alertDialog.setTitle(R.string.win);
 			alertDialog.setMessage(getString(R.string.winr));
@@ -1112,14 +1280,25 @@ public class MainActivity extends SherlockActivity implements OnClickListener, O
 				if (save)
 					Toast.makeText(MainActivity.this, R.string.saved, Toast.LENGTH_SHORT).show();
 
-				if (fromBT)
-					;
-				else if (fromMulti)
+				if (fromBT) {
+					if (isSignedIn()) {
+						getGamesClient().incrementAchievement(getString(R.string.achievement_welltrained), 1);
+					}
+				} else if (fromMulti) {
+					if (isSignedIn()) {
+						getGamesClient().incrementAchievement(getString(R.string.achievement_sadomasochistic), 1);
+					}
 					createNewGameAI();
-				else
+				} else {
 					createNewGame();
+					if (isSignedIn())
+						getGamesClient().incrementAchievement(getString(R.string.achievement_welltrained), 1);
+				}
 			}
 		});
+		if (isSignedIn()) {
+			getGamesClient().submitScore(getString(R.string.leaderboard_most_active), ToolsBDD.getInstance(getApplicationContext()).getNbPartieNumber());
+		}
 		alertDialog.show();
 	}
 
@@ -1134,6 +1313,183 @@ public class MainActivity extends SherlockActivity implements OnClickListener, O
 	protected void onStop() {
 		super.onStop();
 		stopService();
+	}
+
+	public void saveState() {
+		SharedPreferences mgr = PreferenceManager.getDefaultSharedPreferences(this);
+		byte[] my_app_state = new byte[128];
+
+		if (mgr.getBoolean("save", true))
+			my_app_state[0] = 1;
+		else
+			my_app_state[0] = 0;
+
+		if (mgr.getBoolean("isDark", false))
+			my_app_state[1] = 1;
+		else
+			my_app_state[1] = 0;
+
+		my_app_state[2] = (byte) mgr.getInt("colorblue", 0);
+		my_app_state[3] = (byte) mgr.getInt("colorred", 0);
+
+		my_app_state[4] = (byte) ToolsBDD.getInstance(getApplicationContext()).getNbPartieNumber();
+
+		if (getGamesClient().isConnected()) {
+			getAppStateClient().updateState(SAVE_PREF, my_app_state);
+		}
+
+		byte[] hist1 = new byte[128];
+		byte[] hist2 = new byte[128];
+		byte[] hist3 = new byte[128];
+
+		Cursor c = ToolsBDD.getInstance(this).getAllParties();
+		if (c == null || c.getCount() == 0) {
+
+		} else {
+			c.moveToFirst();
+			String futurByte = "";
+			int currentByteTab = 0;
+			int currentTabIndex = 0;
+			int currentGameNum = 1;
+			for (int i = 0; i < c.getCount(); i++) {
+
+				int newGameNum = c.getInt(0);
+				if (newGameNum - currentGameNum > 1) {
+					int missingGames = newGameNum - currentGameNum;
+					missingGames--;
+					for (int m = 0; m < missingGames; m++) {
+						futurByte += SAVE_DELETED;
+						if (futurByte.length() == 8) {
+							byte b = (byte) (int) Integer.valueOf(futurByte, 2);
+							if (currentByteTab == 0)
+								hist1[currentTabIndex] = b;
+							if (currentByteTab == 1)
+								hist2[currentTabIndex] = b;
+							if (currentByteTab == 2)
+								hist3[currentTabIndex] = b;
+							currentTabIndex++;
+							if (currentTabIndex == 128) {
+								currentTabIndex = 0;
+								currentByteTab++;
+							}
+							futurByte = "";
+						}
+					}
+				}
+				currentGameNum = newGameNum;
+
+				int n = c.getInt(1);
+				if (n == MainActivity.BLUE_PLAYER) {
+					futurByte += SAVE_BLUE_WIN;
+				} else if (n == MainActivity.RED_PLAYER) {
+					futurByte += SAVE_RED_WIN;
+				} else {
+					futurByte += SAVE_TIE;
+				}
+
+				if (futurByte.length() == 8) {
+					byte b = (byte) (int) Integer.valueOf(futurByte, 2);
+					if (currentByteTab == 0)
+						hist1[currentTabIndex] = b;
+					if (currentByteTab == 1)
+						hist2[currentTabIndex] = b;
+					if (currentByteTab == 2)
+						hist3[currentTabIndex] = b;
+					currentTabIndex++;
+					if (currentTabIndex == 128) {
+						currentTabIndex = 0;
+						currentByteTab++;
+					}
+					futurByte = "";
+				}
+
+				c.moveToNext();
+			}
+
+			while (futurByte.length() < 8) {
+				futurByte += "0";
+			}
+
+			if (futurByte.length() == 8) {
+				byte b = (byte) (int) Integer.valueOf(futurByte, 2);
+				if (currentByteTab == 0)
+					hist1[currentTabIndex] = b;
+				if (currentByteTab == 1)
+					hist2[currentTabIndex] = b;
+				if (currentByteTab == 2)
+					hist3[currentTabIndex] = b;
+				currentTabIndex++;
+				if (currentTabIndex == 128) {
+					currentTabIndex = 0;
+					currentByteTab++;
+				}
+				futurByte = "";
+			}
+
+		}
+
+		if (getGamesClient().isConnected()) {
+			getAppStateClient().updateState(SAVE_HIST_1, hist1);
+			getAppStateClient().updateState(SAVE_HIST_2, hist2);
+			getAppStateClient().updateState(SAVE_HIST_3, hist3);
+		}
+
+		Toast.makeText(getApplicationContext(), "saved", Toast.LENGTH_SHORT).show();
+	}
+
+	private void restoreState(ArrayList<byte[]> dataSaved2) {
+		if (totalGameToRestore != -1) {
+			int totalTreater = 0;
+
+			byte[] data = new byte[128 * 3];
+			int n = 0;
+			for (int i = 0; i < 3; i++) {
+				for (int j = 0; j < dataSaved2.get(i).length; j++) {
+					data[n] = dataSaved2.get(i)[j];
+					n++;
+				}
+			}
+
+			for (int i = 0; i < data.length && totalTreater < totalGameToRestore; i++) {
+				String d = getWellFormedBytesAsString("" + Integer.toBinaryString((data[i] + 256) % 256));
+				for (int di = 0; di < 4 && totalTreater < totalGameToRestore; di++) {
+					String code = d.substring(di * 2, (di * 2) + 2);
+					if (ToolsBDD.getInstance(getApplicationContext()).getResultat((totalTreater + 1)).compareTo("vide") == 0) {
+
+						if (code.compareTo(SAVE_BLUE_WIN) == 0) {
+							ToolsBDD.getInstance(getApplicationContext()).insertPartie((totalTreater + 1), BLUE_PLAYER, BLUE_PLAYER + "," + BLUE_PLAYER + "," + BLUE_PLAYER + "," + BLUE_PLAYER + "," + BLUE_PLAYER + "," + BLUE_PLAYER + "," + BLUE_PLAYER + "," + BLUE_PLAYER + "," + BLUE_PLAYER);
+						}
+						if (code.compareTo(SAVE_RED_WIN) == 0) {
+							ToolsBDD.getInstance(getApplicationContext()).insertPartie((totalTreater + 1), RED_PLAYER, RED_PLAYER + "," + RED_PLAYER + "," + RED_PLAYER + "," + RED_PLAYER + "," + RED_PLAYER + "," + RED_PLAYER + "," + RED_PLAYER + "," + RED_PLAYER + "," + RED_PLAYER);
+						}
+						if (code.compareTo(SAVE_TIE) == 0) {
+							ToolsBDD.getInstance(getApplicationContext()).insertPartie((totalTreater + 1), NONE_PLAYER, BLUE_PLAYER + "," + BLUE_PLAYER + "," + NONE_PLAYER + "," + BLUE_PLAYER + "," + NONE_PLAYER + "," + RED_PLAYER + "," + NONE_PLAYER + "," + RED_PLAYER + "," + RED_PLAYER);
+						}
+					}
+					if (code.compareTo(SAVE_DELETED) == 0) {
+						ToolsBDD.getInstance(getApplicationContext()).removePartie((totalTreater + 1));
+					}
+
+					totalTreater++;
+				}
+
+			}
+			nbGame = ToolsBDD.getInstance(this).getNbPartieNumber() + 1;
+			TextView tv1 = (TextView) findViewById(R.id.welcomeGame);
+			tv1.setText(getString(R.string.game) + nbGame);
+		}
+	}
+
+	public String getWellFormedBytesAsString(String value) {
+		String res = value;
+		if (res.length() > 8) {
+			res = res.substring(res.length() - 8);
+		} else if (res.length() < 8) {
+			while (res.length() < 8) {
+				res = "0" + res;
+			}
+		}
+		return res;
 	}
 
 	@Override
@@ -1370,6 +1726,126 @@ public class MainActivity extends SherlockActivity implements OnClickListener, O
 				return null;
 			}
 		};
+	}
+
+	@Override
+	public void onSignInFailed() {
+		// Sign in has failed. So show the user the sign-in button.
+		findViewById(R.id.sign_in_button).setVisibility(View.VISIBLE);
+		findViewById(R.id.sign_out_button).setVisibility(View.GONE);
+		if (moreOptions) {
+			if (navSections.size() > 2) {
+				navSections.remove(2);
+				moreOptions = false;
+			}
+			navAdapter.notifyDataSetChanged();
+		}
+	}
+
+	boolean moreOptions = false;
+
+	@Override
+	public void onSignInSucceeded() {
+		// show sign-out button, hide the sign-in button
+		findViewById(R.id.sign_in_button).setVisibility(View.GONE);
+		findViewById(R.id.sign_out_button).setVisibility(View.VISIBLE);
+		// (your code here: update UI, enable functionality that depends on sign
+		// in, etc)
+		if (!moreOptions) {
+			ArrayList<NavigationItem> n3 = new ArrayList<MainActivity.NavigationItem>();
+			n3.add(new NavigationItem(isDark ? R.drawable.ic_action_spinner_achivmentdark : R.drawable.ic_action_spinner_achivment, getString(R.string.s37), 0));
+			n3.add(new NavigationItem(isDark ? R.drawable.ic_action_spinner_boarddarl : R.drawable.ic_action_spinner_board, getString(R.string.s38), 0));
+			NavigationSection s3 = new NavigationSection(getString(R.string.s41), n3);
+			navSections.add(s3);
+			navAdapter.notifyDataSetChanged();
+			mDrawerList.expandGroup(2);
+		}
+		moreOptions = true;
+		if (comeBackFromSettingsShouldSave) {
+			saveState();
+			comeBackFromSettingsShouldSave = false;
+		} else if (firstStartShouldReloadConfig) {
+			getAppStateClient().loadState(this, SAVE_PREF);
+			getAppStateClient().loadState(this, SAVE_HIST_1);
+			getAppStateClient().loadState(this, SAVE_HIST_2);
+			getAppStateClient().loadState(this, SAVE_HIST_3);
+			firstStartShouldReloadConfig = false;
+		}
+
+	}
+
+	ArrayList<byte[]> dataSaved;
+	int totalGameToRestore = -1;
+
+	@Override
+	public void onStateLoaded(int statusCode, int stateKey, byte[] data) {
+		if (stateKey == 0) {
+			if (statusCode == AppStateClient.STATUS_OK) {
+				SharedPreferences mgr = PreferenceManager.getDefaultSharedPreferences(this);
+
+				SharedPreferences.Editor editor = mgr.edit();
+				editor.putBoolean("save", data[0] == 1);
+				editor.commit();
+
+				if (isDark != (data[1] == 1)) {
+					Toast.makeText(getApplicationContext(), R.string.s43, Toast.LENGTH_SHORT).show();
+				}
+				
+				editor.putBoolean("isDark", data[1] == 1);
+				editor.commit();
+
+				ColorHolder.getInstance(getApplicationContext()).save(MainActivity.RED_PLAYER, data[3]);
+				ColorHolder.getInstance(getApplicationContext()).save(MainActivity.BLUE_PLAYER, data[2]);
+
+				totalGameToRestore = data[4];
+
+				updateField();
+			} else if (statusCode == AppStateClient.STATUS_NETWORK_ERROR_STALE_DATA) {
+				SharedPreferences mgr = PreferenceManager.getDefaultSharedPreferences(this);
+
+				SharedPreferences.Editor editor = mgr.edit();
+				editor.putBoolean("save", data[0] == 1);
+				editor.commit();
+
+				if (isDark != (data[1] == 1)) {
+					Toast.makeText(getApplicationContext(), R.string.s43, Toast.LENGTH_SHORT).show();
+				}
+				editor.putBoolean("isDark", data[1] == 1);
+				editor.commit();
+
+				ColorHolder.getInstance(getApplicationContext()).save(MainActivity.RED_PLAYER, data[3]);
+				ColorHolder.getInstance(getApplicationContext()).save(MainActivity.BLUE_PLAYER, data[2]);
+
+				totalGameToRestore = data[4];
+
+				updateField();
+			} else {
+
+			}
+			Toast.makeText(getApplicationContext(), "" + statusCode, Toast.LENGTH_SHORT).show();
+		}
+		if (stateKey == 1) {
+			dataSaved = new ArrayList<byte[]>();
+			dataSaved.add(data);
+		}
+		if (stateKey == 2) {
+			if (dataSaved != null)
+				dataSaved.add(data);
+		}
+		if (stateKey == 3) {
+			if (dataSaved != null) {
+				dataSaved.add(data);
+				if (dataSaved.size() == 3) {
+					restoreState(dataSaved);
+				}
+			}
+		}
+	}
+
+	@Override
+	public void onStateConflict(int stateKey, String ver, byte[] localData, byte[] serverData) {
+		Toast.makeText(getApplicationContext(), "conflict", Toast.LENGTH_SHORT).show();
+		getAppStateClient().resolveState(this, stateKey, ver, localData);
 	}
 
 }

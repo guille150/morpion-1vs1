@@ -3,36 +3,39 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/card_background_white"
-    android:orientation="vertical"
+    android:orientation="horizontal"
     android:padding="16dp" >
 
-    <TextView
-        android:id="@+id/activity_googlecards_card_textview"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:fontFamily="sans-serif-light"
-        android:textSize="24sp" />
+    <ImageView
+        android:contentDescription="@string/app_name"
+        android:id="@+id/imageViewcroixwinner"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:src="@drawable/croix_bleu_fonce"
+        android:layout_gravity="center_vertical" />
 
     <LinearLayout
-        android:id="@+id/LinearLayout01"
-        android:layout_width="fill_parent"
-        android:layout_height="1dp"
-        android:layout_marginTop="4dp"
-        android:background="@drawable/linegraylight"
-        android:orientation="vertical" >
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1" >
+
+        <fr.mathis.morpion.GameView
+            android:id="@+id/gameView1"
+            android:layout_width="0dp"
+            android:layout_height="200dp"
+            android:layout_weight="1"
+            android:clickable="false"
+            android:focusable="false"
+            android:focusableInTouchMode="false" >
+        </fr.mathis.morpion.GameView>
     </LinearLayout>
 
-    <fr.mathis.morpion.GameView
-        android:id="@+id/gameView1"
-        android:layout_width="fill_parent"
-        android:layout_height="150dp"
-        android:layout_marginBottom="8dp"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
-        android:layout_marginTop="16dp"
-        android:clickable="false"
-        android:focusable="false"
-        android:focusableInTouchMode="false" >
-    </fr.mathis.morpion.GameView>
+    <ImageView
+        android:contentDescription="@string/app_name"
+        android:id="@+id/imageViewcerclewinner"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_gravity="center_vertical" 
+        android:src="@drawable/croix_bleu_fonce" />
 
 </LinearLayout>

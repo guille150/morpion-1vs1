@@ -97,7 +97,7 @@ public class VisuPagerActivity extends SherlockFragmentActivity implements OnPag
 			if (indexs.size() > 1)
 				indexs.remove(indexs.size() - 1);
 		} else {
-			super.onBackPressed();
+			finish();
 		}
 	}
 

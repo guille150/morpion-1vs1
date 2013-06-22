@@ -118,8 +118,14 @@
     <string name="s33">Cette application vous permet de jouer seul contre l\'IA ou à deux joueurs, sur le même téléphone ou par Bluetooth. Pour passer d\'un mode de jeu à l\'autre, utilisez la liste de navigation. Par défaut vous êtes sur le jeu à deux joueurs sur le même téléphone.</string>
     <string name="s34">Victoire : :win - Défaite : :loose - Egalité : :tie</string>
     <string name="s35">Partie restaurée.</string>
-    <string name="s36"></string>
+    <string name="s36">Deconnexion</string>
+    <string name="s37">Succès</string>
+    <string name="s38">Classement</string>
     <string name="drawer_open">Ouvrir menu</string>
     <string name="drawer_close">Fermer menu</string>
-
+	<string name="s39">Modes de jeu</string>
+	<string name="s40">Autres</string>
+	<string name="s41">Play Game</string>
+	<string name="s42">Connexion requise.</string>
+	<string name="s43">Le thème changera au prochain lancement</string>
 </resources>

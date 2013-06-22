@@ -17,7 +17,7 @@
             android:fontFamily="sans-serif-condansed"
             android:text="@string/aide1"
             android:textAllCaps="true"
-            android:textSize="20sp" />
+            android:textSize="20sp"/>
 
         <TextView
             android:id="@+id/helptext1"

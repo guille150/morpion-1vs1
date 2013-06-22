@@ -59,6 +59,8 @@ public class ColorHolder {
 		res.add("#ff8800");
 		res.add("#ff4444");
 		res.add("#f90000");
+		res.add("#A8A8A8");
+		res.add("#515151");
 		return res;
 	}
 
@@ -74,6 +76,8 @@ public class ColorHolder {
 		res.add(R.drawable.croix_jaune_fonce);
 		res.add(R.drawable.croix_rouge_clair);
 		res.add(R.drawable.croix_rouge_fonce);
+		res.add(R.drawable.croix_gris_clair);
+		res.add(R.drawable.croix_gris_fonce);
 		return res;
 	}
 
@@ -89,6 +93,8 @@ public class ColorHolder {
 		res.add(R.drawable.cercle_jaune_fonce);
 		res.add(R.drawable.cercle_rouge_clair);
 		res.add(R.drawable.cercle_rouge_fonce);
+		res.add(R.drawable.cercle_gris_clair);
+		res.add(R.drawable.cercle_gris_fonce);
 		return res;
 	}
 

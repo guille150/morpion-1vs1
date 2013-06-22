@@ -84,7 +84,6 @@ public class VisuFragment extends SherlockFragment {
 	private void generateImageThenShare() {
 		View viewToPrint = v.findViewById(R.id.gameView1);
 		Bitmap bmpToShare = getBitmapFromView(viewToPrint);
-
 		Intent share = new Intent(Intent.ACTION_SEND);
 		share.setType("image/jpeg");
 		String url = Images.Media.insertImage(getActivity().getContentResolver(), bmpToShare, "share", null);
@@ -127,12 +126,12 @@ public class VisuFragment extends SherlockFragment {
 				tooker++;
 			}
 		}
-		
-		GameView gv = (GameView)v.findViewById(R.id.gameView1);
+
+		GameView gv = (GameView) v.findViewById(R.id.gameView1);
 		gv.setMode(GameView.MODE_NOT_INTERACTIVE);
 		gv.setDark(isDark);
 		gv.setAlignement(GameView.STYLE_CENTER_BOTH);
-		gv.setValues(val,MainActivity.BLUE_PLAYER);
+		gv.setValues(val, MainActivity.BLUE_PLAYER);
 		gv.setShowWinner(true);
 
 		return v;
