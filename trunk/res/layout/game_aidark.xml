@@ -30,7 +30,7 @@
             android:layout_marginRight="16dp"
             android:fontFamily="sans-serif-light"
             android:gravity="right"
-            android:text="Small text"
+            android:text=""
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textSize="20sp" />
     </LinearLayout>
@@ -45,17 +45,63 @@
         android:orientation="vertical" >
     </LinearLayout>
 
-    <fr.mathis.morpion.GameView
-        android:id="@+id/gameView1"
+ <RelativeLayout
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:layout_marginBottom="16dp"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
-        android:layout_marginTop="16dp"
-        android:clickable="true"
-        android:focusable="true"
-        android:focusableInTouchMode="true" >
-    </fr.mathis.morpion.GameView>
+        android:layout_height="fill_parent" >
+
+        <fr.mathis.morpion.GameView
+            android:id="@+id/gameView1"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_marginBottom="16dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:layout_marginTop="16dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:focusableInTouchMode="true" >
+        </fr.mathis.morpion.GameView>
+
+        <LinearLayout android:id="@+id/congratsContainer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginBottom="16dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:visibility="gone" >
+
+            <TextView
+                android:id="@+id/resultText"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:textSize="24sp"
+                android:layout_weight="1"
+                android:textColor="#ffffff" />
+
+            <LinearLayout
+                android:layout_width="1.4dp"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:background="#60ffffff"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp" >
+            </LinearLayout>
+
+            <ImageButton android:id="@+id/congratsRetry"
+                android:contentDescription="@string/app_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_action_replaydark"
+                style="@style/Widget.Sherlock.ActionButton" />
+        </LinearLayout>
+    </RelativeLayout>
 
 </LinearLayout>

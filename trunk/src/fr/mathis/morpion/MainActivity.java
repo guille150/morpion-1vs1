@@ -4,11 +4,9 @@ import java.util.ArrayList;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
@@ -34,6 +32,7 @@ import android.view.SubMenu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseExpandableListAdapter;
@@ -116,6 +115,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 	private BluetoothChatService mChatService;
 	private StringBuffer mOutStringBuffer;
 	FrameLayout container;
+	View congratsContainer;
 
 	boolean firstStartShouldReloadConfig = true;
 	boolean comeBackFromSettingsShouldSave = false;
@@ -191,7 +191,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 
 		navAdapter = new NavigationAdapter(a, navSections);
 		mDrawerList.setAdapter(navAdapter);
-
+		mDrawerList.setDividerHeight(0);
 		mDrawerList.setOnItemClickListener(this);
 		mDrawerList.setOnChildClickListener(this);
 
@@ -337,6 +337,8 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 				((android.widget.TextView) v.findViewById(R.id.nav_title)).setText(item.title);
 				((android.widget.TextView) v.findViewById(R.id.nav_title)).setCompoundDrawablesWithIntrinsicBounds(getResources().getDrawable(item.icon), null, null, null);
 				((android.widget.TextView) v.findViewById(R.id.nav_title)).setCompoundDrawablePadding((int) convertDpToPixel(16.0f, getApplicationContext()));
+				v.findViewById(R.id.separator_little).setVisibility(childPosition == 0 ? View.GONE : View.VISIBLE);
+				v.findViewById(R.id.separator_big).setVisibility(childPosition == 0 ? View.VISIBLE : View.GONE);
 				if (activeNavChild == childPosition && activeNavSection == groupPosition)
 					v.setBackgroundColor(isDark ? Color.parseColor("#33B5E5") : Color.parseColor("#D3D3D3"));
 			}
@@ -1069,7 +1071,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 	@SuppressLint("NewApi")
 	public void createNewGame() {
 		View child = getLayoutInflater().inflate(isDark ? R.layout.game_aidark : R.layout.game_ai, null);
-
+		getSupportActionBar().setIcon(R.drawable.two_player);
 		container.removeAllViews();
 		container.addView(child);
 		SharedPreferences mgr = PreferenceManager.getDefaultSharedPreferences(this);
@@ -1238,48 +1240,28 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 			else
 				playerText.setTextColor(Color.DKGRAY);
 		}
-		AlertDialog alertDialog = new AlertDialog.Builder(this).create();
-		alertDialog.setCancelable(false);
-		alertDialog.setIcon(R.drawable.ic_launcher);
 
-		String values = "";
-		for (int i = 0; i < 3; i++) {
-			for (int j = 0; j < 3; j++) {
-				values += "," + tabVal[i][j];
-			}
-		}
-		values = values.substring(1);
+		gv.setMode(GameView.MODE_NOT_INTERACTIVE);
+		
+		congratsContainer = findViewById(R.id.congratsContainer);
+		congratsContainer.setVisibility(View.VISIBLE);
 
-		if (fromBT)
-			createNewMuliGame();
+		AlphaAnimation alpha = new AlphaAnimation(0.0F, 0.0F);
+		alpha.setDuration(0);
+		alpha.setFillAfter(true);
+		congratsContainer.startAnimation(alpha);
 
-		SharedPreferences mgr = PreferenceManager.getDefaultSharedPreferences(this);
-		final boolean save = mgr.getBoolean("save", true);
+		alpha = new AlphaAnimation(0.0F, 1.0F);
+		alpha.setDuration(600);
+		alpha.setFillAfter(true);
+		congratsContainer.startAnimation(alpha);
 
-		if (winner == BLUE_PLAYER) {
-			alertDialog.setTitle(R.string.win);
-			alertDialog.setMessage(getString(R.string.winb));
-			ToolsBDD.getInstance(this).insertPartie(BLUE_PLAYER, values);
-			if (isSignedIn()) {
-				getGamesClient().unlockAchievement(getString(R.string.achievement_firstvictort));
-			}
-		} else if (winner == RED_PLAYER) {
-			alertDialog.setTitle(R.string.win);
-			alertDialog.setMessage(getString(R.string.winr));
-			ToolsBDD.getInstance(this).insertPartie(RED_PLAYER, values);
-		} else if (winner == NONE_PLAYER) {
-			alertDialog.setTitle(R.string.equal);
-			alertDialog.setMessage(getString(R.string.equaltry));
+		TextView tvCongrats = (TextView) findViewById(R.id.resultText);
+		View retry = findViewById(R.id.congratsRetry);
+		retry.setOnClickListener(new OnClickListener() {
 
-			if (save)
-				ToolsBDD.getInstance(this).insertPartie(NONE_PLAYER, values);
-		}
-
-		alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, "OK", new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int which) {
-				if (save)
-					Toast.makeText(MainActivity.this, R.string.saved, Toast.LENGTH_SHORT).show();
-
+			@Override
+			public void onClick(View v) {
 				if (fromBT) {
 					if (isSignedIn()) {
 						getGamesClient().incrementAchievement(getString(R.string.achievement_welltrained), 1);
@@ -1296,17 +1278,51 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 				}
 			}
 		});
+
+		String values = "";
+		for (int i = 0; i < 3; i++) {
+			for (int j = 0; j < 3; j++) {
+				values += "," + tabVal[i][j];
+			}
+		}
+		values = values.substring(1);
+
+		if (fromBT)
+			createNewMuliGame();
+
+		SharedPreferences mgr = PreferenceManager.getDefaultSharedPreferences(this);
+		final boolean save = mgr.getBoolean("save", true);
+
+		if (winner == BLUE_PLAYER) {
+			tvCongrats.setText(R.string.winb);
+			congratsContainer.setBackgroundColor(Color.parseColor(ColorHolder.getInstance(getApplicationContext()).getColor(BLUE_PLAYER)));
+			ToolsBDD.getInstance(this).insertPartie(BLUE_PLAYER, values);
+			if (isSignedIn()) {
+				getGamesClient().unlockAchievement(getString(R.string.achievement_firstvictort));
+			}
+		} else if (winner == RED_PLAYER) {
+			tvCongrats.setText(R.string.winr);
+			congratsContainer.setBackgroundColor(Color.parseColor(ColorHolder.getInstance(getApplicationContext()).getColor(RED_PLAYER)));
+			ToolsBDD.getInstance(this).insertPartie(RED_PLAYER, values);
+		} else if (winner == NONE_PLAYER) {
+			tvCongrats.setText(R.string.equaltry);
+			congratsContainer.setBackgroundColor(isDark ? Color.DKGRAY  :Color.LTGRAY);
+
+			if (save) {
+				ToolsBDD.getInstance(this).insertPartie(NONE_PLAYER, values);
+			}
+			saveState();
+		}
+
 		if (isSignedIn()) {
 			getGamesClient().submitScore(getString(R.string.leaderboard_most_active), ToolsBDD.getInstance(getApplicationContext()).getNbPartieNumber());
 		}
-		alertDialog.show();
 	}
 
 	@SuppressLint("NewApi")
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
 		super.onConfigurationChanged(newConfig);
-		// mDrawerToggle.onConfigurationChanged(newConfig);
 	}
 
 	@Override
@@ -1790,7 +1806,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 				if (isDark != (data[1] == 1)) {
 					Toast.makeText(getApplicationContext(), R.string.s43, Toast.LENGTH_SHORT).show();
 				}
-				
+
 				editor.putBoolean("isDark", data[1] == 1);
 				editor.commit();
 

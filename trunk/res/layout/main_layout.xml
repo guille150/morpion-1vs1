@@ -23,8 +23,6 @@
             android:layout_height="fill_parent"
             android:layout_above="@+id/linearLayout1"
             android:choiceMode="singleChoice"
-            android:divider="@drawable/linegraylight"
-            android:dividerHeight="1dp"
             android:groupIndicator="@null" />
 
         <LinearLayout
