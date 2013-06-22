@@ -35,10 +35,10 @@
     <string name="sharetry">Morpion 1vs1 - Essaye le !</string>
     <string name="win">Victoire</string>
     <string name="loose">Défaite</string>
-    <string name="winb">Vous avez gagné</string>
-    <string name="winr">Votre adversaire a gagné</string>
+    <string name="winb">Victoire</string>
+    <string name="winr">Défaite</string>
     <string name="equal">Egalité</string>
-    <string name="equaltry">Essayez Pierre-Feuille-Ciseau-Lezard-Spock.</string>
+    <string name="equaltry">Egalité</string>
     <string name="share1"> parties : </string>
     <string name="share2"> victoires, </string>
     <string name="share3"> défaites.</string>

@@ -35,10 +35,10 @@
     <string name="sharetry">Tic-tac-toe 1vs1 - Try it !</string>
     <string name="win">Victory</string>
     <string name="loose">Defeat</string>
-    <string name="winb">You win !</string>
-    <string name="winr">Your partner wins.</string>
+    <string name="winb">Victort</string>
+    <string name="winr">Lost</string>
     <string name="equal">Equality</string>
-    <string name="equaltry">Try Rock-Paper-Scissor-Lizard-Spock.</string>
+    <string name="equaltry">Tie</string>
     <string name="share1"> games : </string>
     <string name="share2"> victories, </string>
     <string name="share3"> defeats.</string>

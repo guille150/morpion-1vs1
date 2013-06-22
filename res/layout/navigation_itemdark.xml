@@ -1,18 +1,33 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent" >
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
+
+    <LinearLayout android:id="@+id/separator_little"
+        android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        android:background="#20FFFFFF"
+        android:orientation="vertical" >
+    </LinearLayout>
+    
+        <LinearLayout android:id="@+id/separator_big"
+        android:layout_width="fill_parent"
+        android:layout_height="3dp"
+        android:background="#20FFFFFF"
+        android:orientation="vertical" >
+    </LinearLayout>
 
     <TextView
         android:id="@+id/nav_title"
         android:layout_width="wrap_content"
         android:layout_height="fill_parent"
+        android:layout_marginBottom="14dp"
+        android:layout_marginTop="14dp"
         android:fontFamily="sans-serif-light"
         android:gravity="center_vertical"
         android:paddingLeft="16dp"
         android:paddingRight="16dp"
-        android:layout_marginTop="14dp"
-        android:layout_marginBottom="14dp"
-        android:textSize="20sp"
-        android:textColor="#BBB"/>
+        android:textColor="#BBB"
+        android:textSize="20sp" />
 
 </LinearLayout>
