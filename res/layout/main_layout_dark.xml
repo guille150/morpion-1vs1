@@ -3,19 +3,55 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
-    <FrameLayout android:id="@+id/container"
+    <FrameLayout
+        android:id="@+id/container"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent">
+        android:layout_height="fill_parent" >
     </FrameLayout>
 
-    <ListView
+    <RelativeLayout
         android:id="@+id/left_drawer"
         android:layout_width="300dp"
-        android:layout_height="match_parent"
-        android:layout_gravity="start"
+        android:layout_height="fill_parent"
         android:background="#111"
-        android:choiceMode="singleChoice"
-        android:divider="@drawable/linegraylightdark"
-        android:dividerHeight="1dp" />
+        android:orientation="vertical" 
+        android:layout_gravity="start">
+
+        <ExpandableListView
+            android:id="@+id/left_drawerlist"
+            android:layout_width="300dp"
+            android:layout_height="fill_parent"
+            android:layout_above="@+id/linearLayout1"
+            android:choiceMode="singleChoice"
+            android:divider="@drawable/linegraylightdark"
+            android:dividerHeight="1dp"
+            android:groupIndicator="@null" />
+
+        <LinearLayout
+            android:id="@+id/linearLayout1"
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:background="#222" >
+
+            <com.google.android.gms.common.SignInButton
+                android:id="@+id/sign_in_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp" >
+            </com.google.android.gms.common.SignInButton>
+
+            <Button
+                android:id="@+id/sign_out_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:text="@string/s36"
+                android:visibility="gone" />
+        </LinearLayout>
+    </RelativeLayout>
 
 </android.support.v4.widget.DrawerLayout>
