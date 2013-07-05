@@ -91,6 +91,13 @@ public class VisuPagerActivity extends SherlockFragmentActivity implements OnPag
 
 	@Override
 	public void onBackPressed() {
+		
+		if(indexs.size() == 2 && indexs.get(0) == indexs.get(1))
+		{
+			finish();
+			return;
+		}
+		
 		if (indexs.size() > 1) {
 			mPager.setCurrentItem(indexs.get(indexs.size() - 2));
 			indexs.remove(indexs.size() - 1);

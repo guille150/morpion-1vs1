@@ -48,6 +48,7 @@ public class GameView extends View {
 	int nextTurn = MainActivity.BLUE_PLAYER;
 	boolean showWinner = false;
 	boolean isHoveredMode = false;
+	int alphaForSet = 255;
 
 	GameHandler delegate;
 	HoverHandler handler;
@@ -212,8 +213,8 @@ public class GameView extends View {
 		return res;
 	}
 
-	public void setValues(int[][] values, int nextTurn) {
-		this.values = values;
+	public void setValues(int[][] values2, int nextTurn) {
+		this.values = values2;
 		this.nextTurn = nextTurn;
 		this.invalidate();
 	}
@@ -450,7 +451,7 @@ public class GameView extends View {
 	public void setHoverHandler(HoverHandler handler) {
 		this.handler = handler;
 	}
-	
+
 	public boolean isHoveredMode() {
 		return isHoveredMode;
 	}
@@ -468,5 +469,5 @@ public class GameView extends View {
 		} else
 			return true;
 	}
-	
+
 }
