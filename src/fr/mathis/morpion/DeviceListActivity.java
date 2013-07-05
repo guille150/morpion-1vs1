@@ -18,6 +18,8 @@ package fr.mathis.morpion;
 
 import java.util.Set;
 
+import com.google.android.gms.maps.GoogleMap.InfoWindowAdapter;
+
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -170,21 +172,27 @@ public class DeviceListActivity extends Activity {
 	// The on-click listener for all devices in the ListViews
 	private OnItemClickListener mDeviceClickListener = new OnItemClickListener() {
 		public void onItemClick(AdapterView<?> av, View v, int arg2, long arg3) {
-			// Cancel discovery because it's costly and we're about to connect
-			mBtAdapter.cancelDiscovery();
-
-			// Get the device MAC address, which is the last 17 chars in the
-			// View
 			String info = ((TextView) v).getText().toString();
-			String address = info.substring(info.length() - 17);
+			if (info.compareTo(getString(R.string.s13)) == 0) {
 
-			// Create the result Intent and include the MAC address
-			Intent intent = new Intent();
-			intent.putExtra(EXTRA_DEVICE_ADDRESS, address);
+			} else {
+				// Cancel discovery because it's costly and we're about to
+				// connect
+				mBtAdapter.cancelDiscovery();
 
-			// Set result and finish this Activity
-			setResult(Activity.RESULT_OK, intent);
-			finish();
+				// Get the device MAC address, which is the last 17 chars in the
+				// View
+
+				String address = info.substring(info.length() - 17);
+
+				// Create the result Intent and include the MAC address
+				Intent intent = new Intent();
+				intent.putExtra(EXTRA_DEVICE_ADDRESS, address);
+
+				// Set result and finish this Activity
+				setResult(Activity.RESULT_OK, intent);
+				finish();
+			}
 		}
 	};
 

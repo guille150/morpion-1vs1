@@ -1,6 +1,7 @@
 package fr.mathis.morpion;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -32,6 +33,7 @@ import android.view.SubMenu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.animation.AlphaAnimation;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -49,6 +51,14 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.google.android.gms.appstate.AppStateClient;
 import com.google.android.gms.appstate.OnStateLoadedListener;
+import com.google.android.gms.games.GamesClient;
+import com.google.android.gms.games.multiplayer.Invitation;
+import com.google.android.gms.games.multiplayer.realtime.RealTimeMessage;
+import com.google.android.gms.games.multiplayer.realtime.RealTimeMessageReceivedListener;
+import com.google.android.gms.games.multiplayer.realtime.Room;
+import com.google.android.gms.games.multiplayer.realtime.RoomConfig;
+import com.google.android.gms.games.multiplayer.realtime.RoomStatusUpdateListener;
+import com.google.android.gms.games.multiplayer.realtime.RoomUpdateListener;
 import com.google.example.games.basegameutils.BaseGameActivity;
 
 import fr.mathis.morpion.GameView.GameHandler;
@@ -57,7 +67,7 @@ import fr.mathis.morpion.tools.StateHolder;
 import fr.mathis.morpion.tools.ToolsBDD;
 
 @SuppressLint("HandlerLeak")
-public class MainActivity extends BaseGameActivity implements OnClickListener, OnItemClickListener, OnChildClickListener, OnStateLoadedListener {
+public class MainActivity extends BaseGameActivity implements OnClickListener, OnItemClickListener, OnChildClickListener, OnStateLoadedListener, RoomUpdateListener, RealTimeMessageReceivedListener, RoomStatusUpdateListener {
 
 	public static final int RED_PLAYER = 4;
 	public static final int BLUE_PLAYER = 3;
@@ -108,6 +118,9 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 	boolean isDark;
 	boolean shouldRestartBeVisible = false;
 	boolean initdone = false;
+	boolean finishedAI = false;
+	boolean comeBackFromHistoryShouldAchievement = false;
+	boolean oneGameHasBeenPlayedWeCanSave = false;
 	MenuItem miPref;
 	Activity a;
 	GameView gv;
@@ -135,12 +148,14 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 
 		getSupportActionBar().setDisplayShowTitleEnabled(true);
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
+		activeNavChild = 2;
+		getSupportActionBar().setTitle(R.string.s31);
 		a = this;
 		setContentView(isDark ? R.layout.main_layout_dark : R.layout.main_layout);
 		container = (FrameLayout) findViewById(R.id.container);
 		initDrawer();
 		createNewGame();
+		createNewGameAI();
 		if (!StateHolder.GetMemorizedValue("showwelcomedrawer", this) || android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
 			new Async().execute();
 		}
@@ -265,6 +280,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 				activeNavChild = childPosition;
 				activeNavSection = groupPosition;
 				navAdapter.notifyDataSetChanged();
+				getSupportActionBar().setTitle(navSections.get(activeNavSection).items.get(activeNavChild).title);
 			}
 			mDrawerLayout.closeDrawer(GravityCompat.START);
 		}
@@ -285,7 +301,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 
 	public class NavigationSection {
 		public String title;
-		ArrayList<NavigationItem> items;
+		public ArrayList<NavigationItem> items;
 
 		public NavigationSection(String title, ArrayList<NavigationItem> items) {
 			super();
@@ -488,7 +504,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 		gv.setDark(isDark);
 		gv.setAlignement(GameView.STYLE_TOP_VERTICAL_CENTER_HORIZONTAL);
 		gv.invalidate();
-
+		finishedAI = false;
 		playerText = (TextView) findViewById(R.id.playerText);
 
 		for (int i = 0; i < 3; i++) {
@@ -504,18 +520,17 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 					tabVal[i][j] = BLUE_PLAYER;
 					gv.setValues(tabVal, BLUE_PLAYER);
 					gv.invalidate();
-					makeTheAIPlay(i, j);
 				} else {
 					tabVal[i][j] = RED_PLAYER;
 					gv.setValues(tabVal, BLUE_PLAYER);
 					gv.invalidate();
-					makeTheAIPlay(i, j);
 				}
 				if (m != null) {
 					m.getItem(0).setVisible(true);
 				}
 				checkWinner(i, j, false, true);
-
+				if (!finishedAI)
+					makeTheAIPlay(i, j);
 			}
 		});
 
@@ -589,7 +604,10 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 
 			if (numberOfTurn() == 2 && i == -1 && j == -1) {
 
-				if (tabVal[0][1] == BLUE_PLAYER && tabVal[1][0] == BLUE_PLAYER && tabVal[1][1] == NONE_PLAYER) {
+				if (tabVal[0][1] == BLUE_PLAYER && tabVal[1][2] == BLUE_PLAYER) {
+					i = 1;
+					j = 1;
+				} else if (tabVal[0][1] == BLUE_PLAYER && tabVal[1][0] == BLUE_PLAYER && tabVal[1][1] == NONE_PLAYER) {
 					i = 1;
 					j = 1;
 				} else if (tabVal[0][2] == NONE_PLAYER) {
@@ -603,6 +621,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 					j = 0;
 				}
 			}
+
 		} else {
 
 			if (numberOfTurn() == 0 && tabVal[1][1] == NONE_PLAYER) {
@@ -662,6 +681,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 			tabVal[i][j] = RED_PLAYER;
 			gv.setValues(tabVal, BLUE_PLAYER);
 			gv.invalidate();
+			checkWinner(i, j, false, true);
 		}
 	}
 
@@ -796,6 +816,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 			container.addView(child);
 			activeNavSection = 0;
 			activeNavChild = 1;
+			getSupportActionBar().setTitle(navSections.get(activeNavSection).items.get(activeNavChild).title);
 			navAdapter.notifyDataSetChanged();
 			mDrawerLayout.closeDrawer(GravityCompat.START);
 			// Initialize the BluetoothChatService to perform bluetooth
@@ -1040,8 +1061,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 			break;
 		case ACTIVITY_HISTORY:
 			comeBackFromSettingsShouldSave = true;
-			if (isSignedIn())
-				getGamesClient().unlockAchievement(getString(R.string.achievement_history));
+			comeBackFromHistoryShouldAchievement = true;
 			break;
 		}
 	}
@@ -1111,7 +1131,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 					displayNextTurn();
 					gv.setValues(tabVal, turn);
 				}
-				if (m != null && activeNavSection != 0 && activeNavChild != 1) {
+				if (m != null && !(activeNavSection == 0 && activeNavChild == 1)) {
 					m.getItem(0).setVisible(true);
 				}
 				checkWinner(i, j, false, false);
@@ -1222,6 +1242,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 	}
 
 	private void congratsWinner(int winner, final boolean fromBT, final boolean fromMulti) {
+		finishedAI = true;
 
 		if (isSignedIn()) {
 			if (tabVal[0][0] == RED_PLAYER && tabVal[0][1] == RED_PLAYER && tabVal[0][2] == BLUE_PLAYER && tabVal[1][0] == BLUE_PLAYER && tabVal[1][1] == BLUE_PLAYER && tabVal[1][2] == RED_PLAYER && tabVal[2][0] == RED_PLAYER && tabVal[2][1] == BLUE_PLAYER && tabVal[2][2] == RED_PLAYER) {
@@ -1242,7 +1263,8 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 		}
 
 		gv.setMode(GameView.MODE_NOT_INTERACTIVE);
-		
+		gv.setShowWinner(true);
+
 		congratsContainer = findViewById(R.id.congratsContainer);
 		congratsContainer.setVisibility(View.VISIBLE);
 
@@ -1294,6 +1316,8 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 		final boolean save = mgr.getBoolean("save", true);
 
 		if (winner == BLUE_PLAYER) {
+			if (fromBT)
+				Toast.makeText(getApplicationContext(), R.string.winb, Toast.LENGTH_LONG).show();
 			tvCongrats.setText(R.string.winb);
 			congratsContainer.setBackgroundColor(Color.parseColor(ColorHolder.getInstance(getApplicationContext()).getColor(BLUE_PLAYER)));
 			ToolsBDD.getInstance(this).insertPartie(BLUE_PLAYER, values);
@@ -1301,17 +1325,20 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 				getGamesClient().unlockAchievement(getString(R.string.achievement_firstvictort));
 			}
 		} else if (winner == RED_PLAYER) {
+			if (fromBT)
+				Toast.makeText(getApplicationContext(), R.string.winr, Toast.LENGTH_LONG).show();
 			tvCongrats.setText(R.string.winr);
 			congratsContainer.setBackgroundColor(Color.parseColor(ColorHolder.getInstance(getApplicationContext()).getColor(RED_PLAYER)));
 			ToolsBDD.getInstance(this).insertPartie(RED_PLAYER, values);
 		} else if (winner == NONE_PLAYER) {
+			if (fromBT)
+				Toast.makeText(getApplicationContext(), R.string.equaltry, Toast.LENGTH_LONG).show();
 			tvCongrats.setText(R.string.equaltry);
-			congratsContainer.setBackgroundColor(isDark ? Color.DKGRAY  :Color.LTGRAY);
+			congratsContainer.setBackgroundColor(isDark ? Color.DKGRAY : Color.LTGRAY);
 
 			if (save) {
 				ToolsBDD.getInstance(this).insertPartie(NONE_PLAYER, values);
 			}
-			saveState();
 		}
 
 		if (isSignedIn()) {
@@ -1329,6 +1356,13 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 	protected void onStop() {
 		super.onStop();
 		stopService();
+	}
+
+	@Override
+	protected void onPause() {
+		if (oneGameHasBeenPlayedWeCanSave)
+			saveState();
+		super.onPause();
 	}
 
 	public void saveState() {
@@ -1450,7 +1484,6 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 			getAppStateClient().updateState(SAVE_HIST_3, hist3);
 		}
 
-		Toast.makeText(getApplicationContext(), "saved", Toast.LENGTH_SHORT).show();
 	}
 
 	private void restoreState(ArrayList<byte[]> dataSaved2) {
@@ -1760,6 +1793,10 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 
 	boolean moreOptions = false;
 
+	private RoomConfig.Builder makeBasicRoomConfigBuilder() {
+		return RoomConfig.builder(this).setMessageReceivedListener(this).setRoomStatusUpdateListener(this);
+	}
+
 	@Override
 	public void onSignInSucceeded() {
 		// show sign-out button, hide the sign-in button
@@ -1771,6 +1808,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 			ArrayList<NavigationItem> n3 = new ArrayList<MainActivity.NavigationItem>();
 			n3.add(new NavigationItem(isDark ? R.drawable.ic_action_spinner_achivmentdark : R.drawable.ic_action_spinner_achivment, getString(R.string.s37), 0));
 			n3.add(new NavigationItem(isDark ? R.drawable.ic_action_spinner_boarddarl : R.drawable.ic_action_spinner_board, getString(R.string.s38), 0));
+			n3.add(new NavigationItem(isDark ? R.drawable.ic_action_onlinedark : R.drawable.ic_action_online, getString(R.string.s44), 0));
 			NavigationSection s3 = new NavigationSection(getString(R.string.s41), n3);
 			navSections.add(s3);
 			navAdapter.notifyDataSetChanged();
@@ -1786,6 +1824,23 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 			getAppStateClient().loadState(this, SAVE_HIST_2);
 			getAppStateClient().loadState(this, SAVE_HIST_3);
 			firstStartShouldReloadConfig = false;
+		}
+		if (comeBackFromHistoryShouldAchievement) {
+			if (isSignedIn())
+				getGamesClient().unlockAchievement(getString(R.string.achievement_history));
+		}
+		comeBackFromHistoryShouldAchievement = false;
+
+		if (getInvitationId() != null) {
+			RoomConfig.Builder roomConfigBuilder = makeBasicRoomConfigBuilder();
+			roomConfigBuilder.setInvitationIdToAccept(getInvitationId());
+			getGamesClient().joinRoom(roomConfigBuilder.build());
+
+			// prevent screen from sleeping during handshake
+			getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+			Toast.makeText(getApplicationContext(), "invitation when connected", Toast.LENGTH_SHORT).show();
+			// go to game screen
 		}
 
 	}
@@ -1838,7 +1893,6 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 			} else {
 
 			}
-			Toast.makeText(getApplicationContext(), "" + statusCode, Toast.LENGTH_SHORT).show();
 		}
 		if (stateKey == 1) {
 			dataSaved = new ArrayList<byte[]>();
@@ -1860,8 +1914,97 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 
 	@Override
 	public void onStateConflict(int stateKey, String ver, byte[] localData, byte[] serverData) {
-		Toast.makeText(getApplicationContext(), "conflict", Toast.LENGTH_SHORT).show();
 		getAppStateClient().resolveState(this, stateKey, ver, localData);
+	}
+
+	@Override
+	public void onJoinedRoom(int arg0, Room arg1) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void onLeftRoom(int arg0, String arg1) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void onRoomConnected(int arg0, Room arg1) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void onRoomCreated(int arg0, Room arg1) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void onConnectedToRoom(Room arg0) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void onDisconnectedFromRoom(Room arg0) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void onPeerDeclined(Room arg0, List<String> arg1) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void onPeerInvitedToRoom(Room arg0, List<String> arg1) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void onPeerJoined(Room arg0, List<String> arg1) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void onPeerLeft(Room arg0, List<String> arg1) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void onPeersConnected(Room arg0, List<String> arg1) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void onPeersDisconnected(Room arg0, List<String> arg1) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void onRoomAutoMatching(Room arg0) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void onRoomConnecting(Room arg0) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void onRealTimeMessageReceived(RealTimeMessage arg0) {
+		// TODO Auto-generated method stub
+
 	}
 
 }
