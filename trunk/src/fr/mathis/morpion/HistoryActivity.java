@@ -1032,6 +1032,8 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 					popoup.dismiss();
 				gv.setHoveredMode(false);
 			}
-		}
+		}		
 	}
+	
+	
 }

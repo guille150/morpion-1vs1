@@ -35,7 +35,7 @@
     <string name="sharetry">Tic-tac-toe 1vs1 - Try it !</string>
     <string name="win">Victory</string>
     <string name="loose">Defeat</string>
-    <string name="winb">Victort</string>
+    <string name="winb">Victory</string>
     <string name="winr">Lost</string>
     <string name="equal">Equality</string>
     <string name="equaltry">Tie</string>
@@ -99,7 +99,7 @@
     <string name="s13">No device found</string>
     <string name="s14">Saved devices</string>
     <string name="s15">New devices</string>
-    <string name="s16">Scann the network</string>
+    <string name="s16">Scan the network</string>
     <string name="s17">Next: ?</string>
     <string name="s18">How to connect with your partner?</string>
     <string name="s19">1. Turn on the bluetooth</string>
@@ -130,4 +130,17 @@
     <string name="s42">You need to be signed in.</string>
     <string name="s43">Restarting the app is needed to change the theme</string>
 	<string name="s44">Online</string>
+	<string name="s45">An invitation has been sent to you</string>
+	<string name="s46">Accept</string>
+	<string name="s47">Decline</string>
+	<string name="s48">You can\'t go to another screen without quitting the current game.</string>
+	<string name="s49">Connecting</string>
+	<string name="s50">Please wait…</string>
+	<string name="s51">Other player left the game</string>
+	<string name="s52">Stop online game</string>
+	<string name="s53">Quick game</string>
+	<string name="s54">Invite a friend</string>
+	<string name="s55">View invitations</string>
+	<string name="s56">Play online</string>
+	<string name="s57">Only available when connected to Google+.</string>
 </resources>
