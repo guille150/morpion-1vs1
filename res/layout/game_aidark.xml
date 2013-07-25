@@ -45,7 +45,7 @@
         android:orientation="vertical" >
     </LinearLayout>
 
- <RelativeLayout
+    <RelativeLayout
         android:layout_width="fill_parent"
         android:layout_height="fill_parent" >
 
@@ -62,7 +62,8 @@
             android:focusableInTouchMode="true" >
         </fr.mathis.morpion.GameView>
 
-        <LinearLayout android:id="@+id/congratsContainer"
+        <LinearLayout
+            android:id="@+id/congratsContainer"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
@@ -71,36 +72,47 @@
             android:layout_marginBottom="16dp"
             android:gravity="center_vertical"
             android:orientation="horizontal"
+            android:paddingBottom="8dp"
             android:paddingLeft="16dp"
             android:paddingRight="16dp"
             android:paddingTop="8dp"
-            android:paddingBottom="8dp"
             android:visibility="gone" >
 
             <TextView
                 android:id="@+id/resultText"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text=""
-                android:textSize="24sp"
                 android:layout_weight="1"
-                android:textColor="#ffffff" />
+                android:text=""
+                android:textColor="#ffffff"
+                android:textSize="24sp" />
 
             <LinearLayout
                 android:layout_width="1.4dp"
                 android:layout_height="match_parent"
-                android:orientation="vertical"
                 android:background="#60ffffff"
-                android:paddingTop="8dp"
-                android:paddingBottom="8dp" >
+                android:orientation="vertical"
+                android:paddingBottom="8dp"
+                android:paddingTop="8dp" >
             </LinearLayout>
 
-            <ImageButton android:id="@+id/congratsRetry"
-                android:contentDescription="@string/app_name"
+            <ImageButton
+                android:id="@+id/congratsRetry"
+                style="@style/Widget.Sherlock.ActionButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/ic_action_replaydark"
-                style="@style/Widget.Sherlock.ActionButton" />
+                android:contentDescription="@string/app_name"
+                android:src="@drawable/ic_action_replaydark" />
+
+            <TextView
+                android:id="@+id/congratsRetryCount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="16dp"
+                android:paddingRight="8dp"
+                android:textSize="24sp"
+                android:textColor="#ffffff"
+                android:visibility="gone" />
         </LinearLayout>
     </RelativeLayout>
 

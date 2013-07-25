@@ -9,6 +9,22 @@
         android:layout_marginRight="16dp"
         android:orientation="vertical" >
 
+        <Button
+            android:id="@+id/buttonOnline"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:layout_marginTop="8dp"
+            android:text="@string/s56"
+            android:visibility="visible" />
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="2dp"
+            android:background="@color/bluehighlighted"
+            android:paddingBottom="16dp" >
+        </LinearLayout>
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

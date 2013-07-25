@@ -5,9 +5,12 @@ import java.util.List;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
@@ -49,10 +52,14 @@ import android.widget.Toast;
 
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
+import com.actionbarsherlock.view.Window;
 import com.google.android.gms.appstate.AppStateClient;
 import com.google.android.gms.appstate.OnStateLoadedListener;
+import com.google.android.gms.games.GamesActivityResultCodes;
 import com.google.android.gms.games.GamesClient;
 import com.google.android.gms.games.multiplayer.Invitation;
+import com.google.android.gms.games.multiplayer.OnInvitationReceivedListener;
+import com.google.android.gms.games.multiplayer.Participant;
 import com.google.android.gms.games.multiplayer.realtime.RealTimeMessage;
 import com.google.android.gms.games.multiplayer.realtime.RealTimeMessageReceivedListener;
 import com.google.android.gms.games.multiplayer.realtime.Room;
@@ -67,7 +74,7 @@ import fr.mathis.morpion.tools.StateHolder;
 import fr.mathis.morpion.tools.ToolsBDD;
 
 @SuppressLint("HandlerLeak")
-public class MainActivity extends BaseGameActivity implements OnClickListener, OnItemClickListener, OnChildClickListener, OnStateLoadedListener, RoomUpdateListener, RealTimeMessageReceivedListener, RoomStatusUpdateListener {
+public class MainActivity extends BaseGameActivity implements OnClickListener, OnItemClickListener, OnChildClickListener, OnStateLoadedListener, RoomUpdateListener, RealTimeMessageReceivedListener, RoomStatusUpdateListener, OnInvitationReceivedListener {
 
 	public static final int RED_PLAYER = 4;
 	public static final int BLUE_PLAYER = 3;
@@ -96,6 +103,14 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 	private static final int REQUEST_CONNECT_DEVICE_INSECURE = 2;
 	private static final int REQUEST_PREF = 7;
 	private static final int ACTIVITY_HISTORY = 36;
+	final static int RC_INVITATION_INBOX = 10001;
+	final static int RC_SELECT_PLAYERS = 10000;
+	final static int RC_WAITING_ROOM = 10002;
+
+	public static final String CMD_DETERMINE_TURN = "playerid";
+	public static final String CMD_PLAY = "newturn";
+	public static final String CMD_WANTS_RESTART = "wantsrestart";
+	public static final String CMD_RESTART = "restart";
 
 	private ActionBarDrawerToggle mDrawerToggle;
 	ArrayList<NavigationSection> navSections;
@@ -122,6 +137,8 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 	boolean comeBackFromHistoryShouldAchievement = false;
 	boolean oneGameHasBeenPlayedWeCanSave = false;
 	MenuItem miPref;
+	MenuItem miDeco;
+	MenuItem miStopOnline;
 	Activity a;
 	GameView gv;
 	protected BluetoothAdapter mBluetoothAdapter;
@@ -129,9 +146,16 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 	private StringBuffer mOutStringBuffer;
 	FrameLayout container;
 	View congratsContainer;
+	TextView retrycount;
 
 	boolean firstStartShouldReloadConfig = true;
 	boolean comeBackFromSettingsShouldSave = false;
+
+	boolean isPlayingOnline = false;
+	String roomId = null;
+	Room myroom = null;
+	ProgressDialog progress;
+	GameHandler onlineHandler;
 
 	public MainActivity() {
 		super(BaseGameActivity.CLIENT_APPSTATE | BaseGameActivity.CLIENT_GAMES);
@@ -139,6 +163,8 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+
 		SharedPreferences mgr = PreferenceManager.getDefaultSharedPreferences(this);
 		isDark = mgr.getBoolean("isDark", false);
 
@@ -187,7 +213,6 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 		mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
 		mDrawerList = (ExpandableListView) findViewById(R.id.left_drawerlist);
 		findViewById(R.id.sign_in_button).setOnClickListener(this);
-		findViewById(R.id.sign_out_button).setOnClickListener(this);
 
 		navSections = new ArrayList<MainActivity.NavigationSection>();
 
@@ -195,6 +220,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 		n1.add(new NavigationItem(isDark ? R.drawable.ic_action_spinner_partiemultidark : R.drawable.ic_action_spinner_partiemulti, getString(R.string.m1), 0));
 		n1.add(new NavigationItem(isDark ? R.drawable.ic_action_spinner_partiemultidark : R.drawable.ic_action_spinner_partiemulti, getString(R.string.m8), 0));
 		n1.add(new NavigationItem(isDark ? R.drawable.ic_action_spinner_partiedark : R.drawable.ic_action_spinner_partie, getString(R.string.s31), 0));
+		n1.add(new NavigationItem(isDark ? R.drawable.ic_action_onlinedark : R.drawable.ic_action_online, getString(R.string.s44), 0));
 		NavigationSection s1 = new NavigationSection(getString(R.string.s39), n1);
 		navSections.add(s1);
 
@@ -242,59 +268,77 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 
 	@Override
 	public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
-		boolean forseFirst = false;
-		if (groupPosition == 0 && childPosition == 0) {
-			getSupportActionBar().setIcon(R.drawable.ic_launcher);
-			createNewGame();
+		boolean shouldCloseDrawer = true;
+		if (activeNavChild != childPosition || activeNavSection != groupPosition) {
+			shouldRestartBeVisible = false;
+		}
+		if (isPlayingOnline) {
+			Toast.makeText(getApplicationContext(), R.string.s48, Toast.LENGTH_SHORT).show();
+		} else {
+			boolean forseFirst = false;
 
-		}
-		if (groupPosition == 1 && childPosition == 0) {
-			getSupportActionBar().setIcon(R.drawable.ic_launcher);
-			if (0 != ToolsBDD.getInstance(this).getNbPartie()) {
-				Intent intent = new Intent(MainActivity.this, HistoryActivity.class);
-				startActivityForResult(intent, ACTIVITY_HISTORY);
-			} else {
-				Toast.makeText(this, R.string.nohistory, Toast.LENGTH_SHORT).show();
-				onItemClick(null, null, 0, 0);
-				forseFirst = true;
+			if (groupPosition == 0 && childPosition == 3) {
+				if (isSignedIn()) {
+					getSupportActionBar().setIcon(R.drawable.two_player);
+					createOnlineScreen();
+				} else {
+					Toast.makeText(getApplicationContext(), R.string.s57, Toast.LENGTH_SHORT).show();
+					shouldCloseDrawer = false;
+				}
 			}
-		}
-		if (groupPosition == 1 && childPosition == 1) {
-			getSupportActionBar().setIcon(R.drawable.ic_launcher);
-			View child = getLayoutInflater().inflate(isDark ? R.layout.helpdark : R.layout.help, null);
-			container.removeAllViews();
-			container.addView(child);
+			if (groupPosition == 0 && childPosition == 0) {
+				getSupportActionBar().setIcon(R.drawable.ic_launcher);
+				createNewGame();
+			}
+			if (groupPosition == 1 && childPosition == 0) {
+				getSupportActionBar().setIcon(R.drawable.ic_launcher);
+				if (0 != ToolsBDD.getInstance(this).getNbPartie()) {
+					Intent intent = new Intent(MainActivity.this, HistoryActivity.class);
+					startActivityForResult(intent, ACTIVITY_HISTORY);
+				} else {
+					Toast.makeText(this, R.string.nohistory, Toast.LENGTH_SHORT).show();
+					onItemClick(null, null, 0, 0);
+					forseFirst = true;
+				}
+			}
+			if (groupPosition == 1 && childPosition == 1) {
+				getSupportActionBar().setIcon(R.drawable.ic_launcher);
+				View child = getLayoutInflater().inflate(isDark ? R.layout.helpdark : R.layout.help, null);
+				container.removeAllViews();
+				container.addView(child);
 
-			if (m != null) {
-				m.getItem(0).setVisible(false);
+				if (m != null) {
+					m.getItem(0).setVisible(false);
+				}
+			} else if (groupPosition == 0 && childPosition == 1) {
+				getSupportActionBar().setIcon(R.drawable.two_player);
+				startBluetooth();
+			} else if (groupPosition == 0 && childPosition == 2) {
+				getSupportActionBar().setIcon(R.drawable.ic_launcher);
+				createNewGameAI();
 			}
-		} else if (groupPosition == 0 && childPosition == 1) {
-			getSupportActionBar().setIcon(R.drawable.two_player);
-			startBluetooth();
-		} else if (groupPosition == 0 && childPosition == 2) {
-			getSupportActionBar().setIcon(R.drawable.ic_launcher);
-			createNewGameAI();
-		}
-		if (!(groupPosition == 0 && childPosition == 1) && !forseFirst) {
-			if (!(groupPosition == 1 && childPosition == 0) && !(groupPosition == 2 && childPosition == 1) && !(groupPosition == 2 && childPosition == 0)) {
-				activeNavChild = childPosition;
-				activeNavSection = groupPosition;
-				navAdapter.notifyDataSetChanged();
-				getSupportActionBar().setTitle(navSections.get(activeNavSection).items.get(activeNavChild).title);
+			if (!(groupPosition == 0 && childPosition == 1) && !forseFirst) {
+				if (!(groupPosition == 1 && childPosition == 0) && !(groupPosition == 2 && childPosition == 1) && !(groupPosition == 2 && childPosition == 0) && shouldCloseDrawer) {
+					activeNavChild = childPosition;
+					activeNavSection = groupPosition;
+					navAdapter.notifyDataSetChanged();
+					getSupportActionBar().setTitle(navSections.get(activeNavSection).items.get(activeNavChild).title);
+				}
+				if (shouldCloseDrawer)
+					mDrawerLayout.closeDrawer(GravityCompat.START);
 			}
-			mDrawerLayout.closeDrawer(GravityCompat.START);
-		}
-		if (groupPosition == 2 && childPosition == 0) {
-			if (isSignedIn())
-				startActivityForResult(getGamesClient().getAchievementsIntent(), 0);
-			else
-				Toast.makeText(getApplicationContext(), R.string.s42, Toast.LENGTH_SHORT).show();
-		}
-		if (groupPosition == 2 && childPosition == 1) {
-			if (isSignedIn())
-				startActivityForResult(getGamesClient().getLeaderboardIntent(getString(R.string.leaderboard_most_active)), 0);
-			else
-				Toast.makeText(getApplicationContext(), R.string.s42, Toast.LENGTH_SHORT).show();
+			if (groupPosition == 2 && childPosition == 0) {
+				if (isSignedIn())
+					startActivityForResult(getGamesClient().getAchievementsIntent(), 0);
+				else
+					Toast.makeText(getApplicationContext(), R.string.s42, Toast.LENGTH_SHORT).show();
+			}
+			if (groupPosition == 2 && childPosition == 1) {
+				if (isSignedIn())
+					startActivityForResult(getGamesClient().getLeaderboardIntent(getString(R.string.leaderboard_most_active)), 0);
+				else
+					Toast.makeText(getApplicationContext(), R.string.s42, Toast.LENGTH_SHORT).show();
+			}
 		}
 		return true;
 	}
@@ -357,6 +401,10 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 				v.findViewById(R.id.separator_big).setVisibility(childPosition == 0 ? View.VISIBLE : View.GONE);
 				if (activeNavChild == childPosition && activeNavSection == groupPosition)
 					v.setBackgroundColor(isDark ? Color.parseColor("#33B5E5") : Color.parseColor("#D3D3D3"));
+
+				if (groupPosition == 0 && childPosition == 3 && !isSignedIn()) {
+					((android.widget.TextView) v.findViewById(R.id.nav_title)).setTextColor(isDark ? Color.parseColor("#40FFFFFF") : Color.parseColor("#40000000"));
+				}
 			}
 			return v;
 		}
@@ -383,9 +431,12 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 
 		@Override
 		public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
-			TextView tv = (TextView) inflater.inflate(isDark ? R.layout.navigation_sectiondark : R.layout.navigation_section, null);
-			tv.setText(data.get(groupPosition).title);
-			return tv;
+			View v = inflater.inflate(isDark ? R.layout.navigation_sectiondark : R.layout.navigation_section, null);
+			((TextView) v.findViewById(R.id.textView1)).setText(data.get(groupPosition).title);
+
+			v.findViewById(R.id.imageView1).setVisibility(isExpanded ? View.GONE : View.VISIBLE);
+
+			return v;
 		}
 
 		@Override
@@ -410,9 +461,8 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 		if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
 			getSupportActionBar().setDisplayHomeAsUpEnabled(false);
 		}
-
-		new ShowMenuAsync().execute();
-
+		if (!isPlayingOnline)
+			new ShowMenuAsync().execute();
 	}
 
 	class ShowMenuAsync extends AsyncTask<Void, Void, Void> {
@@ -440,9 +490,11 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 		if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
 			getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		}
-		shouldRestartBeVisible = m.getItem(0).isVisible();
-		if (m != null) {
-			m.getItem(0).setVisible(false);
+		if (!isPlayingOnline) {
+			shouldRestartBeVisible = m.getItem(0).isVisible();
+			if (m != null) {
+				m.getItem(0).setVisible(false);
+			}
 		}
 	}
 
@@ -456,11 +508,17 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		m = menu;
-		menu.add(R.string.restart).setIcon((isDark) ? R.drawable.ic_action_replaydark : R.drawable.ic_action_replay).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
+		menu.add(R.string.restart).setIcon((isDark) ? R.drawable.ic_action_replaydark : R.drawable.ic_action_replay).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
 		menu.getItem(0).setVisible(false);
 
 		miPref = menu.add(R.string.menupref).setIcon((isDark) ? R.drawable.ic_action_prefdark : R.drawable.ic_action_pref);
-		miPref.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
+		miPref.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+
+		miStopOnline = menu.add(R.string.s52).setIcon((isDark) ? R.drawable.ic_action_av_stopdark : R.drawable.ic_action_av_stop);
+		miStopOnline.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+		miStopOnline.setVisible(false);
+
+		miDeco = menu.add(R.string.s36).setVisible(false);
 		return true;
 	}
 
@@ -484,6 +542,14 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 		if (item.getTitle().toString().compareTo(getString(R.string.menupref)) == 0) {
 			Intent prefIntent = new Intent(this, PreferencesActivity.class);
 			startActivityForResult(prefIntent, REQUEST_PREF);
+		}
+
+		if (item.getTitle().toString().compareTo(getString(R.string.s52)) == 0) {
+			leftGameOnline(-1);
+		}
+
+		if (item.getTitle().toString().compareTo(getString(R.string.s36)) == 0) {
+			signOutProcess();
 		}
 
 		return super.onMenuItemSelected(featureId, item);
@@ -528,7 +594,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 				if (m != null) {
 					m.getItem(0).setVisible(true);
 				}
-				checkWinner(i, j, false, true);
+				checkWinner(i, j, false, true, false);
 				if (!finishedAI)
 					makeTheAIPlay(i, j);
 			}
@@ -681,7 +747,75 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 			tabVal[i][j] = RED_PLAYER;
 			gv.setValues(tabVal, BLUE_PLAYER);
 			gv.invalidate();
-			checkWinner(i, j, false, true);
+			checkWinner(i, j, false, true, false);
+		}
+	}
+
+	private void createOnlineScreen() {
+		View child = getLayoutInflater().inflate(isDark ? R.layout.onlinedark : R.layout.online, null);
+
+		container.removeAllViews();
+		container.addView(child);
+		getSupportActionBar().setTitle(R.string.s44);
+		View quick = child.findViewById(R.id.onlineQuickMatch);
+		quick.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				startQuickGame();
+			}
+		});
+
+		View showInvit = child.findViewById(R.id.onlineshowInvit);
+		showInvit.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				progress = ProgressDialog.show(a, getString(R.string.s49), getString(R.string.s50), true);
+				Intent intent = getGamesClient().getInvitationInboxIntent();
+				startActivityForResult(intent, RC_INVITATION_INBOX);
+				if (progress != null && progress.isShowing())
+					progress.dismiss();
+			}
+		});
+
+		View invite = child.findViewById(R.id.onlineAskInvit);
+		invite.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				progress = ProgressDialog.show(a, getString(R.string.s49), getString(R.string.s50), true);
+				Intent intent = getGamesClient().getSelectPlayersIntent(1, 1);
+				startActivityForResult(intent, RC_SELECT_PLAYERS);
+				if (progress != null && progress.isShowing())
+					progress.dismiss();
+			}
+		});
+
+		View b1 = findViewById(R.id.imageView1);
+		View b2 = findViewById(R.id.imageView2);
+		View b3 = findViewById(R.id.imageView3);
+		b1.setBackgroundColor(Color.parseColor(ColorHolder.getInstance(getApplicationContext()).getColor(MainActivity.BLUE_PLAYER)));
+		b2.setBackgroundColor(Color.parseColor(ColorHolder.getInstance(getApplicationContext()).getColor(MainActivity.RED_PLAYER)));
+		b3.setBackgroundColor(Color.parseColor(ColorHolder.getInstance(getApplicationContext()).getColor(MainActivity.RED_PLAYER)));
+
+	}
+
+	private void startQuickGame() {
+		if (getGamesClient().isConnected()) {
+			Bundle am = RoomConfig.createAutoMatchCriteria(1, 1, 0);
+
+			RoomConfig.Builder roomConfigBuilder = makeBasicRoomConfigBuilder();
+			roomConfigBuilder.setAutoMatchCriteria(am);
+			RoomConfig roomConfig = roomConfigBuilder.build();
+
+			getGamesClient().createRoom(roomConfig);
+
+			getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+			progress = ProgressDialog.show(this, getString(R.string.s49), getString(R.string.s50), true);
+		} else {
+
 		}
 	}
 
@@ -869,6 +1003,20 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 				}
 			});
 
+			final Button btnOnline = (Button) findViewById(R.id.buttonOnline);
+			btnOnline.setOnClickListener(new OnClickListener() {
+
+				@Override
+				public void onClick(View v) {
+					createOnlineScreen();
+					activeNavChild = 0;
+					activeNavSection = 3;
+					navAdapter.notifyDataSetChanged();
+					miStopOnline.setVisible(false);
+					isPlayingOnline = false;
+				}
+			});
+
 		}
 
 	}
@@ -969,7 +1117,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 
 		if (gv != null)
 			gv.setValues(tabVal, turn);
-		this.checkWinner(i, j, true, false);
+		this.checkWinner(i, j, true, false, false);
 	}
 
 	private void createNewMuliGame() {
@@ -1063,7 +1211,211 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 			comeBackFromSettingsShouldSave = true;
 			comeBackFromHistoryShouldAchievement = true;
 			break;
+
+		case RC_INVITATION_INBOX:
+			if (resultCode != Activity.RESULT_OK) {
+				return;
+			}
+			Bundle extras = data.getExtras();
+			Invitation invitation = extras.getParcelable(GamesClient.EXTRA_INVITATION);
+
+			RoomConfig roomConfig = makeBasicRoomConfigBuilder().setInvitationIdToAccept(invitation.getInvitationId()).build();
+			getGamesClient().joinRoom(roomConfig);
+
+			getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+			break;
+		case RC_SELECT_PLAYERS:
+			if (resultCode != Activity.RESULT_OK) {
+				return;
+			}
+			if (isSignedIn())
+				getGamesClient().unlockAchievement(getString(R.string.achivement_friendly));
+			createGameAvoidDuplicate(data);
+
+			break;
+		case RC_WAITING_ROOM:
+			if (resultCode == Activity.RESULT_OK) {
+				isPlayingOnline = true;
+
+				createOnlineGame(true);
+
+			} else if (resultCode == Activity.RESULT_CANCELED) {
+				// Waiting room was dismissed with the back button. The meaning
+				// of this
+				// action is up to the game. You may choose to leave the room
+				// and cancel the
+				// match, or do something else like minimize the waiting room
+				// and
+				// continue to connect in the background.
+
+				// in this example, we take the simple approach and just leave
+				// the room:
+				getGamesClient().leaveRoom(this, roomId);
+				getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+				if (progress != null && progress.isShowing())
+					progress.dismiss();
+			} else if (resultCode == GamesActivityResultCodes.RESULT_LEFT_ROOM) {
+				// player wants to leave the room.
+				getGamesClient().leaveRoom(this, roomId);
+				getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+				if (progress != null && progress.isShowing())
+					progress.dismiss();
+			}
+
+			break;
 		}
+	}
+
+	private void createOnlineGame(boolean firstone) {
+		if (progress != null && progress.isShowing()) {
+			progress.dismiss();
+		}
+		miStopOnline.setVisible(true);
+		View child = getLayoutInflater().inflate(isDark ? R.layout.game_aidark : R.layout.game_ai, null);
+
+		container.removeAllViews();
+		container.addView(child);
+
+		nbGame = ToolsBDD.getInstance(this).getNbPartieNumber() + 1;
+		TextView tv1 = (TextView) findViewById(R.id.welcomeGame);
+		tv1.setText(getString(R.string.game) + nbGame);
+
+		gv = (GameView) findViewById(R.id.gameView1);
+		gv.setValues(null, BLUE_PLAYER);
+		gv.setMode(GameView.MODE_INTERACTIVE);
+		gv.setDark(isDark);
+		gv.setAlignement(GameView.STYLE_TOP_VERTICAL_CENTER_HORIZONTAL);
+		gv.invalidate();
+
+		playerText = (TextView) findViewById(R.id.playerText);
+		tabIB = new ImageButton[3][3];
+		tabVal = new int[3][3];
+
+		if (onlineHandler == null)
+			onlineHandler = new MultiHandler();
+
+		for (int i = 0; i < 3; i++) {
+			for (int j = 0; j < 3; j++) {
+				tabVal[i][j] = NONE_PLAYER;
+			}
+		}
+		if (firstone) {
+			gv.setValues(tabVal, turn);
+			new TurnFinder().execute();
+		} else {
+			displayNextTurn();
+			displayNextTurn();
+			gv.setDelegate(onlineHandler);
+		}
+
+	}
+
+	class TurnFinder extends AsyncTask<Void, Void, Void> {
+
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+			setSupportProgressBarIndeterminateVisibility(true);
+		}
+
+		@Override
+		protected Void doInBackground(Void... params) {
+			try {
+				Thread.sleep(4000);
+			}
+			catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(Void result) {
+			super.onPostExecute(result);
+			setSupportProgressBarIndeterminateVisibility(false);
+			getGamesClient().sendUnreliableRealTimeMessageToAll((CMD_DETERMINE_TURN + "/" + getGamesClient().getCurrentPlayerId()).getBytes(), roomId);
+		}
+	}
+
+	class MultiHandler implements GameHandler {
+
+		@Override
+		public void handleTurn(int i, int j) {
+			miStopOnline.setVisible(true);
+			if (turn == BLUE_PLAYER) {
+				tabVal[i][j] = BLUE_PLAYER;
+				displayNextTurn();
+				gv.setValues(tabVal, turn);
+				getGamesClient().sendUnreliableRealTimeMessageToAll((CMD_PLAY + "/" + (i + "") + (j + "")).getBytes(), roomId);
+				setSupportProgressBarIndeterminateVisibility(true);
+			} else if (turn == RED_PLAYER) {
+
+			}
+
+			checkWinner(i, j, false, false, true);
+		}
+
+	}
+
+	@Override
+	public void onRealTimeMessageReceived(RealTimeMessage rtm) {
+		byte[] b = rtm.getMessageData();
+		String s = new String(b);
+		if (s.startsWith(CMD_DETERMINE_TURN)) {
+			String otherplayerId = s.split("/")[1];
+			if (getGamesClient().getCurrentPlayerId().compareTo(otherplayerId) < 0)
+				turn = BLUE_PLAYER;
+			else {
+				turn = RED_PLAYER;
+				setSupportProgressBarIndeterminateVisibility(true);
+			}
+			displayNextTurn();
+			displayNextTurn();
+
+			gv.setDelegate(onlineHandler);
+		} else if (s.startsWith(CMD_PLAY)) {
+			String options = s.split("/")[1];
+			int i = Integer.parseInt(options.substring(0, 1));
+			int j = Integer.parseInt(options.substring(1, 2));
+			tabVal[i][j] = RED_PLAYER;
+			turn = RED_PLAYER;
+			displayNextTurn();
+			gv.setValues(tabVal, turn);
+			checkWinner(i, j, false, false, true);
+			setSupportProgressBarIndeterminateVisibility(false);
+			miStopOnline.setVisible(true);
+		}
+
+	}
+
+	public void createGameAvoidDuplicate(Intent data) {
+		// get the invitee list
+
+		final ArrayList<String> invitees = data.getStringArrayListExtra(GamesClient.EXTRA_PLAYERS);
+
+		// get automatch criteria
+		Bundle autoMatchCriteria = null;
+		int minAutoMatchPlayers = data.getIntExtra(GamesClient.EXTRA_MIN_AUTOMATCH_PLAYERS, 0);
+		int maxAutoMatchPlayers = data.getIntExtra(GamesClient.EXTRA_MAX_AUTOMATCH_PLAYERS, 0);
+
+		if (minAutoMatchPlayers > 0) {
+			autoMatchCriteria = RoomConfig.createAutoMatchCriteria(minAutoMatchPlayers, maxAutoMatchPlayers, 0);
+		} else {
+			autoMatchCriteria = null;
+		}
+
+		// create the room and specify a variant if appropriate
+		RoomConfig.Builder roomConfigBuilder = makeBasicRoomConfigBuilder();
+		roomConfigBuilder.addPlayersToInvite(invitees);
+		if (autoMatchCriteria != null) {
+			roomConfigBuilder.setAutoMatchCriteria(autoMatchCriteria);
+		}
+		RoomConfig roomConfig = roomConfigBuilder.build();
+		getGamesClient().createRoom(roomConfig);
+
+		// prevent screen from sleeping during handshake
+		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 	}
 
 	private void connectDevice(Intent data, boolean secure) {
@@ -1134,7 +1486,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 				if (m != null && !(activeNavSection == 0 && activeNavChild == 1)) {
 					m.getItem(0).setVisible(true);
 				}
-				checkWinner(i, j, false, false);
+				checkWinner(i, j, false, false, false);
 
 			}
 		});
@@ -1162,25 +1514,27 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 		playerText.setTextColor(Color.parseColor(ColorHolder.getInstance(this).getColor(turn)));
 	}
 
+	public void signOutProcess() {
+		signOut();
+
+		if (moreOptions)
+			if (navSections.size() > 2) {
+				moreOptions = false;
+				navSections.remove(2);
+			}
+		navAdapter.notifyDataSetChanged();
+
+		// show sign-in button, hide the sign-out button
+		findViewById(R.id.sign_in_button).setVisibility(View.VISIBLE);
+		if (miDeco != null)
+			miDeco.setVisible(false);
+	}
+
 	public void onClick(View view) {
 
 		if (view.getId() == R.id.sign_in_button) {
 			// start the asynchronous sign in flow
 			beginUserInitiatedSignIn();
-		} else if (view.getId() == R.id.sign_out_button) {
-			// sign out.
-			signOut();
-
-			if (moreOptions)
-				if (navSections.size() > 2) {
-					moreOptions = false;
-					navSections.remove(2);
-				}
-			navAdapter.notifyDataSetChanged();
-
-			// show sign-in button, hide the sign-out button
-			findViewById(R.id.sign_in_button).setVisibility(View.VISIBLE);
-			findViewById(R.id.sign_out_button).setVisibility(View.GONE);
 		} else {
 
 			for (int i = 0; i < 3; i++) {
@@ -1199,7 +1553,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 						}
 						tabIB[i][j].setImageDrawable(d);
 						tabIB[i][j].setEnabled(false);
-						this.checkWinner(i, j, false, false);
+						this.checkWinner(i, j, false, false, false);
 
 					}
 				}
@@ -1207,23 +1561,23 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 		}
 	}
 
-	private void checkWinner(int i, int j, boolean fromBT, boolean fromMulti) {
+	private void checkWinner(int i, int j, boolean fromBT, boolean fromMulti, boolean fromOnline) {
 		if (tabVal[0][0] == tabVal[0][1] && tabVal[0][1] == tabVal[0][2] && tabVal[0][2] != NONE_PLAYER)
-			congratsWinner(tabVal[0][0], fromBT, fromMulti);
+			congratsWinner(tabVal[0][0], fromBT, fromMulti, fromOnline);
 		else if (tabVal[1][0] == tabVal[1][1] && tabVal[1][1] == tabVal[1][2] && tabVal[1][2] != NONE_PLAYER)
-			congratsWinner(tabVal[1][0], fromBT, fromMulti);
+			congratsWinner(tabVal[1][0], fromBT, fromMulti, fromOnline);
 		else if (tabVal[2][0] == tabVal[2][1] && tabVal[2][1] == tabVal[2][2] && tabVal[2][2] != NONE_PLAYER)
-			congratsWinner(tabVal[2][0], fromBT, fromMulti);
+			congratsWinner(tabVal[2][0], fromBT, fromMulti, fromOnline);
 		else if (tabVal[0][0] == tabVal[1][0] && tabVal[1][0] == tabVal[2][0] && tabVal[2][0] != NONE_PLAYER)
-			congratsWinner(tabVal[0][0], fromBT, fromMulti);
+			congratsWinner(tabVal[0][0], fromBT, fromMulti, fromOnline);
 		else if (tabVal[0][1] == tabVal[1][1] && tabVal[1][1] == tabVal[2][1] && tabVal[2][1] != NONE_PLAYER)
-			congratsWinner(tabVal[0][1], fromBT, fromMulti);
+			congratsWinner(tabVal[0][1], fromBT, fromMulti, fromOnline);
 		else if (tabVal[0][2] == tabVal[1][2] && tabVal[1][2] == tabVal[2][2] && tabVal[2][2] != NONE_PLAYER)
-			congratsWinner(tabVal[0][2], fromBT, fromMulti);
+			congratsWinner(tabVal[0][2], fromBT, fromMulti, fromOnline);
 		else if (tabVal[0][0] == tabVal[1][1] && tabVal[1][1] == tabVal[2][2] && tabVal[2][2] != NONE_PLAYER)
-			congratsWinner(tabVal[0][0], fromBT, fromMulti);
+			congratsWinner(tabVal[0][0], fromBT, fromMulti, fromOnline);
 		else if (tabVal[2][0] == tabVal[1][1] && tabVal[1][1] == tabVal[0][2] && tabVal[0][2] != NONE_PLAYER)
-			congratsWinner(tabVal[2][0], fromBT, fromMulti);
+			congratsWinner(tabVal[2][0], fromBT, fromMulti, fromOnline);
 		else {
 			boolean equal = true;
 			for (int x = 0; x < 3; x++) {
@@ -1236,22 +1590,26 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 			}
 
 			if (equal) {
-				congratsWinner(NONE_PLAYER, fromBT, fromMulti);
+				congratsWinner(NONE_PLAYER, fromBT, fromMulti, fromOnline);
 			}
 		}
 	}
 
-	private void congratsWinner(int winner, final boolean fromBT, final boolean fromMulti) {
+	private void congratsWinner(int winner, final boolean fromBT, final boolean fromMulti, final boolean fromOnline) {
 		finishedAI = true;
 
 		if (isSignedIn()) {
 			if (tabVal[0][0] == RED_PLAYER && tabVal[0][1] == RED_PLAYER && tabVal[0][2] == BLUE_PLAYER && tabVal[1][0] == BLUE_PLAYER && tabVal[1][1] == BLUE_PLAYER && tabVal[1][2] == RED_PLAYER && tabVal[2][0] == RED_PLAYER && tabVal[2][1] == BLUE_PLAYER && tabVal[2][2] == RED_PLAYER) {
 				getGamesClient().unlockAchievement(getString(R.string.achievement_fan));
 			}
+			getGamesClient().unlockAchievement(getString(R.string.achivement_multiplayer));
 		}
 		if (isSignedIn()) {
 			getGamesClient().incrementAchievement(getString(R.string.achievement_bored), 1);
 			getGamesClient().incrementAchievement(getString(R.string.achievement_veteran), 1);
+		}
+		if (isSignedIn() && fromOnline) {
+			getGamesClient().incrementAchievement(getString(R.string.achievement_welltrained), 1);
 		}
 		nbGame++;
 		if (!fromBT) {
@@ -1279,27 +1637,40 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 		congratsContainer.startAnimation(alpha);
 
 		TextView tvCongrats = (TextView) findViewById(R.id.resultText);
-		View retry = findViewById(R.id.congratsRetry);
-		retry.setOnClickListener(new OnClickListener() {
 
-			@Override
-			public void onClick(View v) {
-				if (fromBT) {
-					if (isSignedIn()) {
-						getGamesClient().incrementAchievement(getString(R.string.achievement_welltrained), 1);
+		if (fromOnline) {
+			View retry = findViewById(R.id.congratsRetry);
+			retry.setVisibility(View.GONE);
+			retrycount = (TextView) findViewById(R.id.congratsRetryCount);
+			retrycount.setVisibility(View.VISIBLE);
+			new OnlineWaiterCount().execute();
+		} else {
+			View retry = findViewById(R.id.congratsRetry);
+			retry.setVisibility(View.VISIBLE);
+			View retrycount = findViewById(R.id.congratsRetryCount);
+			retrycount.setVisibility(View.GONE);
+
+			retry.setOnClickListener(new OnClickListener() {
+
+				@Override
+				public void onClick(View v) {
+					if (fromBT) {
+						if (isSignedIn()) {
+							getGamesClient().incrementAchievement(getString(R.string.achievement_welltrained), 1);
+						}
+					} else if (fromMulti) {
+						if (isSignedIn()) {
+							getGamesClient().incrementAchievement(getString(R.string.achievement_sadomasochistic), 1);
+						}
+						createNewGameAI();
+					} else {
+						createNewGame();
+						if (isSignedIn())
+							getGamesClient().incrementAchievement(getString(R.string.achievement_welltrained), 1);
 					}
-				} else if (fromMulti) {
-					if (isSignedIn()) {
-						getGamesClient().incrementAchievement(getString(R.string.achievement_sadomasochistic), 1);
-					}
-					createNewGameAI();
-				} else {
-					createNewGame();
-					if (isSignedIn())
-						getGamesClient().incrementAchievement(getString(R.string.achievement_welltrained), 1);
 				}
-			}
-		});
+			});
+		}
 
 		String values = "";
 		for (int i = 0; i < 3; i++) {
@@ -1343,6 +1714,36 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 
 		if (isSignedIn()) {
 			getGamesClient().submitScore(getString(R.string.leaderboard_most_active), ToolsBDD.getInstance(getApplicationContext()).getNbPartieNumber());
+		}
+	}
+
+	class OnlineWaiterCount extends AsyncTask<Void, String, Void> {
+
+		@Override
+		protected Void doInBackground(Void... params) {
+			for (int i = 5; i > 0; i--) {
+				try {
+					publishProgress((i) + "");
+					Thread.sleep(1000);
+				}
+				catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+			return null;
+		}
+
+		@Override
+		protected void onProgressUpdate(String... values) {
+			super.onProgressUpdate(values);
+			retrycount.setText(values[0]);
+		}
+
+		@Override
+		protected void onPostExecute(Void result) {
+			super.onPostExecute(result);
+			if (isPlayingOnline)
+				createOnlineGame(false);
 		}
 	}
 
@@ -1525,7 +1926,8 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 			}
 			nbGame = ToolsBDD.getInstance(this).getNbPartieNumber() + 1;
 			TextView tv1 = (TextView) findViewById(R.id.welcomeGame);
-			tv1.setText(getString(R.string.game) + nbGame);
+			if (tv1 != null)
+				tv1.setText(getString(R.string.game) + nbGame);
 		}
 	}
 
@@ -1781,7 +2183,8 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 	public void onSignInFailed() {
 		// Sign in has failed. So show the user the sign-in button.
 		findViewById(R.id.sign_in_button).setVisibility(View.VISIBLE);
-		findViewById(R.id.sign_out_button).setVisibility(View.GONE);
+		if (miDeco != null)
+			miDeco.setVisible(false);
 		if (moreOptions) {
 			if (navSections.size() > 2) {
 				navSections.remove(2);
@@ -1801,14 +2204,14 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 	public void onSignInSucceeded() {
 		// show sign-out button, hide the sign-in button
 		findViewById(R.id.sign_in_button).setVisibility(View.GONE);
-		findViewById(R.id.sign_out_button).setVisibility(View.VISIBLE);
+		if (miDeco != null)
+			miDeco.setVisible(true);
 		// (your code here: update UI, enable functionality that depends on sign
 		// in, etc)
 		if (!moreOptions) {
 			ArrayList<NavigationItem> n3 = new ArrayList<MainActivity.NavigationItem>();
 			n3.add(new NavigationItem(isDark ? R.drawable.ic_action_spinner_achivmentdark : R.drawable.ic_action_spinner_achivment, getString(R.string.s37), 0));
 			n3.add(new NavigationItem(isDark ? R.drawable.ic_action_spinner_boarddarl : R.drawable.ic_action_spinner_board, getString(R.string.s38), 0));
-			n3.add(new NavigationItem(isDark ? R.drawable.ic_action_onlinedark : R.drawable.ic_action_online, getString(R.string.s44), 0));
 			NavigationSection s3 = new NavigationSection(getString(R.string.s41), n3);
 			navSections.add(s3);
 			navAdapter.notifyDataSetChanged();
@@ -1831,6 +2234,8 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 		}
 		comeBackFromHistoryShouldAchievement = false;
 
+		getGamesClient().registerInvitationListener(this);
+
 		if (getInvitationId() != null) {
 			RoomConfig.Builder roomConfigBuilder = makeBasicRoomConfigBuilder();
 			roomConfigBuilder.setInvitationIdToAccept(getInvitationId());
@@ -1839,7 +2244,6 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 			// prevent screen from sleeping during handshake
 			getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-			Toast.makeText(getApplicationContext(), "invitation when connected", Toast.LENGTH_SHORT).show();
 			// go to game screen
 		}
 
@@ -1847,6 +2251,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 
 	ArrayList<byte[]> dataSaved;
 	int totalGameToRestore = -1;
+	private String mIncomingInvitationId;
 
 	@Override
 	public void onStateLoaded(int statusCode, int stateKey, byte[] data) {
@@ -1918,27 +2323,129 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 	}
 
 	@Override
-	public void onJoinedRoom(int arg0, Room arg1) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
 	public void onLeftRoom(int arg0, String arg1) {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public void onRoomConnected(int arg0, Room arg1) {
-		// TODO Auto-generated method stub
+	public void onRoomCreated(int statusCode, Room room) {
+		if (statusCode != GamesClient.STATUS_OK) {
+			// let screen go to sleep
+			getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+			// show error message, return to main screen.
+			if (progress != null && progress.isShowing())
+				progress.dismiss();
+		} else {
+			roomId = room.getRoomId();
+			myroom = room;
+			Intent i = getGamesClient().getRealTimeWaitingRoomIntent(room, Integer.MAX_VALUE);
+			startActivityForResult(i, RC_WAITING_ROOM);
+		}
 
 	}
 
 	@Override
-	public void onRoomCreated(int arg0, Room arg1) {
-		// TODO Auto-generated method stub
+	public void onJoinedRoom(int statusCode, Room room) {
+		if (statusCode != GamesClient.STATUS_OK) {
+			// let screen go to sleep
+			getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
+			// show error message, return to main screen.
+		} else {
+			roomId = room.getRoomId();
+			myroom = room;
+			Intent i = getGamesClient().getRealTimeWaitingRoomIntent(room, Integer.MAX_VALUE);
+			startActivityForResult(i, RC_WAITING_ROOM);
+		}
+	}
+
+	@Override
+	public void onRoomConnected(int statusCode, Room room) {
+		if (statusCode != GamesClient.STATUS_OK) {
+			// let screen go to sleep
+			getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+			// show error message, return to main screen.
+
+		} else {
+
+		}
+	}
+
+	boolean mPlaying = false;
+
+	final static int MIN_PLAYERS = 2;
+
+	boolean shouldStartGame(Room room) {
+		int connectedPlayers = 0;
+		for (Participant p : room.getParticipants()) {
+			if (p.isConnectedToRoom())
+				++connectedPlayers;
+		}
+		return connectedPlayers >= MIN_PLAYERS;
+	}
+
+	boolean shouldCancelGame(Room room) {
+
+		return shouldStartGame(room);
+	}
+
+	@Override
+	public void onPeersConnected(Room room, List<String> peers) {
+		if (mPlaying) {
+
+		} else if (shouldStartGame(room)) {
+
+		}
+	}
+
+	@Override
+	public void onPeersDisconnected(Room room, List<String> peers) {
+		if (shouldCancelGame(room)) {
+			// cancel the game
+			getGamesClient().leaveRoom(this, room.getRoomId());
+			getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+			if (progress != null && progress.isShowing())
+				progress.dismiss();
+			leftGameOnline(-1);
+		}
+	}
+
+	@Override
+	public void onPeerLeft(Room room, List<String> peers) {
+		// peer left -- see if game should be cancelled
+		if (!mPlaying && shouldCancelGame(room)) {
+			leftGameOnline(R.string.s51);
+		}
+	}
+
+	public void leftGameOnline(int s) {
+		getGamesClient().leaveRoom(this, roomId);
+		getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+		if (s > 0)
+			Toast.makeText(getApplicationContext(), s, Toast.LENGTH_SHORT).show();
+		createOnlineScreen();
+		activeNavChild = 0;
+		activeNavSection = 3;
+		navAdapter.notifyDataSetChanged();
+		miStopOnline.setVisible(false);
+		isPlayingOnline = false;
+		if (progress != null && progress.isShowing())
+			progress.dismiss();
+		setSupportProgressBarIndeterminateVisibility(false);
+	}
+
+	@Override
+	public void onPeerDeclined(Room room, List<String> peers) {
+		// peer declined invitation -- see if game should be cancelled
+		if (!mPlaying && shouldCancelGame(room)) {
+			getGamesClient().leaveRoom(this, room.getRoomId());
+			getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+			leftGameOnline(-1);
+		}
 	}
 
 	@Override
@@ -1948,14 +2455,12 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 	}
 
 	@Override
-	public void onDisconnectedFromRoom(Room arg0) {
-		// TODO Auto-generated method stub
+	public void onDisconnectedFromRoom(Room room) {
 
-	}
+		getGamesClient().leaveRoom(this, room.getRoomId());
 
-	@Override
-	public void onPeerDeclined(Room arg0, List<String> arg1) {
-		// TODO Auto-generated method stub
+		// clear the flag that keeps the screen on
+		getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
 	}
 
@@ -1967,24 +2472,6 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 
 	@Override
 	public void onPeerJoined(Room arg0, List<String> arg1) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void onPeerLeft(Room arg0, List<String> arg1) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void onPeersConnected(Room arg0, List<String> arg1) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void onPeersDisconnected(Room arg0, List<String> arg1) {
 		// TODO Auto-generated method stub
 
 	}
@@ -2002,9 +2489,39 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 	}
 
 	@Override
-	public void onRealTimeMessageReceived(RealTimeMessage arg0) {
-		// TODO Auto-generated method stub
+	public void onInvitationReceived(Invitation invitation) {
+		mIncomingInvitationId = invitation.getInvitationId();
 
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setTitle(R.string.s44);
+		builder.setMessage(R.string.s45);
+		builder.setPositiveButton(R.string.s46, new DialogInterface.OnClickListener() {
+
+			public void onClick(DialogInterface dialog, int which) {
+				RoomConfig.Builder roomConfigBuilder = makeBasicRoomConfigBuilder();
+				roomConfigBuilder.setInvitationIdToAccept(mIncomingInvitationId);
+				getGamesClient().joinRoom(roomConfigBuilder.build());
+
+				// prevent screen from sleeping during handshake
+				getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+				dialog.dismiss();
+				createOnlineGame(true);
+
+			}
+
+		});
+
+		builder.setNegativeButton(R.string.s47, new DialogInterface.OnClickListener() {
+
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				dialog.dismiss();
+			}
+		});
+
+		AlertDialog alert = builder.create();
+		alert.show();
 	}
 
 }

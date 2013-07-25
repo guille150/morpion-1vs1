@@ -21,12 +21,12 @@
             android:id="@+id/left_drawerlist"
             android:layout_width="300dp"
             android:layout_height="fill_parent"
-            android:layout_above="@+id/linearLayout1"
+            android:layout_above="@+id/layoutConnexion"
             android:choiceMode="singleChoice"
             android:groupIndicator="@null" />
 
         <LinearLayout
-            android:id="@+id/linearLayout1"
+            android:id="@+id/layoutConnexion"
             android:layout_width="300dp"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
@@ -42,13 +42,6 @@
                 android:layout_margin="8dp" >
             </com.google.android.gms.common.SignInButton>
 
-            <Button
-                android:id="@+id/sign_out_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="8dp"
-                android:text="@string/s36"
-                android:visibility="gone" />
         </LinearLayout>
     </RelativeLayout>
 

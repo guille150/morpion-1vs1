@@ -16,10 +16,10 @@
 -->
 <resources>
 
-    <!-- TODO: Replace this by your app's app ID! -->
+
     <string name="app_id">193573255589</string>
 
-    <!-- TODO: Replace these by your achievement/leaderboard IDs! -->
+
     <string name="achievement_firstvictort">CgkIpfP1jtEFEAIQAQ</string>
     <string name="achievement_fan">CgkIpfP1jtEFEAIQAg</string>
     <string name="achievement_bored">CgkIpfP1jtEFEAIQAw</string>
@@ -27,6 +27,8 @@
     <string name="achievement_sadomasochistic">CgkIpfP1jtEFEAIQBQ</string>
     <string name="achievement_welltrained">CgkIpfP1jtEFEAIQCg</string>
     <string name="achievement_history">CgkIpfP1jtEFEAIQDA</string>
+    <string name="achivement_multiplayer">CgkIpfP1jtEFEAIQEQ</string>
+    <string name="achivement_friendly">CgkIpfP1jtEFEAIQEg</string>
     
     <string name="leaderboard_most_active">CgkIpfP1jtEFEAIQBg</string>
 
