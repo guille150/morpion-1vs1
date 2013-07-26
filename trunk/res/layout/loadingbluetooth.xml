@@ -18,7 +18,8 @@
             android:text="@string/s56"
             android:visibility="visible" />
 
-        <LinearLayout
+        <LinearLayout android:id="@+id/tohidewhenno"
+            android:orientation="vertical"
             android:layout_width="fill_parent"
             android:layout_height="2dp"
             android:background="@color/bluehighlighted"
