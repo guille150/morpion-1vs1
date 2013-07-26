@@ -15,6 +15,7 @@ import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.BaseAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.Toast;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
@@ -126,7 +127,7 @@ public class PreferencesActivity extends SherlockActivity implements OnCheckedCh
 			editor.putBoolean("isDark", isChecked);
 			editor.commit();
 			setResult(RESULT_OK);
-			finish();
+			Toast.makeText(getApplicationContext(), R.string.s43, Toast.LENGTH_SHORT).show();
 		}
 	}
 
