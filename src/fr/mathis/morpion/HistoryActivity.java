@@ -17,6 +17,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -144,8 +145,10 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 		listItem = new ArrayList<HashMap<String, String>>();
 		Cursor c = ToolsBDD.getInstance(this).getAllParties();
 		if (c == null || c.getCount() == 0) {
+			c.close();
 			share = getString(R.string.sharetry);
 		} else {
+			c.close();
 			reloadItems();
 		}
 		lv.setOnItemLongClickListener(this);
@@ -185,6 +188,7 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 		Cursor c = ToolsBDD.getInstance(this).getAllParties();
 		if (c == null || c.getCount() == 0) {
 			share = getString(R.string.sharetry);
+			c.close();
 		} else {
 
 			share = getString(R.string.app_name) + " - https://play.google.com/store/apps/details?id=fr.mathis.morpion - ";
@@ -214,6 +218,7 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 				listItem.add(map);
 				c.moveToNext();
 			}
+			c.close();
 			share += (win + lost + equal) + " " + getString(R.string.share1);
 			share += " " + win + " " + getString(R.string.share2);
 			share += " " + lost + " " + getString(R.string.share3);
@@ -727,22 +732,31 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 		return false;
 	}
 
+	public static float convertDpToPixel(float dp, Context context) {
+		Resources resources = context.getResources();
+		DisplayMetrics metrics = resources.getDisplayMetrics();
+		float px = dp * (metrics.densityDpi / 160f);
+		return px;
+	}
+	
 	private void createChart() {
 		lv.setVisibility(View.GONE);
 		listViewcards.setVisibility(View.GONE);
 		chartView.setVisibility(View.VISIBLE);
 		chartView.setGridLineColor(isDark ? Color.rgb(19, 133, 173) : Color.BLACK);
+		chartView.setGridLinesVertical(0);
+		chartView.setGridLinesHorizontal(0);
 		LinearSeries seriesBlue = new LinearSeries();
 		seriesBlue.setLineColor(Color.parseColor(ColorHolder.getInstance(this).getColor(MainActivity.BLUE_PLAYER)));
-		seriesBlue.setLineWidth(4);
+		seriesBlue.setLineWidth(convertDpToPixel(1.5f, getApplicationContext()));
 
 		LinearSeries seriesRed = new LinearSeries();
 		seriesRed.setLineColor(Color.parseColor(ColorHolder.getInstance(this).getColor(MainActivity.RED_PLAYER)));
-		seriesRed.setLineWidth(4);
+		seriesRed.setLineWidth(convertDpToPixel(1.5f, getApplicationContext()));
 
 		LinearSeries seriesGreen = new LinearSeries();
 		seriesGreen.setLineColor(isDark ? Color.WHITE : Color.BLACK);
-		seriesGreen.setLineWidth(4);
+		seriesGreen.setLineWidth(convertDpToPixel(1.5f, getApplicationContext()));
 
 		Cursor c = ToolsBDD.getInstance(this).getAllParties();
 		c.moveToFirst();
@@ -766,6 +780,7 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 			seriesGreen.addPoint(new LinearPoint(i, greencount));
 			c.moveToNext();
 		}
+		c.close();
 
 		chartView.addSeries(seriesBlue);
 		chartView.addSeries(seriesRed);
@@ -787,6 +802,7 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 		Cursor c = ToolsBDD.getInstance(this).getAllParties();
 		if (c == null || c.getCount() == 0) {
 			share = getString(R.string.sharetry);
+			c.close();
 		} else {
 			share = getString(R.string.app_name) + " - https://play.google.com/store/apps/details?id=fr.mathis.morpion - ";
 			int win = 0;
@@ -805,6 +821,7 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 				items.add(i);
 				c.moveToNext();
 			}
+			c.close();
 			share += (win + lost + equal) + " " + getString(R.string.share1);
 			share += " " + win + " " + getString(R.string.share2);
 			share += " " + lost + " " + getString(R.string.share);
@@ -862,6 +879,7 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 				}
 				c.moveToNext();
 			}
+			c.close();
 
 			int[][] val = new int[3][3];
 			int tooker = 0;
@@ -904,6 +922,7 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 			Cursor c = ToolsBDD.getInstance(this).getAllParties();
 			if (c == null || c.getCount() == 0) {
 				share = getString(R.string.sharetry);
+				c.close();
 			} else {
 				share = getString(R.string.app_name) + " - https://play.google.com/store/apps/details?id=fr.mathis.morpion - ";
 				int win = 0;
@@ -922,6 +941,7 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 					items.add(i);
 					c.moveToNext();
 				}
+				c.close();
 				share += (win + lost + equal) + " " + getString(R.string.share1);
 				share += " " + win + " " + getString(R.string.share2);
 				share += " " + lost + " " + getString(R.string.share);
@@ -990,6 +1010,7 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 			}
 			c.moveToNext();
 		}
+		c.close();
 
 		ToolsBDD.getInstance(getApplicationContext()).removePartie(id);
 		saveId = id;

@@ -19,6 +19,7 @@ import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -141,6 +142,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 	boolean oneGameHasBeenPlayedWeCanSave = false;
 	MenuItem miPref;
 	MenuItem miDeco;
+	boolean shouldShowDeco = false;
 	MenuItem miStopOnline;
 	Activity a;
 	GameView gv;
@@ -228,7 +230,22 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 		if (GooglePlayServicesUtil.isGooglePlayServicesAvailable(getApplicationContext()) == ConnectionResult.SUCCESS) {
 			n1.add(new NavigationItem(isDark ? R.drawable.ic_action_onlinedark : R.drawable.ic_action_online, getString(R.string.s44), 0));
 		} else {
-			findViewById(R.id.layoutConnexion).setVisibility(View.GONE);
+			findViewById(R.id.sign_in_button).setVisibility(View.GONE);
+
+			findViewById(R.id.layoutPlayService).setVisibility(View.VISIBLE);
+			findViewById(R.id.playgo).setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					final String appName = "com.google.android.gms";
+					try {
+						startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + appName)));
+					}
+					catch (android.content.ActivityNotFoundException anfe) {
+						startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://play.google.com/store/apps/details?id=" + appName)));
+					}
+					finish();
+				}
+			});
 		}
 		NavigationSection s1 = new NavigationSection(getString(R.string.s39), n1);
 		navSections.add(s1);
@@ -405,7 +422,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 			if (item != null) {
 				((android.widget.TextView) v.findViewById(R.id.nav_title)).setText(item.title);
 				((android.widget.TextView) v.findViewById(R.id.nav_title)).setCompoundDrawablesWithIntrinsicBounds(getResources().getDrawable(item.icon), null, null, null);
-				((android.widget.TextView) v.findViewById(R.id.nav_title)).setCompoundDrawablePadding((int) convertDpToPixel(16.0f, getApplicationContext()));
+				((android.widget.TextView) v.findViewById(R.id.nav_title)).setCompoundDrawablePadding((int) convertDpToPixel(8.0f, getApplicationContext()));
 				v.findViewById(R.id.separator_little).setVisibility(childPosition == 0 ? View.GONE : View.VISIBLE);
 				v.findViewById(R.id.separator_big).setVisibility(childPosition == 0 ? View.VISIBLE : View.GONE);
 				if (activeNavChild == childPosition && activeNavSection == groupPosition)
@@ -527,7 +544,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 		miStopOnline.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
 		miStopOnline.setVisible(false);
 
-		miDeco = menu.add(R.string.s36).setVisible(false);
+		miDeco = menu.add(R.string.s36).setVisible(shouldShowDeco);
 		return true;
 	}
 
@@ -1017,12 +1034,12 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 			});
 
 			final Button btnOnline = (Button) findViewById(R.id.buttonOnline);
-			
+
 			if (GooglePlayServicesUtil.isGooglePlayServicesAvailable(getApplicationContext()) != ConnectionResult.SUCCESS) {
 				btnOnline.setVisibility(View.GONE);
 				findViewById(R.id.tohidewhenno).setVisibility(View.GONE);
 			}
-			
+
 			btnOnline.setOnClickListener(new OnClickListener() {
 
 				@Override
@@ -1862,7 +1879,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 
 		Cursor c = ToolsBDD.getInstance(this).getAllParties();
 		if (c == null || c.getCount() == 0) {
-
+			c.close();
 		} else {
 			c.moveToFirst();
 			String futurByte = "";
@@ -1923,6 +1940,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 
 				c.moveToNext();
 			}
+			c.close();
 
 			while (futurByte.length() < 8) {
 				futurByte += "0";
@@ -2252,6 +2270,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 		if (GooglePlayServicesUtil.isGooglePlayServicesAvailable(getApplicationContext()) == ConnectionResult.SUCCESS) {
 			findViewById(R.id.sign_in_button).setVisibility(View.VISIBLE);
 		}
+		shouldShowDeco = false;
 		if (miDeco != null)
 			miDeco.setVisible(false);
 		if (moreOptions) {
@@ -2271,6 +2290,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 
 	@Override
 	public void onSignInSucceeded() {
+		shouldShowDeco = true;
 		// show sign-out button, hide the sign-in button
 		findViewById(R.id.sign_in_button).setVisibility(View.GONE);
 		if (miDeco != null)
