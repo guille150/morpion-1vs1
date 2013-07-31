@@ -62,7 +62,7 @@
     <string name="deletegame">Supprimer cette partie ?</string>
     <string name="previous">Précédent</string>
     <string name="next">Suivant</string>
-    <string name="m1">Via le même téléphone</string>
+    <string name="m1">Via ce téléphone</string>
     <string name="m2">Historique</string>
     <string name="m3">Aide</string>
     <string name="empty"></string>
@@ -142,4 +142,5 @@
     <string name="s55">Voir les invitations</string>
 	<string name="s56">Jouer en ligne</string>
 	<string name="s57">Disponible après connexion avec Google+.</string>
+	<string name="s58">Mode en ligne requiert les Services Google Play.</string>
 </resources>

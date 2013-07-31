@@ -1,6 +1,7 @@
 package fr.mathis.morpion;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -33,6 +34,7 @@ public class VisuPagerActivity extends SherlockFragmentActivity implements OnPag
 	boolean isDark;
 	PagerSlidingTabStrip tabs;
 	private String defaultColor = "#666666";
+	ArrayList<HashMap<String, String>> listItem;
 
 	public static float convertDpToPixel(float dp, Context context) {
 		Resources resources = context.getResources();
@@ -51,16 +53,39 @@ public class VisuPagerActivity extends SherlockFragmentActivity implements OnPag
 		}
 		super.onCreate(savedInstanceState);
 
-
 		initiActivity();
 	}
 
 	private void initiActivity() {
-		
+
 		setContentView(isDark ? R.layout.visupagedark : R.layout.visupage);
 		NUM_PAGES = ToolsBDD.getInstance(this).getNbPartie();
 		indexs = new ArrayList<Integer>();
 
+
+
+		int premsIndex = this.getIntent().getIntExtra("id", 0);
+		int pos = 0;
+
+		listItem = new ArrayList<HashMap<String, String>>();
+		HashMap<String, String> map = new HashMap<String, String>();
+
+		Cursor c = ToolsBDD.getInstance(this).getAllParties();
+
+		c.moveToFirst();
+		for (int i = 0; i < c.getCount(); i++) {
+			map = new HashMap<String, String>();
+			if (c.getInt(0) == premsIndex)
+				pos = i;
+
+			int n = c.getInt(1);
+			map.put("num", "" + c.getInt(0));
+			map.put("winner", n + "");
+			listItem.add(map);
+			c.moveToNext();
+		}
+		c.close();
+		
 		mPager = (ViewPager) findViewById(R.id.pager);
 		mPagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
 		mPager.setAdapter(mPagerAdapter);
@@ -70,17 +95,7 @@ public class VisuPagerActivity extends SherlockFragmentActivity implements OnPag
 		tabs = (PagerSlidingTabStrip) findViewById(R.id.tabs);
 		tabs.setViewPager(mPager);
 		tabs.setOnPageChangeListener(this);
-
-		int premsIndex = this.getIntent().getIntExtra("id", 0);
-		int pos = 0;
-		Cursor c = ToolsBDD.getInstance(getApplicationContext()).getAllParties();
-		c.moveToFirst();
-		for (int i = 0; i < c.getCount(); i++) {
-			if (c.getInt(0) == premsIndex)
-				pos = i;
-			c.moveToNext();
-		}
-
+		
 		mPager.setCurrentItem(pos);
 		indexs.add(pos);
 	}
@@ -91,13 +106,13 @@ public class VisuPagerActivity extends SherlockFragmentActivity implements OnPag
 
 	@Override
 	public void onBackPressed() {
-		
-		if(indexs.size() == 2 && indexs.get(0) == indexs.get(1))
-		{
+		int i1 = indexs.get(0);
+		int i2 = indexs.get(1);
+		if (indexs.size() == 2 && i1 == i2) {
 			finish();
 			return;
 		}
-		
+
 		if (indexs.size() > 1) {
 			mPager.setCurrentItem(indexs.get(indexs.size() - 2));
 			indexs.remove(indexs.size() - 1);
@@ -126,39 +141,28 @@ public class VisuPagerActivity extends SherlockFragmentActivity implements OnPag
 
 		@Override
 		public CharSequence getPageTitle(int position) {
-			int id = 0;
-			Cursor c = ToolsBDD.getInstance(getApplicationContext()).getAllParties();
-			c.moveToFirst();
-			for (int i = 0; i < c.getCount(); i++) {
-				if (i == position)
-					id = c.getInt(0);
-				c.moveToNext();
+
+			if (listItem != null) {
+				HashMap<String, String> map = listItem.get(position);
+				String s = map.get("num") + " - ";
+				int n = Integer.parseInt(map.get("winner"));
+				if (n == MainActivity.BLUE_PLAYER) {
+					s += getString(R.string.win);
+				} else if (n == MainActivity.RED_PLAYER) {
+					s += getString(R.string.loose);
+				} else {
+					s += getString(R.string.equal);
+				}
+
+				return s;
 			}
-			String s = id +" - ";
-			int n = ToolsBDD.getInstance(getApplicationContext()).getWinner(id);
-			if (n == MainActivity.BLUE_PLAYER) {
-				s += getString(R.string.win);
-			} else if (n == MainActivity.RED_PLAYER) {
-				s += getString(R.string.loose);
-			} else {
-				s += getString(R.string.equal);
-			}
-			
-			return s;
+			return "error";
 		}
 
 		@Override
 		public Fragment getItem(int position) {
-			int id = 0;
-			Cursor c = ToolsBDD.getInstance(getApplicationContext()).getAllParties();
-			c.moveToFirst();
-			for (int i = 0; i < c.getCount(); i++) {
-				if (i == position)
-					id = c.getInt(0);
-				c.moveToNext();
-			}
-
-			return VisuFragment.newInstance(id);
+			HashMap<String, String> map = listItem.get(position);
+			return VisuFragment.newInstance(Integer.parseInt(map.get("num")));
 		}
 
 		@Override
@@ -180,16 +184,9 @@ public class VisuPagerActivity extends SherlockFragmentActivity implements OnPag
 	@Override
 	public void onPageSelected(int arg0) {
 		indexs.add(arg0);
-		int id = 0;
-		Cursor c = ToolsBDD.getInstance(getApplicationContext()).getAllParties();
-		c.moveToFirst();
-		for (int i = 0; i < c.getCount(); i++) {
-			if (i == arg0)
-				id = c.getInt(0);
-			c.moveToNext();
-		}
+		HashMap<String, String> map = listItem.get(arg0);
 
-		int n = ToolsBDD.getInstance(this).getWinner(id);
+		int n = Integer.parseInt(map.get("winner"));
 
 		if (n != MainActivity.NONE_PLAYER)
 			changeColor(Color.parseColor(ColorHolder.getInstance(getApplicationContext()).getColor(n)));
