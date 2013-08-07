@@ -20,7 +20,7 @@
         android:dividerHeight="16dp"
         android:padding="16dp"
         android:scrollbarStyle="outsideOverlay"
-        android:visibility="gone" />
+        android:visibility="gone"/>
 
     <com.michaelpardo.android.widget.chartview.ChartView
         android:id="@+id/chart_view"

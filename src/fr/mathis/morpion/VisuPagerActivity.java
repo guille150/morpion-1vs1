@@ -62,8 +62,6 @@ public class VisuPagerActivity extends SherlockFragmentActivity implements OnPag
 		NUM_PAGES = ToolsBDD.getInstance(this).getNbPartie();
 		indexs = new ArrayList<Integer>();
 
-
-
 		int premsIndex = this.getIntent().getIntExtra("id", 0);
 		int pos = 0;
 
@@ -92,9 +90,9 @@ public class VisuPagerActivity extends SherlockFragmentActivity implements OnPag
 		mPager.setPageMargin((int) convertDpToPixel(9, this));
 		mPager.setPageMarginDrawable(isDark ? R.drawable.lineblue : R.drawable.linegraypager);
 
-		tabs = (PagerSlidingTabStrip) findViewById(R.id.tabs);
-		tabs.setViewPager(mPager);
-		tabs.setOnPageChangeListener(this);
+//		tabs = (PagerSlidingTabStrip) findViewById(R.id.tabs);
+//		tabs.setViewPager(mPager);
+//		tabs.setOnPageChangeListener(this);
 		
 		mPager.setCurrentItem(pos);
 		indexs.add(pos);
@@ -106,12 +104,16 @@ public class VisuPagerActivity extends SherlockFragmentActivity implements OnPag
 
 	@Override
 	public void onBackPressed() {
+		if (indexs.size() > 1)
+		{
 		int i1 = indexs.get(0);
 		int i2 = indexs.get(1);
 		if (indexs.size() == 2 && i1 == i2) {
 			finish();
 			return;
 		}
+		}
+		else finish();
 
 		if (indexs.size() > 1) {
 			mPager.setCurrentItem(indexs.get(indexs.size() - 2));
@@ -183,6 +185,7 @@ public class VisuPagerActivity extends SherlockFragmentActivity implements OnPag
 
 	@Override
 	public void onPageSelected(int arg0) {
+		
 		indexs.add(arg0);
 		HashMap<String, String> map = listItem.get(arg0);
 

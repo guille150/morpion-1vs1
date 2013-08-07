@@ -154,6 +154,9 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 		lv.setOnItemLongClickListener(this);
 		lv.setOnItemClickListener(this);
 		lv.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+		if (listItem.size() > 100)
+			lv.setFastScrollEnabled(true);
+
 		setSwypeListener();
 
 		TypedValue tv = new TypedValue();
@@ -738,7 +741,7 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 		float px = dp * (metrics.densityDpi / 160f);
 		return px;
 	}
-	
+
 	private void createChart() {
 		lv.setVisibility(View.GONE);
 		listViewcards.setVisibility(View.GONE);
@@ -847,9 +850,9 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 				view = LayoutInflater.from(mContext).inflate(isDark ? R.layout.activity_googlecards_carddark : R.layout.activity_googlecards_card, parent, false);
 			}
 
-			ImageView cercle = (ImageView)view.findViewById(R.id.imageViewcerclewinner);
-			ImageView croix = (ImageView)view.findViewById(R.id.imageViewcroixwinner);
-			
+			ImageView cercle = (ImageView) view.findViewById(R.id.imageViewcerclewinner);
+			ImageView croix = (ImageView) view.findViewById(R.id.imageViewcroixwinner);
+
 			cercle.setImageResource(ColorHolder.getInstance(mContext).getDrawable(MainActivity.RED_PLAYER));
 			croix.setImageResource(ColorHolder.getInstance(mContext).getDrawable(MainActivity.BLUE_PLAYER));
 
@@ -1026,8 +1029,8 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 				if (popoup != null && popoup.isShowing())
 					popoup.dismiss();
 				gv.setHoveredMode(true);
-				View popupView = getLayoutInflater().inflate(isDark ?R.layout.popup_gameviewdark : R.layout.popup_gameview, null);
-				GameView gvPopup = (GameView)popupView.findViewById(R.id.popupGame);
+				View popupView = getLayoutInflater().inflate(isDark ? R.layout.popup_gameviewdark : R.layout.popup_gameview, null);
+				GameView gvPopup = (GameView) popupView.findViewById(R.id.popupGame);
 				gvPopup.setMode(GameView.MODE_NOT_INTERACTIVE);
 				gvPopup.setAlignement(GameView.STYLE_CENTER_HORIZONTAL);
 				gvPopup.setDark(isDark);
@@ -1053,8 +1056,7 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 					popoup.dismiss();
 				gv.setHoveredMode(false);
 			}
-		}		
+		}
 	}
-	
-	
+
 }
