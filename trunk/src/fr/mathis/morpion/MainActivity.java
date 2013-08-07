@@ -1680,6 +1680,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 	}
 
 	private void congratsWinner(int winner, final boolean fromBT, final boolean fromMulti, final boolean fromOnline) {
+		oneGameHasBeenPlayedWeCanSave = true;
 		finishedAI = true;
 
 		if (isSignedIn()) {
@@ -1867,7 +1868,13 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 		my_app_state[2] = (byte) mgr.getInt("colorblue", 0);
 		my_app_state[3] = (byte) mgr.getInt("colorred", 0);
 
-		my_app_state[4] = (byte) ToolsBDD.getInstance(getApplicationContext()).getNbPartieNumber();
+		String bValue = Integer.toString(ToolsBDD.getInstance(getApplicationContext()).getNbPartieNumber(), 2);
+		if (bValue.length() > 8) {
+			my_app_state[4] = (byte) (int) Integer.valueOf(bValue.substring(bValue.length() - 8), 2);
+			my_app_state[5] = (byte) (int) Integer.valueOf(bValue.substring(0, bValue.length() - 8), 2);
+		} else {
+			my_app_state[4] = (byte) (int) Integer.valueOf(bValue, 2);
+		}
 
 		if (getGamesClient().isConnected()) {
 			getAppStateClient().updateState(SAVE_PREF, my_app_state);
@@ -1885,9 +1892,8 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 			String futurByte = "";
 			int currentByteTab = 0;
 			int currentTabIndex = 0;
-			int currentGameNum = 1;
+			int currentGameNum = 0;
 			for (int i = 0; i < c.getCount(); i++) {
-
 				int newGameNum = c.getInt(0);
 				if (newGameNum - currentGameNum > 1) {
 					int missingGames = newGameNum - currentGameNum;
@@ -1987,7 +1993,8 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 
 			for (int i = 0; i < data.length && totalTreater < totalGameToRestore; i++) {
 				String d = getWellFormedBytesAsString("" + Integer.toBinaryString((data[i] + 256) % 256));
-				for (int di = 0; di < 4 && totalTreater < totalGameToRestore; di++) {
+				for (int di = 0; di < 4 && totalTreater < totalGameToRestore; ) {
+
 					String code = d.substring(di * 2, (di * 2) + 2);
 					if (ToolsBDD.getInstance(getApplicationContext()).getResultat((totalTreater + 1)).compareTo("vide") == 0) {
 
@@ -2006,6 +2013,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 					}
 
 					totalTreater++;
+					di++;
 				}
 
 			}
@@ -2339,7 +2347,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 	}
 
 	ArrayList<byte[]> dataSaved;
-	int totalGameToRestore = -1;
+	short totalGameToRestore = -1;
 	private String mIncomingInvitationId;
 
 	@Override
@@ -2362,7 +2370,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 				ColorHolder.getInstance(getApplicationContext()).save(MainActivity.RED_PLAYER, data[3]);
 				ColorHolder.getInstance(getApplicationContext()).save(MainActivity.BLUE_PLAYER, data[2]);
 
-				totalGameToRestore = data[4];
+				totalGameToRestore = (short) ((data[5] << 8) | (data[4] & 0xFF));
 
 				updateField();
 			} else if (statusCode == AppStateClient.STATUS_NETWORK_ERROR_STALE_DATA) {
@@ -2381,7 +2389,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 				ColorHolder.getInstance(getApplicationContext()).save(MainActivity.RED_PLAYER, data[3]);
 				ColorHolder.getInstance(getApplicationContext()).save(MainActivity.BLUE_PLAYER, data[2]);
 
-				totalGameToRestore = data[4];
+				totalGameToRestore = (short) ((data[5] << 8) | (data[4] & 0xFF));
 
 				updateField();
 			} else {
@@ -2408,7 +2416,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 
 	@Override
 	public void onStateConflict(int stateKey, String ver, byte[] localData, byte[] serverData) {
-		getAppStateClient().resolveState(this, stateKey, ver, localData);
+		getAppStateClient().resolveState(this, stateKey, ver, serverData);
 	}
 
 	@Override
