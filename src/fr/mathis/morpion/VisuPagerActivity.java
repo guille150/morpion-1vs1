@@ -83,17 +83,32 @@ public class VisuPagerActivity extends SherlockFragmentActivity implements OnPag
 			c.moveToNext();
 		}
 		c.close();
-		
+
+		ArrayList<HashMap<String, String>> realItems = new ArrayList<HashMap<String, String>>();
+		int realpos = 0;
+		for (int i = pos - 10; i < pos + 11; i++) {
+			if (i >= 0 && i < listItem.size()) {
+				realItems.add(listItem.get(i));
+				if (i < pos) {
+					realpos++;
+				}
+			}
+
+		}
+		listItem = realItems;
+		pos = realpos;
+		NUM_PAGES = listItem.size();
+
 		mPager = (ViewPager) findViewById(R.id.pager);
 		mPagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
 		mPager.setAdapter(mPagerAdapter);
 		mPager.setPageMargin((int) convertDpToPixel(9, this));
 		mPager.setPageMarginDrawable(isDark ? R.drawable.lineblue : R.drawable.linegraypager);
 
-//		tabs = (PagerSlidingTabStrip) findViewById(R.id.tabs);
-//		tabs.setViewPager(mPager);
-//		tabs.setOnPageChangeListener(this);
-		
+		tabs = (PagerSlidingTabStrip) findViewById(R.id.tabs);
+		tabs.setViewPager(mPager);
+		tabs.setOnPageChangeListener(this);
+
 		mPager.setCurrentItem(pos);
 		indexs.add(pos);
 	}
@@ -104,16 +119,15 @@ public class VisuPagerActivity extends SherlockFragmentActivity implements OnPag
 
 	@Override
 	public void onBackPressed() {
-		if (indexs.size() > 1)
-		{
-		int i1 = indexs.get(0);
-		int i2 = indexs.get(1);
-		if (indexs.size() == 2 && i1 == i2) {
+		if (indexs.size() > 1) {
+			int i1 = indexs.get(0);
+			int i2 = indexs.get(1);
+			if (indexs.size() == 2 && i1 == i2) {
+				finish();
+				return;
+			}
+		} else
 			finish();
-			return;
-		}
-		}
-		else finish();
 
 		if (indexs.size() > 1) {
 			mPager.setCurrentItem(indexs.get(indexs.size() - 2));
@@ -185,7 +199,7 @@ public class VisuPagerActivity extends SherlockFragmentActivity implements OnPag
 
 	@Override
 	public void onPageSelected(int arg0) {
-		
+
 		indexs.add(arg0);
 		HashMap<String, String> map = listItem.get(arg0);
 

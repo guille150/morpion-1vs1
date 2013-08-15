@@ -20,11 +20,13 @@
     <string name="aide5">Puis-je jouer seul au Morpion ?</string>
     <string name="aide6">Oui, une intelligence artificielle peut jouer contre vous. Il faut sélectionner l\'option \'contre l\'IA\' dans le menu de navigation</string>
     <string name="aide7">Ai-je la possibilité de proposer des améliorations ?</string>
-    <string name="aide8">Bien sûr. Les commentaires sur l\'android market sont là pour ça.</string>
+    <string name="aide8">Bien sûr. Les commentaires sur le Google Play sont là pour ça.</string>
     <string name="aide9">Qui a developpé cette application ?</string>
     <string name="aide10">Moi, Stéphane Mathis. Simplement pour m\'initier au développement sur Android, c\'est ma première application.</string>
     <string name="aide11">Qu\'est-ce qui est affiché sur le graphique ?</string>
     <string name="aide12">La courbe de couleur primaire correspond à vos victoires, la courbe de couleur secondaire aux victoires de votre adversaires et la courbe noire aux égalités. Elles vous permettent de comparer l\'évolution du score au fil des parties (axe horizontale).</string>
+    <string name="aide13">Pourquoi y a-t-il 21 parties dans le détail de l\'historique ?</string>
+    <string name="aide14">Il y a la partie sélectionnée avec les 10 précédentes et suivantes.</string>
     <string name="yes">Oui</string>
     <string name="no">Non</string>
     <string name="saveText">Sauvegarder les égalités</string>

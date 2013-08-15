@@ -144,7 +144,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 	MenuItem miDeco;
 	boolean shouldShowDeco = false;
 	MenuItem miStopOnline;
-	Activity a;
+	Activity activContext;
 	GameView gv;
 	protected BluetoothAdapter mBluetoothAdapter;
 	private BluetoothChatService mChatService;
@@ -181,7 +181,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		activeNavChild = 2;
 		getSupportActionBar().setTitle(R.string.s31);
-		a = this;
+		activContext = this;
 		setContentView(isDark ? R.layout.main_layout_dark : R.layout.main_layout);
 		setSupportProgressBarIndeterminateVisibility(false);
 		container = (FrameLayout) findViewById(R.id.container);
@@ -256,7 +256,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 		NavigationSection s2 = new NavigationSection(getString(R.string.s40), n2);
 		navSections.add(s2);
 
-		navAdapter = new NavigationAdapter(a, navSections);
+		navAdapter = new NavigationAdapter(activContext, navSections);
 		mDrawerList.setAdapter(navAdapter);
 		mDrawerList.setDividerHeight(0);
 		mDrawerList.setOnItemClickListener(this);
@@ -801,7 +801,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 
 			@Override
 			public void onClick(View v) {
-				progress = ProgressDialog.show(a, getString(R.string.s49), getString(R.string.s50), true);
+				progress = ProgressDialog.show(activContext, getString(R.string.s49), getString(R.string.s50), true);
 				Intent intent = getGamesClient().getInvitationInboxIntent();
 				startActivityForResult(intent, RC_INVITATION_INBOX);
 				if (progress != null && progress.isShowing())
@@ -814,7 +814,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 
 			@Override
 			public void onClick(View v) {
-				progress = ProgressDialog.show(a, getString(R.string.s49), getString(R.string.s50), true);
+				progress = ProgressDialog.show(activContext, getString(R.string.s49), getString(R.string.s50), true);
 				Intent intent = getGamesClient().getSelectPlayersIntent(1, 1);
 				startActivityForResult(intent, RC_SELECT_PLAYERS);
 				if (progress != null && progress.isShowing())
@@ -1975,27 +1975,34 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 			getAppStateClient().updateState(SAVE_HIST_2, hist2);
 			getAppStateClient().updateState(SAVE_HIST_3, hist3);
 		}
-
 	}
 
+	@SuppressWarnings("unchecked")
 	private void restoreState(ArrayList<byte[]> dataSaved2) {
 		if (totalGameToRestore != -1) {
+			new RestoreTask().execute(dataSaved2);
+		}
+	}
+	
+	class RestoreTask extends AsyncTask<List<byte[]>, Void, Void>
+	{
+		@Override
+		protected Void doInBackground(List<byte[]>... params) {
 			int totalTreater = 0;
 
 			byte[] data = new byte[128 * 3];
 			int n = 0;
 			for (int i = 0; i < 3; i++) {
-				for (int j = 0; j < dataSaved2.get(i).length; j++) {
-					data[n] = dataSaved2.get(i)[j];
+				for (int j = 0; j < params[0].get(i).length; j++) {
+					data[n] = params[0].get(i)[j];
 					n++;
 				}
 			}
-
 			for (int i = 0; i < data.length && totalTreater < totalGameToRestore; i++) {
 				String d = getWellFormedBytesAsString("" + Integer.toBinaryString((data[i] + 256) % 256));
 				for (int di = 0; di < 4 && totalTreater < totalGameToRestore; ) {
 
-					String code = d.substring(di * 2, (di * 2) + 2);
+					String code = d.substring(di * 2, (di * 2) + 2); 
 					if (ToolsBDD.getInstance(getApplicationContext()).getResultat((totalTreater + 1)).compareTo("vide") == 0) {
 
 						if (code.compareTo(SAVE_BLUE_WIN) == 0) {
@@ -2017,11 +2024,18 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 				}
 
 			}
-			nbGame = ToolsBDD.getInstance(this).getNbPartieNumber() + 1;
+			return null;
+		}
+		
+		@Override
+		protected void onPostExecute(Void result) {
+			super.onPostExecute(result);
+			nbGame = ToolsBDD.getInstance(activContext).getNbPartieNumber() + 1;
 			TextView tv1 = (TextView) findViewById(R.id.welcomeGame);
 			if (tv1 != null)
 				tv1.setText(getString(R.string.game) + nbGame);
 		}
+
 	}
 
 	public String getWellFormedBytesAsString(String value) {
