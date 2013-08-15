@@ -20,11 +20,13 @@
     <string name="aide5">Can I play on my own ?</string>
     <string name="aide6">Yes, you can play againt an AI. You just have to select the option \'Against AI\' in the main navigation spinner.</string>
     <string name="aide7">Can I propose some ameliorations for this app ?</string>
-    <string name="aide8">Of course ! You should leave a comment on the Android Market.</string>
-    <string name="aide9">This app is wonderful.</string>
-    <string name="aide10">You should try the Star Wars version of this app, available on the Android Market.</string>
+    <string name="aide8">Of course ! You should leave a comment on the Google Play Store.</string>
+    <string name="aide9">Who developed this application ?</string>
+    <string name="aide10">Me, Stéphane Mathis. It\'s the first app that I\'ve done to learn Android.</string>
     <string name="aide11">What is displayed on the graph ?</string>
     <string name="aide12">The blue curve corresponds to your victories, the red curve to the victories of your opponents and the black curve equalities. They allow you to compare the evolution of the score over the games (horizontal axis).</string>
+    <string name="aide13">Why is there only 21 detailed history games ?</string>
+    <string name="aide14">You can see the selected one with the ten done before and after.</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="saveText">Save the equalities</string>

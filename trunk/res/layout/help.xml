@@ -13,9 +13,10 @@
             android:id="@+id/helptitle1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
             android:layout_marginTop="16dp"
             android:fontFamily="sans-serif-condansed"
-            android:lineSpacingMultiplier="0.95"
+            android:lineSpacingMultiplier="0.8"
             android:text="@string/aide1"
             android:textAllCaps="true"
             android:textSize="15sp"
@@ -44,7 +45,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
             android:fontFamily="sans-serif-condansed"
-            android:lineSpacingMultiplier="0.95"
+            android:lineSpacingMultiplier="0.8"
             android:text="@string/aide3"
             android:textAllCaps="true"
             android:textSize="15sp"
@@ -68,12 +69,41 @@
         </LinearLayout>
 
         <TextView
+            android:id="@+id/helptitle32"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:fontFamily="sans-serif-condansed"
+            android:lineSpacingMultiplier="0.8"
+            android:text="@string/aide13"
+            android:textAllCaps="true"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/helptext32"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-light"
+            android:text="@string/aide14"
+            android:textSize="16sp" />
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="1dp"
+            android:layout_marginBottom="16dp"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/linegraylight"
+            android:orientation="vertical" >
+        </LinearLayout>
+
+        <TextView
             android:id="@+id/helptitle6"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
             android:fontFamily="sans-serif-condansed"
-            android:lineSpacingMultiplier="0.95"
+            android:lineSpacingMultiplier="0.8"
             android:text="@string/aide11"
             android:textAllCaps="true"
             android:textSize="15sp"
@@ -102,7 +132,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
             android:fontFamily="sans-serif-condansed"
-            android:lineSpacingMultiplier="0.95"
+            android:lineSpacingMultiplier="0.8"
             android:text="@string/aide5"
             android:textAllCaps="true"
             android:textSize="15sp"
@@ -131,7 +161,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
             android:fontFamily="sans-serif-condansed"
-            android:lineSpacingMultiplier="0.95"
+            android:lineSpacingMultiplier="0.8"
             android:text="@string/aide7"
             android:textAllCaps="true"
             android:textSize="15sp"
@@ -160,7 +190,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
             android:fontFamily="sans-serif-condansed"
-            android:lineSpacingMultiplier="0.95"
+            android:lineSpacingMultiplier="0.8"
             android:text="@string/aide9"
             android:textAllCaps="true"
             android:textSize="15sp"

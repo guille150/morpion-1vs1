@@ -25,7 +25,6 @@
             android:id="@+id/helptext1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-
             android:fontFamily="sans-serif-light"
             android:text="@string/aide2"
             android:textSize="16sp" />
@@ -43,6 +42,7 @@
             android:id="@+id/helptitle2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
             android:fontFamily="sans-serif-condansed"
             android:lineSpacingMultiplier="0.8"
             android:text="@string/aide3"
@@ -54,7 +54,6 @@
             android:id="@+id/helptext2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-
             android:fontFamily="sans-serif-light"
             android:text="@string/aide4"
             android:textSize="16sp" />
@@ -65,6 +64,35 @@
             android:layout_marginBottom="16dp"
             android:layout_marginTop="16dp"
             android:background="@drawable/linegraylightdark"
+            android:orientation="vertical" >
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/helptitle32"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:fontFamily="sans-serif-condansed"
+            android:lineSpacingMultiplier="0.8"
+            android:text="@string/aide13"
+            android:textAllCaps="true"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/helptext32"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-light"
+            android:text="@string/aide14"
+            android:textSize="16sp" />
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="1dp"
+            android:layout_marginBottom="16dp"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/linegraylight"
             android:orientation="vertical" >
         </LinearLayout>
 
@@ -83,7 +111,6 @@
             android:id="@+id/helptext6"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-
             android:fontFamily="sans-serif-light"
             android:text="@string/aide12"
             android:textSize="16sp" />
@@ -101,6 +128,7 @@
             android:id="@+id/helptitle3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
             android:fontFamily="sans-serif-condansed"
             android:lineSpacingMultiplier="0.8"
             android:text="@string/aide5"
@@ -112,7 +140,6 @@
             android:id="@+id/helptext3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-
             android:fontFamily="sans-serif-light"
             android:text="@string/aide6"
             android:textSize="16sp" />
@@ -130,6 +157,7 @@
             android:id="@+id/helptitle4"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
             android:fontFamily="sans-serif-condansed"
             android:lineSpacingMultiplier="0.8"
             android:text="@string/aide7"
@@ -141,7 +169,6 @@
             android:id="@+id/helptext4"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-
             android:fontFamily="sans-serif-light"
             android:text="@string/aide8"
             android:textSize="16sp" />
@@ -159,6 +186,7 @@
             android:id="@+id/helptitle5"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
             android:fontFamily="sans-serif-condansed"
             android:lineSpacingMultiplier="0.8"
             android:text="@string/aide9"
@@ -170,7 +198,6 @@
             android:id="@+id/helptext5"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-
             android:fontFamily="sans-serif-light"
             android:text="@string/aide10"
             android:textSize="16sp" />
