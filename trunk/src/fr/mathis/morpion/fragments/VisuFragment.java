@@ -1,4 +1,4 @@
-package fr.mathis.morpion;
+package fr.mathis.morpion.fragments;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
@@ -23,12 +23,16 @@ import android.view.ViewTreeObserver;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.widget.ImageButton;
 import android.widget.ScrollView;
+import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 
+import fr.mathis.moprion.views.GameView;
+import fr.mathis.morpion.MainActivity;
+import fr.mathis.morpion.R;
 import fr.mathis.morpion.tools.ToolsBDD;
 
 public class VisuFragment extends SherlockFragment {
@@ -66,7 +70,7 @@ public class VisuFragment extends SherlockFragment {
 
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-		menu.add(0, MENU_SHARE, 0, R.string.share).setIcon(isDark ? R.drawable.ic_action_sharedark : R.drawable.ic_action_share).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+		menu.add(0, MENU_SHARE, 0, R.string.s59).setIcon(isDark ? R.drawable.ic_action_sharedark : R.drawable.ic_action_share).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
 		super.onCreateOptionsMenu(menu, inflater);
 	}
 
@@ -87,8 +91,12 @@ public class VisuFragment extends SherlockFragment {
 		Intent share = new Intent(Intent.ACTION_SEND);
 		share.setType("image/jpeg");
 		String url = Images.Media.insertImage(getActivity().getContentResolver(), bmpToShare, "share", null);
-		share.putExtra(Intent.EXTRA_STREAM, Uri.parse(url));
-		startActivity(Intent.createChooser(share, getString(R.string.sharewith)));
+		if (url == null) {
+			Toast.makeText(getActivity(), R.string.s60, Toast.LENGTH_SHORT).show();
+		} else {
+			share.putExtra(Intent.EXTRA_STREAM, Uri.parse(url));
+			startActivity(Intent.createChooser(share, getString(R.string.sharewith)));
+		}
 	}
 
 	public static Bitmap getBitmapFromView(View view) {

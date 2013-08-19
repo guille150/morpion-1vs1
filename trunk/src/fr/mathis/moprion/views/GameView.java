@@ -1,4 +1,4 @@
-package fr.mathis.morpion;
+package fr.mathis.moprion.views;
 
 import java.util.ArrayList;
 
@@ -16,6 +16,8 @@ import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.view.MotionEvent;
 import android.view.View;
+import fr.mathis.morpion.MainActivity;
+import fr.mathis.morpion.interfaces.HoverHandler;
 import fr.mathis.morpion.tools.ColorHolder;
 
 public class GameView extends View {

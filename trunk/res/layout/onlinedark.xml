@@ -13,13 +13,13 @@
         android:paddingTop="8dp" >
 
         <LinearLayout
-            android:id="@+id/imageView1"
+            android:id="@+id/imageViewPrems"
             android:layout_width="70dp"
             android:layout_height="70dp"
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
             android:layout_marginLeft="50dp"
-            android:background="#00ff00" >
+            android:background="#000000" >
 
             <ImageView
                 android:layout_width="70dp"
@@ -34,7 +34,7 @@
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_marginLeft="20dp"
-            android:layout_toRightOf="@+id/imageView1"
+            android:layout_toRightOf="@+id/imageViewPrems"
             android:text="@string/s53"
             android:textSize="20sp" />
     </RelativeLayout>
@@ -54,7 +54,7 @@
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
             android:layout_marginLeft="50dp"
-            android:background="#00ff00" >
+            android:background="#000000" >
 
             <ImageView
                 android:layout_width="70dp"
@@ -89,7 +89,7 @@
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
             android:layout_marginLeft="50dp"
-            android:background="#00ff00" >
+            android:background="#000000" >
 
             <ImageView
                 android:layout_width="70dp"
