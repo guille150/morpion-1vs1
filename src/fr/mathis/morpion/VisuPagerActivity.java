@@ -22,6 +22,7 @@ import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.MenuItem;
 import com.astuetz.viewpager.extensions.PagerSlidingTabStrip;
 
+import fr.mathis.morpion.fragments.VisuFragment;
 import fr.mathis.morpion.tools.ColorHolder;
 import fr.mathis.morpion.tools.ToolsBDD;
 

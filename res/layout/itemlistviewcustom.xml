@@ -6,7 +6,7 @@
     android:paddingLeft="2dp"
     android:paddingRight="8dp" >
 
-    <fr.mathis.morpion.GameView
+    <fr.mathis.moprion.views.GameView
         android:id="@+id/gameView1"
         android:layout_width="50dp"
         android:layout_height="50dp"
@@ -15,7 +15,7 @@
         android:clickable="false"
         android:focusable="false"
         android:focusableInTouchMode="false" >
-    </fr.mathis.morpion.GameView>
+    </fr.mathis.moprion.views.GameView>
 
     <LinearLayout
         android:layout_width="0dp"

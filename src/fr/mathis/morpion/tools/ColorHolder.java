@@ -49,16 +49,16 @@ public class ColorHolder {
 
 	public static ArrayList<String> getAllColor() {
 		ArrayList<String> res = new ArrayList<String>();
-		res.add("#33b5e5");
-		res.add("#0099cc");
-		res.add("#aa66cc");
-		res.add("#9933cc");
-		res.add("#99cc00");
+		res.add("#33B5E5");
+		res.add("#0099CC");
+		res.add("#AA66CC");
+		res.add("#9933CC");
+		res.add("#99CC00");
 		res.add("#669900");
-		res.add("#ffbb33");
-		res.add("#ff8800");
-		res.add("#ff4444");
-		res.add("#f90000");
+		res.add("#FFBB33");
+		res.add("#FF8800");
+		res.add("#FF4444");
+		res.add("#F90000");
 		res.add("#A8A8A8");
 		res.add("#515151");
 		return res;

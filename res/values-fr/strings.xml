@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
     <string name="hello">Hello World, MorpionActivity!</string>
     <string name="app_name">Morpion 1vs1</string>
     <string name="newGame">Nouvelle partie</string>
@@ -145,4 +144,6 @@
 	<string name="s56">Jouer en ligne</string>
 	<string name="s57">Disponible après connexion avec Google+.</string>
 	<string name="s58">Mode en ligne requiert les Services Google Play.</string>
+	<string name="s59">Partager cette partie</string>
+	<string name="s60">Partage impossible</string>
 </resources>

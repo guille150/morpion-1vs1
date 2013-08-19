@@ -72,7 +72,8 @@ import com.google.android.gms.games.multiplayer.realtime.RoomStatusUpdateListene
 import com.google.android.gms.games.multiplayer.realtime.RoomUpdateListener;
 import com.google.example.games.basegameutils.BaseGameActivity;
 
-import fr.mathis.morpion.GameView.GameHandler;
+import fr.mathis.moprion.views.GameView;
+import fr.mathis.moprion.views.GameView.GameHandler;
 import fr.mathis.morpion.tools.ColorHolder;
 import fr.mathis.morpion.tools.StateHolder;
 import fr.mathis.morpion.tools.ToolsBDD;
@@ -152,6 +153,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 	FrameLayout container;
 	View congratsContainer;
 	TextView retrycount;
+	int winnerForUpdateField = -1;
 
 	boolean firstStartShouldReloadConfig = true;
 	boolean comeBackFromSettingsShouldSave = false;
@@ -208,15 +210,18 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 
 		@Override
 		protected void onPostExecute(Void result) {
-			mDrawerLayout.openDrawer(GravityCompat.START);
+			if (mDrawerLayout != null)
+				mDrawerLayout.openDrawer(GravityCompat.START);
 			StateHolder.MemorizeValue("showwelcomedrawer", true, getApplicationContext());
 			super.onPostExecute(result);
 		}
 	}
 
 	private void initDrawer() {
-		mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-		mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
+		if (findViewById(R.id.drawer_layout) != null) {
+			mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+			mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
+		}
 		mDrawerList = (ExpandableListView) findViewById(R.id.left_drawerlist);
 
 		findViewById(R.id.sign_in_button).setOnClickListener(this);
@@ -272,19 +277,23 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 			}
 		});
 
-		showClosedIcon();
-		mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close) {
-			public void onDrawerClosed(View view) {
-				supportInvalidateOptionsMenu();
-				showClosedIcon();
-			}
+		if (mDrawerLayout != null) {
+			showClosedIcon();
+			mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close) {
+				public void onDrawerClosed(View view) {
+					supportInvalidateOptionsMenu();
+					showClosedIcon();
+				}
 
-			public void onDrawerOpened(View drawerView) {
-				supportInvalidateOptionsMenu();
-				showOpenedIcon();
-			}
-		};
-		mDrawerLayout.setDrawerListener(mDrawerToggle);
+				public void onDrawerOpened(View drawerView) {
+					supportInvalidateOptionsMenu();
+					showOpenedIcon();
+				}
+			};
+			mDrawerLayout.setDrawerListener(mDrawerToggle);
+		} else {
+			getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+		}
 	}
 
 	@Override
@@ -350,7 +359,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 					navAdapter.notifyDataSetChanged();
 					getSupportActionBar().setTitle(navSections.get(activeNavSection).items.get(activeNavChild).title);
 				}
-				if (shouldCloseDrawer)
+				if (shouldCloseDrawer && mDrawerLayout != null)
 					mDrawerLayout.closeDrawer(GravityCompat.START);
 			}
 			if (groupPosition == 2 && childPosition == 0) {
@@ -426,7 +435,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 				v.findViewById(R.id.separator_little).setVisibility(childPosition == 0 ? View.GONE : View.VISIBLE);
 				v.findViewById(R.id.separator_big).setVisibility(childPosition == 0 ? View.VISIBLE : View.GONE);
 				if (activeNavChild == childPosition && activeNavSection == groupPosition)
-					v.setBackgroundColor(isDark ? Color.parseColor("#33B5E5") : Color.parseColor("#D3D3D3"));
+					v.setBackgroundColor(isDark ? Color.parseColor("#AA33B5E5") : Color.parseColor("#D3D3D3"));
 
 				if (groupPosition == 0 && childPosition == 3 && !isSignedIn()) {
 					((android.widget.TextView) v.findViewById(R.id.nav_title)).setTextColor(isDark ? Color.parseColor("#40FFFFFF") : Color.parseColor("#40000000"));
@@ -528,7 +537,8 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 	protected void onPostCreate(Bundle savedInstanceState) {
 		super.onPostCreate(savedInstanceState);
 		// Sync the toggle state after onRestoreInstanceState has occurred.
-		mDrawerToggle.syncState();
+		if (mDrawerToggle != null)
+			mDrawerToggle.syncState();
 	}
 
 	@Override
@@ -551,7 +561,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 	@Override
 	public boolean onMenuItemSelected(int featureId, MenuItem item) {
 
-		if (mDrawerToggle.onOptionsItemSelected(getMenuItem(item))) {
+		if (mDrawerToggle != null && mDrawerToggle.onOptionsItemSelected(getMenuItem(item))) {
 			return true;
 		}
 
@@ -579,6 +589,12 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 
 			if (item.getTitle().toString().compareTo(getString(R.string.s36)) == 0) {
 				signOutProcess();
+				if (activeNavChild == 3 && activeNavSection == 0) {
+					createNewGameAI();
+					activeNavChild = 2;
+					navAdapter.notifyDataSetChanged();
+
+				}
 			}
 		}
 
@@ -822,7 +838,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 			}
 		});
 
-		View b1 = findViewById(R.id.imageView1);
+		View b1 = findViewById(R.id.imageViewPrems);
 		View b2 = findViewById(R.id.imageView2);
 		View b3 = findViewById(R.id.imageView3);
 		b1.setBackgroundColor(Color.parseColor(ColorHolder.getInstance(getApplicationContext()).getColor(MainActivity.BLUE_PLAYER)));
@@ -982,7 +998,8 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 			activeNavChild = 1;
 			getSupportActionBar().setTitle(navSections.get(activeNavSection).items.get(activeNavChild).title);
 			navAdapter.notifyDataSetChanged();
-			mDrawerLayout.closeDrawer(GravityCompat.START);
+			if (mDrawerLayout != null)
+				mDrawerLayout.closeDrawer(GravityCompat.START);
 			// Initialize the BluetoothChatService to perform bluetooth
 			// connections
 			mChatService = new BluetoothChatService(this, mHandler);
@@ -1586,7 +1603,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 			gv.invalidate();
 		}
 
-		View b1 = findViewById(R.id.imageView1);
+		View b1 = findViewById(R.id.imageViewPrems);
 		View b2 = findViewById(R.id.imageView2);
 		View b3 = findViewById(R.id.imageView3);
 		if (b1 != null && b2 != null && b3 != null) {
@@ -1595,6 +1612,16 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 			b3.setBackgroundColor(Color.parseColor(ColorHolder.getInstance(getApplicationContext()).getColor(MainActivity.RED_PLAYER)));
 		}
 
+		congratsContainer = findViewById(R.id.congratsContainer);
+		if (congratsContainer != null) {
+			if (winnerForUpdateField == BLUE_PLAYER) {
+				congratsContainer.setBackgroundColor(Color.parseColor(ColorHolder.getInstance(getApplicationContext()).getColor(BLUE_PLAYER)));
+			} else if (winnerForUpdateField == RED_PLAYER) {
+				congratsContainer.setBackgroundColor(Color.parseColor(ColorHolder.getInstance(getApplicationContext()).getColor(RED_PLAYER)));
+			} else if (winnerForUpdateField == NONE_PLAYER) {
+				congratsContainer.setBackgroundColor(isDark ? Color.DKGRAY : Color.LTGRAY);
+			}
+		}
 		playerText.setTextColor(Color.parseColor(ColorHolder.getInstance(this).getColor(turn)));
 	}
 
@@ -1680,6 +1707,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 	}
 
 	private void congratsWinner(int winner, final boolean fromBT, final boolean fromMulti, final boolean fromOnline) {
+		winnerForUpdateField = winner;
 		oneGameHasBeenPlayedWeCanSave = true;
 		finishedAI = true;
 
@@ -1721,7 +1749,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 		alpha.setFillAfter(true);
 		congratsContainer.startAnimation(alpha);
 
-		TextView tvCongrats = (TextView) findViewById(R.id.resultText);
+		TextView tvCongrats = (TextView) findViewById(R.id.resultText2);
 
 		if (fromOnline) {
 			View retry = findViewById(R.id.congratsRetry);
@@ -1983,9 +2011,8 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 			new RestoreTask().execute(dataSaved2);
 		}
 	}
-	
-	class RestoreTask extends AsyncTask<List<byte[]>, Void, Void>
-	{
+
+	class RestoreTask extends AsyncTask<List<byte[]>, Void, Void> {
 		@Override
 		protected Void doInBackground(List<byte[]>... params) {
 			int totalTreater = 0;
@@ -1998,11 +2025,13 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 					n++;
 				}
 			}
+			
+			ToolsBDD.getInstance(getApplicationContext()).getBDD().beginTransaction();
 			for (int i = 0; i < data.length && totalTreater < totalGameToRestore; i++) {
 				String d = getWellFormedBytesAsString("" + Integer.toBinaryString((data[i] + 256) % 256));
-				for (int di = 0; di < 4 && totalTreater < totalGameToRestore; ) {
+				for (int di = 0; di < 4 && totalTreater < totalGameToRestore;) {
 
-					String code = d.substring(di * 2, (di * 2) + 2); 
+					String code = d.substring(di * 2, (di * 2) + 2);
 					if (ToolsBDD.getInstance(getApplicationContext()).getResultat((totalTreater + 1)).compareTo("vide") == 0) {
 
 						if (code.compareTo(SAVE_BLUE_WIN) == 0) {
@@ -2024,9 +2053,10 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 				}
 
 			}
+			ToolsBDD.getInstance(getApplicationContext()).getBDD().endTransaction();
 			return null;
 		}
-		
+
 		@Override
 		protected void onPostExecute(Void result) {
 			super.onPostExecute(result);

@@ -1,0 +1,95 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:baselineAligned="false"
+    android:orientation="horizontal" >
+
+    <RelativeLayout
+        android:id="@+id/left_drawer"
+        android:layout_width="240dp"
+        android:layout_height="fill_parent"
+        android:layout_gravity="start"
+        android:background="#111"
+        android:orientation="vertical" >
+
+        <ExpandableListView
+            android:id="@+id/left_drawerlist"
+            android:layout_width="240dp"
+            android:layout_height="fill_parent"
+            android:layout_above="@+id/layoutConnexion"
+            android:choiceMode="singleChoice"
+            android:groupIndicator="@null" />
+
+        <LinearLayout
+            android:id="@+id/layoutConnexion"
+            android:layout_width="240dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:background="#222"
+            android:gravity="center"
+            android:orientation="vertical" >
+
+            <com.google.android.gms.common.SignInButton
+                android:id="@+id/sign_in_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp" >
+            </com.google.android.gms.common.SignInButton>
+
+            <LinearLayout
+                android:id="@+id/layoutPlayService"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingBottom="8dp"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:paddingTop="8dp"
+                android:visibility="gone" >
+
+                <TextView
+                    android:id="@+id/resultText"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/s58"
+                    android:textColor="#ffffff"
+                    android:textSize="16sp" />
+
+                <LinearLayout
+                    android:layout_width="1.4dp"
+                    android:layout_height="match_parent"
+                    android:background="#60ffffff"
+                    android:orientation="vertical"
+                    android:paddingBottom="8dp"
+                    android:paddingTop="8dp" >
+                </LinearLayout>
+
+                <ImageButton
+                    android:id="@+id/playgo"
+                    style="@style/Widget.Sherlock.ActionButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="fill_parent"
+                    android:contentDescription="@string/app_name"
+                    android:src="@drawable/ic_icon_play" />
+            </LinearLayout>
+        </LinearLayout>
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="1dp"
+        android:layout_height="fill_parent"
+        android:background="@drawable/linegraylightdark"
+        android:orientation="vertical" >
+    </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/container"
+        android:layout_width="0dp"
+        android:layout_height="fill_parent"
+        android:layout_weight="1" >
+    </FrameLayout>
+
+</LinearLayout>

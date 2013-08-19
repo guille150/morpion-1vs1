@@ -5,8 +5,8 @@
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
+        android:layout_marginLeft="@dimen/borderPadding"
+        android:layout_marginRight="@dimen/borderPadding"
         android:orientation="vertical" >
 
         <Button

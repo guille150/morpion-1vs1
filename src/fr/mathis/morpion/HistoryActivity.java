@@ -26,6 +26,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.preference.PreferenceManager;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -42,6 +44,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.PopupWindow;
@@ -50,7 +53,8 @@ import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.ActionBar.OnNavigationListener;
-import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.app.SherlockFragment;
+import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.ActionMode;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
@@ -66,6 +70,10 @@ import com.michaelpardo.android.widget.chartview.LinearSeries.LinearPoint;
 import com.nineoldandroids.animation.Animator;
 import com.nineoldandroids.animation.AnimatorListenerAdapter;
 
+import fr.mathis.moprion.views.GameView;
+import fr.mathis.morpion.fragments.RightFillerFragment;
+import fr.mathis.morpion.fragments.VisuFragment;
+import fr.mathis.morpion.interfaces.HoverHandler;
 import fr.mathis.morpion.tools.ColorHolder;
 import fr.mathis.morpion.tools.StateHolder;
 import fr.mathis.morpion.tools.SwipeDismissListViewTouchListener;
@@ -73,7 +81,7 @@ import fr.mathis.morpion.tools.ToolsBDD;
 import fr.mathis.morpion.tools.UndoBarController;
 import fr.mathis.morpion.tools.UndoBarController.UndoListener;
 
-public class HistoryActivity extends SherlockActivity implements OnItemLongClickListener, OnItemClickListener, OnNavigationListener, UndoListener, OnDismissCallback, HoverHandler {
+public class HistoryActivity extends SherlockFragmentActivity implements OnItemLongClickListener, OnItemClickListener, OnNavigationListener, UndoListener, OnDismissCallback, HoverHandler {
 
 	static final int MENU_RESET = 0;
 	static final int MENU_SHARE = 2;
@@ -96,6 +104,8 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 	GoogleCardsAdapter mGoogleCardsAdapter;
 	ArrayList<Integer> items;
 	PopupWindow popoup;
+	FrameLayout rightContainer;
+	SherlockFragment lastFragment;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -117,19 +127,43 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 
 		getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
 		getSupportActionBar().setListNavigationCallbacks(adapter, this);
-
+		
 		getSupportActionBar().setHomeButtonEnabled(true);
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		getSupportActionBar().setDisplayShowTitleEnabled(false);
 		setContentView(isDark ? R.layout.listviewcustomdark : R.layout.listviewcustom);
-
+		if (findViewById(R.id.container_right) != null)
+			rightContainer = (FrameLayout) findViewById(R.id.container_right);
 		DisplayMetrics metrics = new DisplayMetrics();
 		getWindowManager().getDefaultDisplay().getMetrics(metrics);
 
 		displayWidth = metrics.widthPixels;
+
+		if (rightContainer != null) {
+			FragmentManager fm = getSupportFragmentManager();
+			FragmentTransaction ft = fm.beginTransaction();
+			lastFragment = RightFillerFragment.newInstance();
+			ft.replace(R.id.container_right, lastFragment);
+			ft.commit();
+			if (chartView != null)
+				chartView.setVisibility(View.GONE);
+			rightContainer.setVisibility(View.VISIBLE);
+		}
+
 	}
 
 	public void createList() {
+
+		if (rightContainer != null) {
+			FragmentManager fm = getSupportFragmentManager();
+			FragmentTransaction ft = fm.beginTransaction();
+			lastFragment = RightFillerFragment.newInstance();
+			ft.replace(R.id.container_right, lastFragment);
+			ft.commit();
+			if (chartView != null)
+				chartView.setVisibility(View.GONE);
+			rightContainer.setVisibility(View.VISIBLE);
+		}
 
 		lv = (ListView) findViewById(R.id.listviewperso);
 		lv.setVisibility(View.VISIBLE);
@@ -280,9 +314,11 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 
 		if (item.getTitle().toString().compareTo(getString(R.string.share)) == 0) {
 			share();
+			return true;
 		} else if (item.getTitle().toString().compareTo(getString(R.string.reset)) == 0) {
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
 			builder.setTitle(R.string.sure).setPositiveButton(R.string.yes, dialogClickListener).setNegativeButton(R.string.no, dialogClickListener).show();
+			return true;
 		} else {
 			int itemId = item.getItemId();
 			switch (itemId) {
@@ -292,7 +328,7 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 			}
 		}
 
-		return true;
+		return super.onMenuItemSelected(featureId, item);
 	}
 
 	private void share() {
@@ -311,6 +347,7 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 	@SuppressLint("NewApi")
 	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
 		if (pos.size() == 0) {
+
 			setSwypeListener();
 			@SuppressWarnings("unchecked")
 			HashMap<String, String> map = (HashMap<String, String>) lv.getItemAtPosition(arg2);
@@ -318,28 +355,40 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 			String winner = map.get("winner");
 			currentId = Integer.parseInt(s.split("N°")[1].split(" ")[0]);
 
-			Intent intent = new Intent(HistoryActivity.this, VisuPagerActivity.class);
-			intent.putExtra("id", HistoryActivity.currentId);
-
-			Bundle b = null;
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-
-				View view = arg1.findViewById(R.id.gameView1);
-
-				Bitmap bitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(), Bitmap.Config.ARGB_8888);
-				if (winner.compareTo("" + MainActivity.BLUE_PLAYER) == 0) {
-					bitmap.eraseColor(Color.parseColor(ColorHolder.getInstance(getApplicationContext()).getColor(MainActivity.BLUE_PLAYER)));
-					b = ActivityOptions.makeThumbnailScaleUpAnimation(view, bitmap, 0, 0).toBundle();
-				} else if (winner.compareTo("" + MainActivity.RED_PLAYER) == 0) {
-					bitmap.eraseColor(Color.parseColor(ColorHolder.getInstance(getApplicationContext()).getColor(MainActivity.RED_PLAYER)));
-					b = ActivityOptions.makeThumbnailScaleUpAnimation(view, bitmap, 0, 0).toBundle();
-				} else {
-					bitmap.eraseColor(isDark ? Color.DKGRAY : Color.LTGRAY);
-					b = ActivityOptions.makeThumbnailScaleUpAnimation(view, bitmap, 0, 0).toBundle();
-				}
-				startActivity(intent, b);
+			if (rightContainer != null) {
+				FragmentManager fm = getSupportFragmentManager();
+				FragmentTransaction ft = fm.beginTransaction();
+				lastFragment = VisuFragment.newInstance(currentId);
+				ft.replace(R.id.container_right, lastFragment);
+				ft.commit();
+				rightContainer.setVisibility(View.VISIBLE);
+				if (chartView != null)
+					chartView.setVisibility(View.GONE);
 			} else {
-				startActivity(intent);
+
+				Intent intent = new Intent(HistoryActivity.this, VisuPagerActivity.class);
+				intent.putExtra("id", HistoryActivity.currentId);
+
+				Bundle b = null;
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+
+					View view = arg1.findViewById(R.id.gameView1);
+
+					Bitmap bitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(), Bitmap.Config.ARGB_8888);
+					if (winner.compareTo("" + MainActivity.BLUE_PLAYER) == 0) {
+						bitmap.eraseColor(Color.parseColor(ColorHolder.getInstance(getApplicationContext()).getColor(MainActivity.BLUE_PLAYER)));
+						b = ActivityOptions.makeThumbnailScaleUpAnimation(view, bitmap, 0, 0).toBundle();
+					} else if (winner.compareTo("" + MainActivity.RED_PLAYER) == 0) {
+						bitmap.eraseColor(Color.parseColor(ColorHolder.getInstance(getApplicationContext()).getColor(MainActivity.RED_PLAYER)));
+						b = ActivityOptions.makeThumbnailScaleUpAnimation(view, bitmap, 0, 0).toBundle();
+					} else {
+						bitmap.eraseColor(isDark ? Color.DKGRAY : Color.LTGRAY);
+						b = ActivityOptions.makeThumbnailScaleUpAnimation(view, bitmap, 0, 0).toBundle();
+					}
+					startActivity(intent, b);
+				} else {
+					startActivity(intent);
+				}
 			}
 
 		} else {
@@ -743,8 +792,18 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 	}
 
 	private void createChart() {
-		lv.setVisibility(View.GONE);
-		listViewcards.setVisibility(View.GONE);
+		if (rightContainer == null) {
+			lv.setVisibility(View.GONE);
+			listViewcards.setVisibility(View.GONE);
+
+		} else {
+			FragmentManager fm = getSupportFragmentManager();
+			FragmentTransaction ft = fm.beginTransaction();
+			ft.remove(lastFragment);
+			ft.commit();
+
+			rightContainer.setVisibility(View.GONE);
+		}
 		chartView.setVisibility(View.VISIBLE);
 		chartView.setGridLineColor(isDark ? Color.rgb(19, 133, 173) : Color.BLACK);
 		chartView.setGridLinesVertical(0);
@@ -791,6 +850,18 @@ public class HistoryActivity extends SherlockActivity implements OnItemLongClick
 	}
 
 	public void createCards() {
+
+		if (rightContainer != null) {
+			FragmentManager fm = getSupportFragmentManager();
+			FragmentTransaction ft = fm.beginTransaction();
+			lastFragment = RightFillerFragment.newInstance();
+			ft.replace(R.id.container_right, lastFragment);
+			ft.commit();
+			if (chartView != null)
+				chartView.setVisibility(View.GONE);
+			rightContainer.setVisibility(View.VISIBLE);
+		}
+
 		listViewcards.setVisibility(View.VISIBLE);
 		chartView.setVisibility(View.GONE);
 		lv.setVisibility(View.GONE);

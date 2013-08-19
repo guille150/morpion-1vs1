@@ -49,7 +49,7 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent" >
 
-        <fr.mathis.morpion.GameView
+        <fr.mathis.moprion.views.GameView
             android:id="@+id/gameView1"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
@@ -60,7 +60,7 @@
             android:clickable="true"
             android:focusable="true"
             android:focusableInTouchMode="true" >
-        </fr.mathis.morpion.GameView>
+        </fr.mathis.moprion.views.GameView>
 
         <LinearLayout
             android:id="@+id/congratsContainer"
@@ -72,14 +72,11 @@
             android:layout_marginBottom="16dp"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:paddingBottom="8dp"
             android:paddingLeft="16dp"
-            android:paddingRight="16dp"
-            android:paddingTop="8dp"
             android:visibility="gone" >
 
             <TextView
-                android:id="@+id/resultText"
+                android:id="@+id/resultText2"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -90,10 +87,10 @@
             <LinearLayout
                 android:layout_width="1.4dp"
                 android:layout_height="match_parent"
+                android:layout_marginBottom="16dp"
+                android:layout_marginTop="16dp"
                 android:background="#60ffffff"
-                android:orientation="vertical"
-                android:paddingBottom="8dp"
-                android:paddingTop="8dp" >
+                android:orientation="vertical" >
             </LinearLayout>
 
             <ImageButton
@@ -102,16 +99,21 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:contentDescription="@string/app_name"
+                android:paddingBottom="16dp"
+                android:paddingRight="16dp"
+                android:paddingTop="16dp"
                 android:src="@drawable/ic_action_replaydark" />
 
             <TextView
                 android:id="@+id/congratsRetryCount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:layout_marginTop="16dp"
                 android:paddingLeft="16dp"
-                android:paddingRight="8dp"
-                android:textSize="24sp"
+                android:paddingRight="16dp"
                 android:textColor="#ffffff"
+                android:textSize="24sp"
                 android:visibility="gone" />
         </LinearLayout>
     </RelativeLayout>

@@ -4,7 +4,7 @@
     android:orientation="vertical"
     android:background="@drawable/gave_hover_background" >
 
-    <fr.mathis.morpion.GameView
+    <fr.mathis.moprion.views.GameView
         android:id="@+id/popupGame"
         android:layout_width="180dp"
         android:layout_height="180dp"
@@ -12,6 +12,6 @@
         android:clickable="false"
         android:focusable="false"
         android:focusableInTouchMode="false" >
-    </fr.mathis.morpion.GameView>
+    </fr.mathis.moprion.views.GameView>
 
 </LinearLayout>

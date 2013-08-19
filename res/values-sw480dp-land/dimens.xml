@@ -1,0 +1,5 @@
+<resources>
+
+	<dimen name="borderPadding">48dp</dimen>
+    
+</resources>

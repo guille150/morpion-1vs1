@@ -1,5 +1,6 @@
-package fr.mathis.morpion;
+package fr.mathis.morpion.interfaces;
 
+import fr.mathis.moprion.views.GameView;
 import android.view.MotionEvent;
 
 public interface HoverHandler {

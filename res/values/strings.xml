@@ -146,4 +146,6 @@
 	<string name="s56">Play online</string>
 	<string name="s57">Only available when connected to Google+.</string>
 	<string name="s58">Online mode requires Play Services</string>
+	<string name="s59">Share selected game</string>
+	<string name="s60">Impossible to share</string>
 </resources>

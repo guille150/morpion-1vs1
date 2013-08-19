@@ -19,15 +19,14 @@
         android:layout_height="wrap_content"
         android:layout_weight="1" >
 
-        <fr.mathis.morpion.GameView
+        <fr.mathis.moprion.views.GameView
             android:id="@+id/gameView1"
-            android:layout_width="0dp"
+            android:layout_width="fill_parent"
             android:layout_height="200dp"
-            android:layout_weight="1"
             android:clickable="false"
             android:focusable="false"
             android:focusableInTouchMode="false" >
-        </fr.mathis.morpion.GameView>
+        </fr.mathis.moprion.views.GameView>
     </LinearLayout>
 
     <ImageView
