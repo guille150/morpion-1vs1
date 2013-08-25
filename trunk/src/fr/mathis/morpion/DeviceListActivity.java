@@ -30,12 +30,10 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -71,7 +69,6 @@ public class DeviceListActivity extends Activity {
 
 		// Setup the window
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
-		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 
 		if (isDark)
 			setContentView(R.layout.device_listdark);
@@ -80,15 +77,6 @@ public class DeviceListActivity extends Activity {
 
 		// Set result CANCELED incase the user backs out
 		setResult(Activity.RESULT_CANCELED);
-
-		// Initialize the button to perform device discovery
-		Button scanButton = (Button) findViewById(R.id.button_scan);
-		scanButton.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				doDiscovery();
-				v.setVisibility(View.GONE);
-			}
-		});
 
 		// Initialize array adapters. One for already paired devices and
 		// one for newly discovered devices
@@ -129,6 +117,8 @@ public class DeviceListActivity extends Activity {
 			String noDevices = getString(R.string.s10);
 			mPairedDevicesArrayAdapter.add(noDevices);
 		}
+		
+		doDiscovery();
 	}
 
 	@Override
@@ -152,8 +142,8 @@ public class DeviceListActivity extends Activity {
 			Log.d(TAG, "doDiscovery()");
 
 		// Indicate scanning in the title
-		setProgressBarIndeterminateVisibility(true);
-		((TextView) findViewById(R.id.title_title)).setText(R.string.s11);
+		findViewById(R.id.progressBar).setVisibility(View.VISIBLE);
+		//((TextView) findViewById(R.id.title_title)).setText(R.string.s11);
 
 		// Turn on sub-title for new devices
 		findViewById(R.id.title_new_devices).setVisibility(View.VISIBLE);
@@ -212,8 +202,8 @@ public class DeviceListActivity extends Activity {
 				}
 				// When discovery is finished, change the Activity title
 			} else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
-				setProgressBarIndeterminateVisibility(false);
-				((TextView) findViewById(R.id.title_title)).setText(R.string.s12);
+				findViewById(R.id.progressBar).setVisibility(View.GONE);
+				//((TextView) findViewById(R.id.title_title)).setText(R.string.s12);
 				if (mNewDevicesArrayAdapter.getCount() == 0) {
 					String noDevices = getString(R.string.s13);
 					mNewDevicesArrayAdapter.add(noDevices);

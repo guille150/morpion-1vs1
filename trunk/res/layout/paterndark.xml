@@ -1,0 +1,83 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="#111" >
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingBottom="8dp"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:paddingTop="8dp" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:drawableRight="@drawable/ic_action_action_aboutdark"
+            android:fontFamily="sans-serif-condensed"
+            android:text="@string/s61"
+            android:textAllCaps="true"
+            android:textSize="18sp" />
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="1dp"
+            android:layout_marginBottom="4dp"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/linegraylight"
+            android:orientation="vertical" >
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-condensed"
+            android:text="@string/s62"
+            android:textSize="16sp" />
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center" 
+            android:layout_gravity="center">
+
+            <group.pals.android.lib.ui.lockpattern.widget.LockPatternView
+                android:id="@+id/lockPatternView1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="1dp"
+            android:layout_marginBottom="8dp"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/linegraylightdark"
+            android:orientation="vertical" >
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:alpha="0.8"
+            android:fontFamily="sans-serif-light"
+            android:lineSpacingMultiplier="0.9"
+            android:text="@string/s63"
+            android:textAllCaps="true"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:alpha="0.8"
+            android:fontFamily="sans-serif-light"
+            android:lineSpacingMultiplier="0.9"
+            android:text="@string/s64"
+            android:textSize="13sp" />
+    </LinearLayout>
+
+</ScrollView>
