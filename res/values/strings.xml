@@ -27,6 +27,8 @@
     <string name="aide12">The blue curve corresponds to your victories, the red curve to the victories of your opponents and the black curve equalities. They allow you to compare the evolution of the score over the games (horizontal axis).</string>
     <string name="aide13">Why is there only 21 detailed history games ?</string>
     <string name="aide14">You can see the selected one with the ten done before and after.</string>
+    <string name="aide20">What happens when I launch the app ?</string>
+    <string name="aide21">If you\'re connected with your Google account, your preferences are synced with all your devices. Your game history is partially sync as well.</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="saveText">Save the equalities</string>
@@ -135,11 +137,11 @@
 	<string name="s45">An invitation has been sent to you</string>
 	<string name="s46">Accept</string>
 	<string name="s47">Decline</string>
-	<string name="s48">You can\'t go to another screen without quitting the current game.</string>
+	<string name="s48">You\'re playing with another player, you need to leave the game</string>
 	<string name="s49">Connecting</string>
 	<string name="s50">Please wait…</string>
 	<string name="s51">Other player left the game</string>
-	<string name="s52">Stop online game</string>
+	<string name="s52">Stop the game</string>
 	<string name="s53">Quick game</string>
 	<string name="s54">Invite a friend</string>
 	<string name="s55">View invitations</string>
@@ -148,4 +150,12 @@
 	<string name="s58">Online mode requires Play Services</string>
 	<string name="s59">Share selected game</string>
 	<string name="s60">Impossible to share</string>
+	<string name="s61">Your current game won\'t be saved</string>
+	<string name="s62">To exit, validate the pattern below</string>
+	<string name="s63">What\'s that ?!</string>
+	<string name="s64">Some testers from a long validation process pointed out that it can be really frustating to press the back button and lose the current game. So to be sure you didn\'t miss touched the back key, you need to confirm your first intention to exit without saving.</string>
+	<string name="s65"></string>
+	<string name="s66"></string>
+	<string name="s67"></string>
+	<string name="s68"></string>
 </resources>

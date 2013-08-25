@@ -16,13 +16,15 @@
             android:layout_marginBottom="8dp"
             android:layout_marginTop="8dp"
             android:text="@string/s56"
+            android:textColor="#FFFFFF"
             android:visibility="visible" />
 
-        <LinearLayout android:id="@+id/tohidewhenno"
-            android:orientation="vertical"
+        <LinearLayout
+            android:id="@+id/tohidewhenno"
             android:layout_width="fill_parent"
-            android:layout_height="2dp"
+            android:layout_height="1.4dp"
             android:background="@color/bluehighlighted"
+            android:orientation="vertical"
             android:paddingBottom="16dp" >
         </LinearLayout>
 
@@ -55,7 +57,8 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
-            android:text="@string/s21" />
+            android:text="@string/s21"
+            android:textColor="#FFFFFF" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -78,7 +81,8 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
-            android:text="@string/s24" />
+            android:text="@string/s24"
+            android:textColor="#FFFFFF" />
 
         <LinearLayout
             android:layout_width="fill_parent"
@@ -112,6 +116,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
             android:text="@string/s3"
+            android:textColor="#FFFFFF"
             android:visibility="gone" />
     </LinearLayout>
 

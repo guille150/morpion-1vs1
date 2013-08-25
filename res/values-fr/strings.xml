@@ -26,6 +26,8 @@
     <string name="aide12">La courbe de couleur primaire correspond à vos victoires, la courbe de couleur secondaire aux victoires de votre adversaires et la courbe noire aux égalités. Elles vous permettent de comparer l\'évolution du score au fil des parties (axe horizontale).</string>
     <string name="aide13">Pourquoi y a-t-il 21 parties dans le détail de l\'historique ?</string>
     <string name="aide14">Il y a la partie sélectionnée avec les 10 précédentes et suivantes.</string>
+    <string name="aide20">Que se passe-t-il quand je lance l\'application ?</string>
+    <string name="aide21">En étant connecté à votre compte Google, vos préférences sont synchronisées entre tous les péripériques. L\'historique est partiellement sauvegardé également.</string>
     <string name="yes">Oui</string>
     <string name="no">Non</string>
     <string name="saveText">Sauvegarder les égalités</string>
@@ -133,11 +135,11 @@
     <string name="s45">Une invitation vient de vous être envoyée</string>
     <string name="s46">Accepter</string>
     <string name="s47">Refuser</string>
-    <string name="s48">Vous devez quitter la partie en ligne avant de changer d\'écran.</string>
+    <string name="s48">Vous jouez avec un autre joueur, vous devez quitter la partie</string>
     <string name="s49">Connexion en cours</string>
     <string name="s50">Veuillez patienter…</string>
     <string name="s51">Votre adversaire a quitté la partie</string>
-    <string name="s52">Arrêter la partie en ligne</string>
+    <string name="s52">Arrêter la partie</string>
     <string name="s53">Partie rapide</string>
     <string name="s54">Inviter un ami</string>
     <string name="s55">Voir les invitations</string>
@@ -146,4 +148,8 @@
 	<string name="s58">Mode en ligne requiert les Services Google Play.</string>
 	<string name="s59">Partager cette partie</string>
 	<string name="s60">Partage impossible</string>
+	<string name="s61">La partie en cours ne sera pas sauvegardée</string>
+	<string name="s62">Pour quitter, validez le schéma ci-dessous</string>
+	<string name="s63">Pourquoi ?!</string>
+	<string name="s64">Des testeurs opérant un cycle de validation très long ont mis en évidence que perdre sa partie en cours en cliquant par inadvertance sur Retour est très frustant ! Donc pour être sûr que vous vouliez quittez, vous devez confirmer votre première intention de quitter l\'application sans sauvegarder.</string>
 </resources>

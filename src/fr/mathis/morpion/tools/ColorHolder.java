@@ -63,6 +63,11 @@ public class ColorHolder {
 		res.add("#515151");
 		return res;
 	}
+	
+	public static String addAlphaFormColor(String color, String alpha)
+	{
+		return "#"+alpha+color.substring(1);
+	}
 
 	public static ArrayList<Integer> getAllBlueDrawable() {
 		ArrayList<Integer> res = new ArrayList<Integer>();

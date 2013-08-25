@@ -33,9 +33,11 @@ import android.util.Log;
 import android.view.ActionProvider;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.SubMenu;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.AlphaAnimation;
@@ -107,6 +109,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 
 	private static final int REQUEST_CONNECT_DEVICE_INSECURE = 2;
 	private static final int REQUEST_PREF = 7;
+	private static final int REQUEST_PATERN = 37;
 	private static final int ACTIVITY_HISTORY = 36;
 	final static int RC_INVITATION_INBOX = 10001;
 	final static int RC_SELECT_PLAYERS = 10000;
@@ -157,6 +160,11 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 
 	boolean firstStartShouldReloadConfig = true;
 	boolean comeBackFromSettingsShouldSave = false;
+	boolean userMightNotWantToLeave = false;
+	boolean forceNoPatern = true;
+
+	boolean isPlayingBluetooth = false;
+	boolean avoidNextBluetoothMessage = false;
 
 	boolean isPlayingOnline = false;
 	String roomId = null;
@@ -192,6 +200,23 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 		createNewGameAI();
 		if (!StateHolder.GetMemorizedValue("showwelcomedrawer", this) || android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
 			new Async().execute();
+		}
+	}
+
+	@Override
+	public void onBackPressed() {
+		if (forceNoPatern) {
+			super.onBackPressed();
+		} else {
+			if (userMightNotWantToLeave && gv != null) {
+				Intent aPatern = new Intent(this, PaternActivityDialog.class);
+				Bundle b = new Bundle();
+				b.putSerializable("values", gv.getValues());
+				aPatern.putExtras(b);
+				startActivityForResult(aPatern, REQUEST_PATERN);
+			} else {
+				super.onBackPressed();
+			}
 		}
 	}
 
@@ -309,6 +334,8 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 		}
 		if (isPlayingOnline) {
 			Toast.makeText(getApplicationContext(), R.string.s48, Toast.LENGTH_SHORT).show();
+		} else if (isPlayingBluetooth) {
+			Toast.makeText(getApplicationContext(), R.string.s48, Toast.LENGTH_SHORT).show();
 		} else {
 			boolean forseFirst = false;
 
@@ -361,6 +388,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 				}
 				if (shouldCloseDrawer && mDrawerLayout != null)
 					mDrawerLayout.closeDrawer(GravityCompat.START);
+				userMightNotWantToLeave = false;
 			}
 			if (groupPosition == 2 && childPosition == 0) {
 				if (isSignedIn())
@@ -576,10 +604,18 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 		}
 
 		if (item.getTitle().toString().compareTo(getString(R.string.s52)) == 0) {
-			leftGameOnline(-1);
+			if (isPlayingOnline)
+				leftGameOnline(-1);
+			if (isPlayingBluetooth) {
+				stopService();
+				startService();
+			}
+			return true;
 		}
 
 		if (isPlayingOnline) {
+			Toast.makeText(getApplicationContext(), R.string.s48, Toast.LENGTH_SHORT).show();
+		} else if (isPlayingBluetooth) {
 			Toast.makeText(getApplicationContext(), R.string.s48, Toast.LENGTH_SHORT).show();
 		} else {
 			if (item.getTitle().toString().compareTo(getString(R.string.menupref)) == 0) {
@@ -602,6 +638,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 	}
 
 	private void createNewGameAI() {
+		userMightNotWantToLeave = false;
 		View child = getLayoutInflater().inflate(isDark ? R.layout.game_aidark : R.layout.game_ai, null);
 		container.removeAllViews();
 		container.addView(child);
@@ -628,6 +665,8 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 		gv.setDelegate(new GameHandler() {
 			@Override
 			public void handleTurn(int i, int j) {
+				userMightNotWantToLeave = true;
+				userMightNotWantToLeave = true;
 				if (turn == BLUE_PLAYER) {
 					tabVal[i][j] = BLUE_PLAYER;
 					gv.setValues(tabVal, BLUE_PLAYER);
@@ -977,7 +1016,8 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 
 	private void startBluetooth() {
 		mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-
+		miStopOnline.setVisible(false);
+		firstIsPlayed = false;
 		// If the adapter is null, then Bluetooth is not supported
 		if (mBluetoothAdapter == null) {
 			Toast.makeText(this, R.string.s1s, Toast.LENGTH_LONG).show();
@@ -1003,13 +1043,12 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 			// Initialize the BluetoothChatService to perform bluetooth
 			// connections
 			mChatService = new BluetoothChatService(this, mHandler);
-
-			// Initialize the buffer for outgoing messages
 			mOutStringBuffer = new StringBuffer("");
 
 			startService();
 
 			Button btnBTVisible = (Button) findViewById(R.id.buttonBTVisible);
+			btnBTVisible.setBackgroundColor(Color.parseColor(ColorHolder.getInstance(getApplicationContext()).getColor(MainActivity.RED_PLAYER)));
 			btnBTVisible.setOnClickListener(new OnClickListener() {
 
 				@Override
@@ -1025,6 +1064,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 			});
 
 			Button btnBTSearch = (Button) findViewById(R.id.buttonBTSearch);
+			btnBTSearch.setBackgroundColor(Color.parseColor(ColorHolder.getInstance(getApplicationContext()).getColor(MainActivity.RED_PLAYER)));
 			btnBTSearch.setOnClickListener(new OnClickListener() {
 
 				@Override
@@ -1035,6 +1075,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 			});
 
 			final Button btnBTCut = (Button) findViewById(R.id.buttonBTCut);
+			btnBTCut.setBackgroundColor(Color.parseColor(ColorHolder.getInstance(getApplicationContext()).getColor(MainActivity.RED_PLAYER)));
 			btnBTCut.setOnClickListener(new OnClickListener() {
 
 				@Override
@@ -1051,6 +1092,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 			});
 
 			final Button btnOnline = (Button) findViewById(R.id.buttonOnline);
+			btnOnline.setBackgroundColor(Color.parseColor(ColorHolder.getInstance(getApplicationContext()).getColor(MainActivity.BLUE_PLAYER)));
 
 			if (GooglePlayServicesUtil.isGooglePlayServicesAvailable(getApplicationContext()) != ConnectionResult.SUCCESS) {
 				btnOnline.setVisibility(View.GONE);
@@ -1063,8 +1105,8 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 				public void onClick(View v) {
 					if (isSignedIn()) {
 						createOnlineScreen();
-						activeNavChild = 0;
-						activeNavSection = 3;
+						activeNavChild = 3;
+						activeNavSection = 0;
 						navAdapter.notifyDataSetChanged();
 						miStopOnline.setVisible(false);
 						isPlayingOnline = false;
@@ -1074,6 +1116,59 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 				}
 			});
 
+			btnOnline.setOnTouchListener(new OnTouchListener() {
+				@Override
+				public boolean onTouch(View v, MotionEvent event) {
+					switch (event.getAction()) {
+					case MotionEvent.ACTION_CANCEL:
+					case MotionEvent.ACTION_UP:
+						v.setBackgroundColor(Color.parseColor(ColorHolder.addAlphaFormColor(ColorHolder.getInstance(getApplicationContext()).getColor(MainActivity.BLUE_PLAYER), "FF")));
+						break;
+					case MotionEvent.ACTION_DOWN:
+						v.setBackgroundColor(Color.parseColor(ColorHolder.addAlphaFormColor(ColorHolder.getInstance(getApplicationContext()).getColor(MainActivity.BLUE_PLAYER), "BB")));
+						break;
+					default:
+						break;
+					}
+					return false;
+				}
+			});
+
+			btnBTSearch.setOnTouchListener(new OnTouchListener() {
+				@Override
+				public boolean onTouch(View v, MotionEvent event) {
+					switch (event.getAction()) {
+					case MotionEvent.ACTION_CANCEL:
+					case MotionEvent.ACTION_UP:
+						v.setBackgroundColor(Color.parseColor(ColorHolder.addAlphaFormColor(ColorHolder.getInstance(getApplicationContext()).getColor(MainActivity.RED_PLAYER), "FF")));
+						break;
+					case MotionEvent.ACTION_DOWN:
+						v.setBackgroundColor(Color.parseColor(ColorHolder.addAlphaFormColor(ColorHolder.getInstance(getApplicationContext()).getColor(MainActivity.RED_PLAYER), "BB")));
+						break;
+					default:
+						break;
+					}
+					return false;
+				}
+			});
+
+			btnBTVisible.setOnTouchListener(new OnTouchListener() {
+				@Override
+				public boolean onTouch(View v, MotionEvent event) {
+					switch (event.getAction()) {
+					case MotionEvent.ACTION_CANCEL:
+					case MotionEvent.ACTION_UP:
+						v.setBackgroundColor(Color.parseColor(ColorHolder.addAlphaFormColor(ColorHolder.getInstance(getApplicationContext()).getColor(MainActivity.RED_PLAYER), "FF")));
+						break;
+					case MotionEvent.ACTION_DOWN:
+						v.setBackgroundColor(Color.parseColor(ColorHolder.addAlphaFormColor(ColorHolder.getInstance(getApplicationContext()).getColor(MainActivity.RED_PLAYER), "BB")));
+						break;
+					default:
+						break;
+					}
+					return false;
+				}
+			});
 		}
 
 	}
@@ -1144,7 +1239,8 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 				if (msg.getData().getString(TOAST).compareTo(getString(R.string.s9)) == 0) {
 					startBluetooth();
 				}
-				Toast.makeText(getApplicationContext(), msg.getData().getString(TOAST), Toast.LENGTH_SHORT).show();
+				if (!avoidNextBluetoothMessage)
+					Toast.makeText(getApplicationContext(), msg.getData().getString(TOAST), Toast.LENGTH_SHORT).show();
 				break;
 			}
 		}
@@ -1178,6 +1274,9 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 	}
 
 	private void createNewMuliGame() {
+		isPlayingBluetooth = true;
+		miStopOnline.setVisible(true);
+		userMightNotWantToLeave = false;
 		View child = getLayoutInflater().inflate(isDark ? R.layout.game_aidark : R.layout.game_ai, null);
 
 		container.removeAllViews();
@@ -1233,6 +1332,8 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 
 			@Override
 			public void handleTurn(int i, int j) {
+				userMightNotWantToLeave = true;
+				userMightNotWantToLeave = true;
 				if (!amILatestPlayerMulti) {
 					String messageToSend = "";
 					messageToSend = "newturn/" + i + "/" + j;
@@ -1248,6 +1349,11 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 		case REQUEST_CONNECT_DEVICE_INSECURE:
 			if (resultCode == Activity.RESULT_OK) {
 				connectDevice(data, false);
+			}
+			break;
+		case REQUEST_PATERN:
+			if (resultCode == Activity.RESULT_OK) {
+				finish();
 			}
 			break;
 		case REQUEST_BT:
@@ -1430,6 +1536,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 
 		@Override
 		public void handleTurn(int i, int j) {
+			userMightNotWantToLeave = true;
 			miStopOnline.setVisible(true);
 			if (turn == BLUE_PLAYER) {
 				tabVal[i][j] = BLUE_PLAYER;
@@ -1534,6 +1641,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 
 	@SuppressLint("NewApi")
 	public void createNewGame() {
+		userMightNotWantToLeave = false;
 		View child = getLayoutInflater().inflate(isDark ? R.layout.game_aidark : R.layout.game_ai, null);
 		getSupportActionBar().setIcon(R.drawable.two_player);
 		container.removeAllViews();
@@ -1566,6 +1674,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 		gv.setDelegate(new GameHandler() {
 			@Override
 			public void handleTurn(int i, int j) {
+				userMightNotWantToLeave = true;
 				if (turn == BLUE_PLAYER) {
 					tabVal[i][j] = BLUE_PLAYER;
 					displayNextTurn();
@@ -1623,6 +1732,19 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 			}
 		}
 		playerText.setTextColor(Color.parseColor(ColorHolder.getInstance(this).getColor(turn)));
+
+		Button btnBTVisible = (Button) findViewById(R.id.buttonBTVisible);
+		if (btnBTVisible != null)
+			btnBTVisible.setBackgroundColor(Color.parseColor(ColorHolder.getInstance(getApplicationContext()).getColor(MainActivity.RED_PLAYER)));
+		Button btnBTSearch = (Button) findViewById(R.id.buttonBTSearch);
+		if (btnBTSearch != null)
+			btnBTSearch.setBackgroundColor(Color.parseColor(ColorHolder.getInstance(getApplicationContext()).getColor(MainActivity.RED_PLAYER)));
+		final Button btnBTCut = (Button) findViewById(R.id.buttonBTCut);
+		if (btnBTCut != null)
+			btnBTCut.setBackgroundColor(Color.parseColor(ColorHolder.getInstance(getApplicationContext()).getColor(MainActivity.RED_PLAYER)));
+		final Button btnOnline = (Button) findViewById(R.id.buttonOnline);
+		if (btnOnline != null)
+			btnOnline.setBackgroundColor(Color.parseColor(ColorHolder.getInstance(getApplicationContext()).getColor(MainActivity.BLUE_PLAYER)));
 	}
 
 	public void signOutProcess() {
@@ -1710,6 +1832,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 		winnerForUpdateField = winner;
 		oneGameHasBeenPlayedWeCanSave = true;
 		finishedAI = true;
+		userMightNotWantToLeave = false;
 
 		if (isSignedIn()) {
 			if (tabVal[0][0] == RED_PLAYER && tabVal[0][1] == RED_PLAYER && tabVal[0][2] == BLUE_PLAYER && tabVal[1][0] == BLUE_PLAYER && tabVal[1][1] == BLUE_PLAYER && tabVal[1][2] == RED_PLAYER && tabVal[2][0] == RED_PLAYER && tabVal[2][1] == BLUE_PLAYER && tabVal[2][2] == RED_PLAYER) {
@@ -1870,6 +1993,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 	protected void onStop() {
 		super.onStop();
 		stopService();
+		isPlayingBluetooth = false;
 	}
 
 	@Override
@@ -1998,11 +2122,13 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 
 		}
 
-		if (getGamesClient().isConnected()) {
+		if (getGamesClient().isConnected())
 			getAppStateClient().updateState(SAVE_HIST_1, hist1);
+		if (getGamesClient().isConnected())
 			getAppStateClient().updateState(SAVE_HIST_2, hist2);
+		if (getGamesClient().isConnected())
 			getAppStateClient().updateState(SAVE_HIST_3, hist3);
-		}
+
 	}
 
 	@SuppressWarnings("unchecked")
@@ -2025,7 +2151,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 					n++;
 				}
 			}
-			
+
 			ToolsBDD.getInstance(getApplicationContext()).getBDD().beginTransaction();
 			for (int i = 0; i < data.length && totalTreater < totalGameToRestore; i++) {
 				String d = getWellFormedBytesAsString("" + Integer.toBinaryString((data[i] + 256) % 256));
@@ -2053,6 +2179,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 				}
 
 			}
+			ToolsBDD.getInstance(activContext).getBDD().setTransactionSuccessful();
 			ToolsBDD.getInstance(getApplicationContext()).getBDD().endTransaction();
 			return null;
 		}
@@ -2104,8 +2231,11 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 	}
 
 	public void stopService() {
-		if (mChatService != null)
+		if (mChatService != null) {
 			mChatService.stop();
+			avoidNextBluetoothMessage = true;
+		}
+
 	}
 
 	private android.view.MenuItem getMenuItem(final MenuItem item) {
@@ -2363,10 +2493,14 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 			saveState();
 			comeBackFromSettingsShouldSave = false;
 		} else if (firstStartShouldReloadConfig) {
-			getAppStateClient().loadState(this, SAVE_PREF);
-			getAppStateClient().loadState(this, SAVE_HIST_1);
-			getAppStateClient().loadState(this, SAVE_HIST_2);
-			getAppStateClient().loadState(this, SAVE_HIST_3);
+			if (getGamesClient().isConnected())
+				getAppStateClient().loadState(this, SAVE_PREF);
+			if (getGamesClient().isConnected())
+				getAppStateClient().loadState(this, SAVE_HIST_1);
+			if (getGamesClient().isConnected())
+				getAppStateClient().loadState(this, SAVE_HIST_2);
+			if (getGamesClient().isConnected())
+				getAppStateClient().loadState(this, SAVE_HIST_3);
 			firstStartShouldReloadConfig = false;
 		}
 		if (comeBackFromHistoryShouldAchievement) {
@@ -2375,18 +2509,20 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 		}
 		comeBackFromHistoryShouldAchievement = false;
 
-		getGamesClient().registerInvitationListener(this);
+		if (getGamesClient().isConnected())
+			getGamesClient().registerInvitationListener(this);
 
-		if (getInvitationId() != null) {
-			RoomConfig.Builder roomConfigBuilder = makeBasicRoomConfigBuilder();
-			roomConfigBuilder.setInvitationIdToAccept(getInvitationId());
-			getGamesClient().joinRoom(roomConfigBuilder.build());
+		if (getGamesClient().isConnected())
+			if (getInvitationId() != null) {
+				RoomConfig.Builder roomConfigBuilder = makeBasicRoomConfigBuilder();
+				roomConfigBuilder.setInvitationIdToAccept(getInvitationId());
+				getGamesClient().joinRoom(roomConfigBuilder.build());
 
-			// prevent screen from sleeping during handshake
-			getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+				// prevent screen from sleeping during handshake
+				getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-			// go to game screen
-		}
+				// go to game screen
+			}
 
 	}
 
@@ -2414,7 +2550,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 				ColorHolder.getInstance(getApplicationContext()).save(MainActivity.RED_PLAYER, data[3]);
 				ColorHolder.getInstance(getApplicationContext()).save(MainActivity.BLUE_PLAYER, data[2]);
 
-				totalGameToRestore = (short) ((data[5] << 8) | (data[4] & 0xFF));
+				totalGameToRestore = (short) (((data[5] & 0xFF) << 8) | (data[4] & 0xFF));
 
 				updateField();
 			} else if (statusCode == AppStateClient.STATUS_NETWORK_ERROR_STALE_DATA) {
@@ -2433,7 +2569,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 				ColorHolder.getInstance(getApplicationContext()).save(MainActivity.RED_PLAYER, data[3]);
 				ColorHolder.getInstance(getApplicationContext()).save(MainActivity.BLUE_PLAYER, data[2]);
 
-				totalGameToRestore = (short) ((data[5] << 8) | (data[4] & 0xFF));
+				totalGameToRestore = (short) (((data[5] & 0xFF) << 8) | (data[4] & 0xFF));
 
 				updateField();
 			} else {
