@@ -78,11 +78,6 @@
         </activity>
         <activity android:name="PreferencesActivity" >
         </activity>
-        <activity
-            android:name="PaternActivityDialog"
-            android:configChanges="orientation|keyboardHidden"
-            android:theme="@style/Alp.Theme.Dialog.Light" >
-        </activity>
     </application>
 
 </manifest>
