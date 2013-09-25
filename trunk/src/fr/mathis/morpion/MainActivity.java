@@ -203,23 +203,6 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 		}
 	}
 
-	@Override
-	public void onBackPressed() {
-		if (forceNoPatern) {
-			super.onBackPressed();
-		} else {
-			if (userMightNotWantToLeave && gv != null) {
-				Intent aPatern = new Intent(this, PaternActivityDialog.class);
-				Bundle b = new Bundle();
-				b.putSerializable("values", gv.getValues());
-				aPatern.putExtras(b);
-				startActivityForResult(aPatern, REQUEST_PATERN);
-			} else {
-				super.onBackPressed();
-			}
-		}
-	}
-
 	class Async extends AsyncTask<Void, Void, Void> {
 
 		@Override
