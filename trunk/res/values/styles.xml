@@ -7,7 +7,7 @@
         <item name="android:buttonStyle">@style/ButtonAppTheme</item>
         <item name="android:imageButtonStyle">@style/ImageButtonAppTheme</item>
         <item name="android:spinnerStyle">@style/SpinnerAppTheme</item>
-        <item name="android:dropDownSpinnerStyle">@style/SpinnerAppTheme.DropDown</item>
+        <!-- <item name="android:dropDownSpinnerStyle">@style/SpinnerAppTheme.DropDown</item> -->
         <item name="android:spinnerDropDownItemStyle">@style/SpinnerDropDownItemAppTheme</item>
     </style>
 
@@ -16,7 +16,7 @@
         <item name="android:buttonStyle">@style/ButtonAppThemeDark</item>
         <item name="android:imageButtonStyle">@style/ImageButtonAppThemeDark</item>
         <item name="android:spinnerStyle">@style/SpinnerAppThemeDark</item>
-        <item name="android:dropDownSpinnerStyle">@style/SpinnerAppThemeDark.DropDown</item>
+        <!-- <item name="android:dropDownSpinnerStyle">@style/SpinnerAppThemeDark.DropDown</item> -->
         <item name="android:spinnerDropDownItemStyle">@style/SpinnerDropDownItemAppThemeDark</item>
     </style>
 
@@ -26,7 +26,7 @@
     </style>
 
     <style name="SpinnerAppTheme.DropDown">
-        <item name="android:spinnerMode">dropdown</item>
+        <!-- <item name="android:spinnerMode">dropdown</item> -->
     </style>
 
     <style name="SpinnerDropDownItemAppTheme" parent="android:Widget.DropDownItem.Spinner">
@@ -39,7 +39,7 @@
     </style>
 
     <style name="SpinnerAppThemeDark.DropDown">
-        <item name="android:spinnerMode">dropdown</item>
+        <!-- <item name="android:spinnerMode">dropdown</item> -->
     </style>
 
     <style name="SpinnerDropDownItemAppThemeDark" parent="android:Widget.DropDownItem.Spinner">
@@ -104,9 +104,9 @@
         <item name="android:orientation">horizontal</item>
         <item name="android:background">@drawable/undobar</item>
         <item name="android:clickable">true</item>
-        <item name="android:showDividers">middle</item>
+        <!-- <item name="android:showDividers">middle</item> -->
         <item name="android:divider">@drawable/undobar_divider</item>
-        <item name="android:dividerPadding">10dp</item>
+        <!-- <item name="android:dividerPadding">10dp</item> -->
     </style>
 
     <style name="UndoBarMessage">
@@ -129,10 +129,98 @@
         <item name="android:drawableLeft">@drawable/ic_undobar_undo</item>
         <item name="android:drawablePadding">12dp</item>
         <item name="android:textAppearance">?android:textAppearanceSmall</item>
-        <item name="android:textAllCaps">true</item>
+        <!-- <item name="android:textAllCaps">true</item> -->
         <item name="android:textStyle">bold</item>
         <item name="android:textColor">#fff</item>
         <item name="android:text">@string/undo</item>
+    </style>
+
+    <style name="ActionBar.Solid.Appthemedark" parent="@style/Widget.Sherlock.ActionBar.Solid">
+        <item name="background">@drawable/ab_solid_appthemedark</item>
+        <item name="backgroundStacked">@drawable/ab_stacked_solid_appthemedark</item>
+        <item name="backgroundSplit">@drawable/ab_bottom_solid_appthemedark</item>
+        <item name="progressBarStyle">@style/ProgressBar.Appthemedark</item>
+    </style>
+
+    <style name="ActionBar.Transparent.Appthemedark" parent="@style/Widget.Sherlock.ActionBar">
+        <item name="background">@drawable/ab_transparent_appthemedark</item>
+        <item name="progressBarStyle">@style/ProgressBar.Appthemedark</item>
+    </style>
+
+    <style name="PopupMenu.Appthemedark" parent="@style/Widget.Sherlock.ListPopupWindow">
+        <item name="android:popupBackground">@drawable/menu_dropdown_panel_appthemedark</item>
+    </style>
+
+    <style name="DropDownListView.Appthemedark" parent="@style/Widget.Sherlock.ListView.DropDown">
+        <item name="android:listSelector">@drawable/selectable_background_appthemedark</item>
+    </style>
+
+    <style name="ActionBarTabStyle.Appthemedark" parent="@style/Widget.Sherlock.ActionBar.TabView">
+        <item name="android:background">@drawable/tab_indicator_ab_appthemedark</item>
+    </style>
+
+    <style name="DropDownNav.Appthemedark" parent="@style/Widget.Sherlock.Spinner.DropDown.ActionBar">
+        <item name="android:background">@drawable/spinner_background_ab_appthemedark</item>
+        <item name="android:popupBackground">@drawable/menu_dropdown_panel_appthemedark</item>
+        <item name="android:dropDownSelector">@drawable/selectable_background_appthemedark</item>
+    </style>
+
+    <style name="ProgressBar.Appthemedark" parent="@style/Widget.Sherlock.ProgressBar.Horizontal">
+        <item name="android:progressDrawable">@drawable/progress_horizontal_appthemedark</item>
+    </style>
+
+    <style name="ActionButton.CloseMode.Appthemedark" parent="@style/Widget.Sherlock.ActionButton.CloseMode">
+        <item name="android:background">@drawable/btn_cab_done_appthemedark</item>
+    </style>
+
+    <!-- this style is only referenced in a Light.DarkActionBar based theme -->
+    <style name="Theme.Appthemedark.Widget" parent="@style/Theme.Sherlock">
+        <item name="popupMenuStyle">@style/PopupMenu.Appthemedark</item>
+        <item name="dropDownListViewStyle">@style/DropDownListView.Appthemedark</item>
+    </style>
+
+    <style name="ActionBar.Solid.Apptheme" parent="@style/Widget.Sherlock.Light.ActionBar.Solid">
+        <item name="background">@drawable/ab_solid_apptheme</item>
+        <item name="backgroundStacked">@drawable/ab_stacked_solid_apptheme</item>
+        <item name="backgroundSplit">@drawable/ab_bottom_solid_apptheme</item>
+        <item name="progressBarStyle">@style/ProgressBar.Apptheme</item>
+    </style>
+
+    <style name="ActionBar.Transparent.Apptheme" parent="@style/Widget.Sherlock.Light.ActionBar">
+        <item name="background">@drawable/ab_transparent_apptheme</item>
+        <item name="progressBarStyle">@style/ProgressBar.Apptheme</item>
+    </style>
+
+    <style name="PopupMenu.Apptheme" parent="@style/Widget.Sherlock.Light.ListPopupWindow">
+        <item name="android:popupBackground">@drawable/menu_dropdown_panel_apptheme</item>
+    </style>
+
+    <style name="DropDownListView.Apptheme" parent="@style/Widget.Sherlock.Light.ListView.DropDown">
+        <item name="android:listSelector">@drawable/selectable_background_apptheme</item>
+    </style>
+
+    <style name="ActionBarTabStyle.Apptheme" parent="@style/Widget.Sherlock.Light.ActionBar.TabView">
+        <item name="android:background">@drawable/tab_indicator_ab_apptheme</item>
+    </style>
+
+    <style name="DropDownNav.Apptheme" parent="@style/Widget.Sherlock.Light.Spinner.DropDown.ActionBar">
+        <item name="android:background">@drawable/spinner_background_ab_apptheme</item>
+        <item name="android:popupBackground">@drawable/menu_dropdown_panel_apptheme</item>
+        <item name="android:dropDownSelector">@drawable/selectable_background_apptheme</item>
+    </style>
+
+    <style name="ProgressBar.Apptheme" parent="@style/Widget.Sherlock.Light.ProgressBar.Horizontal">
+        <item name="android:progressDrawable">@drawable/progress_horizontal_apptheme</item>
+    </style>
+
+    <style name="ActionButton.CloseMode.Apptheme" parent="@style/Widget.Sherlock.Light.ActionButton.CloseMode">
+        <item name="android:background">@drawable/btn_cab_done_apptheme</item>
+    </style>
+
+    <!-- this style is only referenced in a Light.DarkActionBar based theme -->
+    <style name="Theme.Apptheme.Widget" parent="@style/Theme.Sherlock">
+        <item name="popupMenuStyle">@style/PopupMenu.Apptheme</item>
+        <item name="dropDownListViewStyle">@style/DropDownListView.Apptheme</item>
     </style>
 
 </resources>

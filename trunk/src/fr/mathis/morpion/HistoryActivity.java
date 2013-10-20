@@ -312,10 +312,7 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 
 	public boolean onMenuItemSelected(int featureId, MenuItem item) {
 
-		if (item.getTitle().toString().compareTo(getString(R.string.share)) == 0) {
-			share();
-			return true;
-		} else if (item.getTitle().toString().compareTo(getString(R.string.reset)) == 0) {
+		if (item.getTitle().toString().compareTo(getString(R.string.reset)) == 0) {
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
 			builder.setTitle(R.string.sure).setPositiveButton(R.string.yes, dialogClickListener).setNegativeButton(R.string.no, dialogClickListener).show();
 			return true;
@@ -329,13 +326,6 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 		}
 
 		return super.onMenuItemSelected(featureId, item);
-	}
-
-	private void share() {
-		final Intent MessIntent = new Intent(Intent.ACTION_SEND);
-		MessIntent.setType("text/plain");
-		MessIntent.putExtra(Intent.EXTRA_TEXT, share);
-		HistoryActivity.this.startActivity(Intent.createChooser(MessIntent, getString(R.string.sharewith)));
 	}
 
 	private void resetHistory() {
@@ -429,7 +419,6 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 	/* MENU */
 
 	public boolean onCreateOptionsMenu(Menu menu) {
-		menu.add(0, MENU_SHARE, 0, R.string.share).setIcon(isDark ? R.drawable.ic_action_sharedark : R.drawable.ic_action_share).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
 		menu.add(0, MENU_RESET, 0, R.string.reset).setIcon(isDark ? R.drawable.ic_action_trashdark : R.drawable.ic_action_trash).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
 		return true;
 	}
