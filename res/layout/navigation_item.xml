@@ -6,7 +6,7 @@
     <LinearLayout
         android:id="@+id/separator_little"
         android:layout_width="fill_parent"
-        android:layout_height="1dp"
+        android:layout_height="@dimen/oneP"
         android:background="#20000000"
         android:orientation="vertical" >
     </LinearLayout>
@@ -14,7 +14,7 @@
     <LinearLayout
         android:id="@+id/separator_big"
         android:layout_width="fill_parent"
-        android:layout_height="3dp"
+        android:layout_height="@dimen/threeP"
         android:background="#20000000"
         android:orientation="vertical" >
     </LinearLayout>

@@ -6,7 +6,8 @@
     <FrameLayout
         android:id="@+id/container"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent" >
+        android:layout_height="fill_parent"
+        android:background="#161616" >
     </FrameLayout>
 
     <RelativeLayout
@@ -14,7 +15,7 @@
         android:layout_width="240dp"
         android:layout_height="fill_parent"
         android:layout_gravity="start"
-        android:background="#111"
+        android:background="#1E1E1E"
         android:orientation="vertical" >
 
         <ExpandableListView

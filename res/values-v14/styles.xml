@@ -3,16 +3,70 @@
     <!--
         Base application theme for API 14+. This theme completely replaces
         AppBaseTheme from BOTH res/values/styles.xml and
-        res/values-v11/styles.xml on API 14+ devices.
+        res/values-v11/styles.xml on API 14+ devices.
     -->
-    <style name="AppBaseTheme" parent="@style/Theme.Sherlock.Light">
-        <!-- API 14 theme customizations can go here. -->
+    <style name="AppTheme" parent="@style/Theme.Sherlock.Light">
+        <item name="android:actionBarItemBackground">@drawable/selectable_background_apptheme</item>
+        <item name="android:popupMenuStyle">@style/PopupMenu.Apptheme</item>
+        <item name="android:dropDownListViewStyle">@style/DropDownListView.Apptheme</item>
+        <item name="android:actionBarTabStyle">@style/ActionBarTabStyle.Apptheme</item>
+        <item name="android:actionDropDownStyle">@style/DropDownNav.Apptheme</item>
+        <item name="android:actionBarStyle">@style/ActionBar.Solid.Apptheme</item>
+        <item name="android:actionModeBackground">@drawable/cab_background_top_apptheme</item>
+        <item name="android:actionModeSplitBackground">@drawable/cab_background_bottom_apptheme</item>
+        <item name="android:actionModeCloseButtonStyle">@style/ActionButton.CloseMode.Apptheme</item>
     </style>
 
-    <style name="AppThemeDark" parent="@style/Theme.Sherlock"></style>
+    <style name="AppThemeDark" parent="@style/Theme.Sherlock">
+        <item name="android:actionBarItemBackground">@drawable/selectable_background_appthemedark</item>
+        <item name="android:popupMenuStyle">@style/PopupMenu.Appthemedark</item>
+        <item name="android:dropDownListViewStyle">@style/DropDownListView.Appthemedark</item>
+        <item name="android:actionBarTabStyle">@style/ActionBarTabStyle.Appthemedark</item>
+        <item name="android:actionDropDownStyle">@style/DropDownNav.Appthemedark</item>
+        <item name="android:actionBarStyle">@style/ActionBar.Solid.Appthemedark</item>
+        <item name="android:actionModeBackground">@drawable/cab_background_top_appthemedark</item>
+        <item name="android:actionModeSplitBackground">@drawable/cab_background_bottom_appthemedark</item>
+        <item name="android:actionModeCloseButtonStyle">@style/ActionButton.CloseMode.Appthemedark</item>
+    </style>
 
     <style name="AppThemeDialog" parent="@style/Theme.Sherlock.Light.Dialog"></style>
-    
+
     <style name="AppThemeDialogDark" parent="@style/Theme.Sherlock.Dialog"></style>
-    
+
+    <style name="ActionBar.Solid.Appthemedark" parent="@style/Widget.Sherlock.ActionBar.Solid">
+        <item name="android:background">@drawable/ab_background_textured_appthemedark</item>
+        <item name="android:backgroundStacked">@drawable/ab_stacked_solid_appthemedark</item>
+        <item name="android:backgroundSplit">@drawable/ab_background_textured_appthemedark</item>
+        <item name="android:progressBarStyle">@style/ProgressBar.Appthemedark</item>
+    </style>
+
+    <style name="ActionBar.Transparent.Appthemedark" parent="@style/Widget.Sherlock.ActionBar">
+        <item name="android:background">@drawable/ab_transparent_appthemedark</item>
+        <item name="android:progressBarStyle">@style/ProgressBar.Appthemedark</item>
+    </style>
+
+    <!-- this style is only referenced in a Light.DarkActionBar based theme -->
+    <style name="Theme.Appthemedark.Widget" parent="@style/Theme.Sherlock">
+        <item name="android:popupMenuStyle">@style/PopupMenu.Appthemedark</item>
+        <item name="android:dropDownListViewStyle">@style/DropDownListView.Appthemedark</item>
+    </style>
+
+    <style name="ActionBar.Solid.Apptheme" parent="@style/Widget.Sherlock.Light.ActionBar.Solid">
+        <item name="android:background">@drawable/ab_background_textured_apptheme</item>
+        <item name="android:backgroundStacked">@drawable/ab_stacked_solid_apptheme</item>
+        <item name="android:backgroundSplit">@drawable/ab_background_textured_apptheme</item>
+        <item name="android:progressBarStyle">@style/ProgressBar.Apptheme</item>
+    </style>
+
+    <style name="ActionBar.Transparent.Apptheme" parent="@style/Widget.Sherlock.Light.ActionBar">
+        <item name="android:background">@drawable/ab_transparent_apptheme</item>
+        <item name="android:progressBarStyle">@style/ProgressBar.Apptheme</item>
+    </style>
+
+    <!-- this style is only referenced in a Light.DarkActionBar based theme -->
+    <style name="Theme.Apptheme.Widget" parent="@style/Theme.Sherlock">
+        <item name="android:popupMenuStyle">@style/PopupMenu.Apptheme</item>
+        <item name="android:dropDownListViewStyle">@style/DropDownListView.Apptheme</item>
+    </style>
+
 </resources>

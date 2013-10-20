@@ -59,6 +59,8 @@ public class VisuPagerActivity extends SherlockFragmentActivity implements OnPag
 
 	private void initiActivity() {
 
+		getSupportActionBar().setTitle("");
+		
 		setContentView(isDark ? R.layout.visupagedark : R.layout.visupage);
 		NUM_PAGES = ToolsBDD.getInstance(this).getNbPartie();
 		indexs = new ArrayList<Integer>();
