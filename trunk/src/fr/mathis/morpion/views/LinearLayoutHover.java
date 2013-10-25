@@ -1,4 +1,4 @@
-package fr.mathis.moprion.views;
+package fr.mathis.morpion.views;
 
 import fr.mathis.morpion.interfaces.HoverHandler;
 import android.content.Context;

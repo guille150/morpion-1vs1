@@ -30,10 +30,10 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 
-import fr.mathis.moprion.views.GameView;
 import fr.mathis.morpion.MainActivity;
 import fr.mathis.morpion.R;
 import fr.mathis.morpion.tools.ToolsBDD;
+import fr.mathis.morpion.views.GameView;
 
 public class VisuFragment extends SherlockFragment {
 

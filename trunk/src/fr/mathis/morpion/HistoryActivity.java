@@ -36,6 +36,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
@@ -70,16 +71,17 @@ import com.michaelpardo.android.widget.chartview.LinearSeries.LinearPoint;
 import com.nineoldandroids.animation.Animator;
 import com.nineoldandroids.animation.AnimatorListenerAdapter;
 
-import fr.mathis.moprion.views.GameView;
+import de.timroes.swipetodismiss.SwipeDismissList;
+import de.timroes.swipetodismiss.SwipeDismissList.UndoMode;
 import fr.mathis.morpion.fragments.RightFillerFragment;
 import fr.mathis.morpion.fragments.VisuFragment;
 import fr.mathis.morpion.interfaces.HoverHandler;
 import fr.mathis.morpion.tools.ColorHolder;
 import fr.mathis.morpion.tools.StateHolder;
-import fr.mathis.morpion.tools.SwipeDismissListViewTouchListener;
 import fr.mathis.morpion.tools.ToolsBDD;
 import fr.mathis.morpion.tools.UndoBarController;
 import fr.mathis.morpion.tools.UndoBarController.UndoListener;
+import fr.mathis.morpion.views.GameView;
 
 public class HistoryActivity extends SherlockFragmentActivity implements OnItemLongClickListener, OnItemClickListener, OnNavigationListener, UndoListener, OnDismissCallback, HoverHandler {
 
@@ -106,6 +108,7 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 	PopupWindow popoup;
 	FrameLayout rightContainer;
 	SherlockFragment lastFragment;
+	SwipeDismissList swipeList;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -127,7 +130,7 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 
 		getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
 		getSupportActionBar().setListNavigationCallbacks(adapter, this);
-		
+
 		getSupportActionBar().setHomeButtonEnabled(true);
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		getSupportActionBar().setDisplayShowTitleEnabled(false);
@@ -271,8 +274,7 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 		protected Void doInBackground(Void... params) {
 			try {
 				Thread.sleep(4000);
-			}
-			catch (InterruptedException e) {
+			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 			return null;
@@ -288,26 +290,35 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 
 	private void setSwypeListener() {
 
-		SwipeDismissListViewTouchListener touchListener = new SwipeDismissListViewTouchListener(lv, new SwipeDismissListViewTouchListener.OnDismissCallback() {
-			@Override
-			public void onDismiss(ListView listView, int[] reverseSortedPositions) {
-				for (int position : reverseSortedPositions) {
-					mSchedule.remove(mSchedule.getItem(position));
+		if (swipeList == null) {
+			SwipeDismissList.OnDismissCallback callback = new SwipeDismissList.OnDismissCallback() {
+				public SwipeDismissList.Undoable onDismiss(AbsListView listView, final int position) {
+					mSchedule.remove(listItem.get(position));
+					mSchedule.notifyDataSetChanged();
+					if (sv != null) {
+						sv.hide();
+						sv = null;
+					}
+					return null;
 				}
-				mSchedule.notifyDataSetChanged();
-				if (sv != null) {
-					sv.hide();
-					sv = null;
-				}
-			}
-		});
-		lv.setOnTouchListener(touchListener);
-		lv.setOnScrollListener(touchListener.makeScrollListener());
+			};
+
+			swipeList = new SwipeDismissList(lv, callback, UndoMode.SINGLE_UNDO);
+		} else
+			swipeList.setSwipeDisabled(false);
 	}
 
 	private void removeSwypeListener() {
-		lv.setOnTouchListener(null);
-		lv.setOnScrollListener(null);
+		swipeList.setSwipeDisabled(true);
+		// lv.setOnTouchListener(null);
+		// lv.setOnScrollListener(null);
+	}
+
+	@Override
+	protected void onStop() {
+		if (swipeList != null)
+			swipeList.discardUndo();
+		super.onStop();
 	}
 
 	public boolean onMenuItemSelected(int featureId, MenuItem item) {
@@ -395,9 +406,9 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 				removeSwypeListener();
 				if (mActionMode != null) {
 					if (pos.size() == 1)
-						mActionMode.setTitle(pos.size() + " " + getString(R.string.s2));
+						mActionMode.setTitle(pos.size() + "");
 					else
-						mActionMode.setTitle(pos.size() + " " + getString(R.string.s1));
+						mActionMode.setTitle(pos.size() + "");
 				}
 			}
 			mSchedule.notifyDataSetChanged();
@@ -437,10 +448,7 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 			setSwypeListener();
 		}
 		if (mActionMode != null) {
-			if (pos.size() == 1)
-				mActionMode.setTitle(pos.size() + " " + getString(R.string.s2));
-			else
-				mActionMode.setTitle(pos.size() + " " + getString(R.string.s1));
+			mActionMode.setTitle(pos.size()+"");
 			removeSwypeListener();
 		}
 		mSchedule.notifyDataSetChanged();
@@ -457,7 +465,6 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 		return pos2;
 	}
 
-	/* BLOCK THE ROTATION OF THE SCREEN */
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
 		super.onConfigurationChanged(newConfig);
@@ -499,8 +506,7 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 				for (int j = 0; j < 3; j++) {
 					try {
 						val[i][j] = Integer.parseInt(resultat.split(",")[tooker]);
-					}
-					catch (Exception e) {
+					} catch (Exception e) {
 						val[i][j] = MainActivity.NONE_PLAYER;
 					}
 					tooker++;
@@ -537,9 +543,9 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 
 					if (mActionMode != null) {
 						if (pos.size() == 1)
-							mActionMode.setTitle(pos.size() + " " + getString(R.string.s2));
+							mActionMode.setTitle(pos.size()+"");
 						else
-							mActionMode.setTitle(pos.size() + " " + getString(R.string.s1));
+							mActionMode.setTitle(pos.size()+"");
 						removeSwypeListener();
 						if (pos.size() == 0) {
 							setSwypeListener();
@@ -681,8 +687,7 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 		protected Void doInBackground(Void... params) {
 			try {
 				Thread.sleep(400);
-			}
-			catch (InterruptedException e) {
+			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 			return null;
@@ -950,8 +955,7 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 				for (int j = 0; j < 3; j++) {
 					try {
 						val[i][j] = Integer.parseInt(result.split(",")[tooker]);
-					}
-					catch (Exception e) {
+					} catch (Exception e) {
 						val[i][j] = MainActivity.NONE_PLAYER;
 					}
 					tooker++;

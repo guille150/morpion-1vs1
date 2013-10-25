@@ -3,13 +3,13 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent" >
 
-        <fr.mathis.moprion.views.GameView
+        <fr.mathis.morpion.views.GameView
             android:id="@+id/gameView1"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:clickable="false"
             android:focusable="false"
             android:focusableInTouchMode="false" >
-        </fr.mathis.moprion.views.GameView>
+        </fr.mathis.morpion.views.GameView>
 
     </LinearLayout>

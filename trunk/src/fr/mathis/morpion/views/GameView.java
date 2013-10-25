@@ -1,4 +1,4 @@
-package fr.mathis.moprion.views;
+package fr.mathis.morpion.views;
 
 import java.util.ArrayList;
 
