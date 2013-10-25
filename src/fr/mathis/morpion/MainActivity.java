@@ -74,11 +74,11 @@ import com.google.android.gms.games.multiplayer.realtime.RoomStatusUpdateListene
 import com.google.android.gms.games.multiplayer.realtime.RoomUpdateListener;
 import com.google.example.games.basegameutils.BaseGameActivity;
 
-import fr.mathis.moprion.views.GameView;
-import fr.mathis.moprion.views.GameView.GameHandler;
 import fr.mathis.morpion.tools.ColorHolder;
 import fr.mathis.morpion.tools.StateHolder;
 import fr.mathis.morpion.tools.ToolsBDD;
+import fr.mathis.morpion.views.GameView;
+import fr.mathis.morpion.views.GameView.GameHandler;
 
 @SuppressLint("HandlerLeak")
 public class MainActivity extends BaseGameActivity implements OnClickListener, OnItemClickListener, OnChildClickListener, OnStateLoadedListener, RoomUpdateListener, RealTimeMessageReceivedListener, RoomStatusUpdateListener, OnInvitationReceivedListener {

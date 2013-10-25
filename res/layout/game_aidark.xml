@@ -49,7 +49,7 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent" >
 
-        <fr.mathis.moprion.views.GameView
+        <fr.mathis.morpion.views.GameView
             android:id="@+id/gameView1"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
@@ -60,7 +60,7 @@
             android:clickable="true"
             android:focusable="true"
             android:focusableInTouchMode="true" >
-        </fr.mathis.moprion.views.GameView>
+        </fr.mathis.morpion.views.GameView>
 
         <LinearLayout
             android:id="@+id/congratsContainer"
