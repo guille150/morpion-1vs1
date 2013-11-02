@@ -18,6 +18,7 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.Point;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -209,8 +210,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 		protected Void doInBackground(Void... params) {
 			try {
 				Thread.sleep(1000);
-			}
-			catch (InterruptedException e) {
+			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 			return null;
@@ -252,8 +252,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 					final String appName = "com.google.android.gms";
 					try {
 						startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + appName)));
-					}
-					catch (android.content.ActivityNotFoundException anfe) {
+					} catch (android.content.ActivityNotFoundException anfe) {
 						startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://play.google.com/store/apps/details?id=" + appName)));
 					}
 					finish();
@@ -265,7 +264,10 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 
 		ArrayList<NavigationItem> n2 = new ArrayList<MainActivity.NavigationItem>();
 		n2.add(new NavigationItem(isDark ? R.drawable.ic_action_spinner_savedark : R.drawable.ic_action_spinner_save, getString(R.string.m2), 0));
-		n2.add(new NavigationItem(isDark ? R.drawable.ic_action_spinner_partiehelpdark : R.drawable.ic_action_spinner_partiehelp, getString(R.string.m3), 0));
+		// n2.add(new NavigationItem(isDark ? R.drawable.ic_action_spinner_partiehelpdark : R.drawable.ic_action_spinner_partiehelp, getString(R.string.m3), 0));
+		n2.add(new NavigationItem(isDark ? R.drawable.ic_action_spinner_achivmentdark : R.drawable.ic_action_spinner_achivment, getString(R.string.s37), 0));
+		n2.add(new NavigationItem(isDark ? R.drawable.ic_action_spinner_boarddarl : R.drawable.ic_action_spinner_board, getString(R.string.s38), 0));
+
 		NavigationSection s2 = new NavigationSection(getString(R.string.s40), n2);
 		navSections.add(s2);
 
@@ -281,7 +283,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 		mDrawerList.setOnGroupClickListener(new OnGroupClickListener() {
 			@Override
 			public boolean onGroupClick(ExpandableListView parent, View v, int groupPosition, long id) {
-				return false;
+				return true;
 			}
 		});
 
@@ -346,22 +348,33 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 					forseFirst = true;
 				}
 			}
-			if (groupPosition == 1 && childPosition == 1) {
-				getSupportActionBar().setIcon(R.drawable.ic_launcher);
-				View child = getLayoutInflater().inflate(isDark ? R.layout.helpdark : R.layout.help, null);
-				container.removeAllViews();
-				container.addView(child);
-
-				if (m != null) {
-					m.getItem(0).setVisible(false);
-				}
-			} else if (groupPosition == 0 && childPosition == 1) {
+			/*
+			 * if (groupPosition == 1 && childPosition == 1) { getSupportActionBar().setIcon(R.drawable.ic_launcher); View child = getLayoutInflater().inflate(isDark ? R.layout.helpdark : R.layout.help, null); container.removeAllViews(); container.addView(child);
+			 * 
+			 * if (m != null) { m.getItem(0).setVisible(false); } } else
+			 */if (groupPosition == 0 && childPosition == 1) {
 				getSupportActionBar().setIcon(R.drawable.two_player);
 				startBluetooth();
 			} else if (groupPosition == 0 && childPosition == 2) {
 				getSupportActionBar().setIcon(R.drawable.ic_launcher);
 				createNewGameAI();
 			}
+
+			if (groupPosition == 1 && childPosition == 1) {
+				if (isSignedIn())
+					startActivityForResult(getGamesClient().getAchievementsIntent(), 0);
+				else
+					Toast.makeText(getApplicationContext(), R.string.s57, Toast.LENGTH_SHORT).show();
+				shouldCloseDrawer = false;
+			}
+			if (groupPosition == 1 && childPosition == 2) {
+				if (isSignedIn())
+					startActivityForResult(getGamesClient().getLeaderboardIntent(getString(R.string.leaderboard_most_active)), 0);
+				else
+					Toast.makeText(getApplicationContext(), R.string.s57, Toast.LENGTH_SHORT).show();
+				shouldCloseDrawer = false;
+			}
+
 			if (!(groupPosition == 0 && childPosition == 1) && !forseFirst) {
 				if (!(groupPosition == 1 && childPosition == 0) && !(groupPosition == 2 && childPosition == 1) && !(groupPosition == 2 && childPosition == 0) && shouldCloseDrawer) {
 					activeNavChild = childPosition;
@@ -373,18 +386,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 					mDrawerLayout.closeDrawer(GravityCompat.START);
 				userMightNotWantToLeave = false;
 			}
-			if (groupPosition == 2 && childPosition == 0) {
-				if (isSignedIn())
-					startActivityForResult(getGamesClient().getAchievementsIntent(), 0);
-				else
-					Toast.makeText(getApplicationContext(), R.string.s42, Toast.LENGTH_SHORT).show();
-			}
-			if (groupPosition == 2 && childPosition == 1) {
-				if (isSignedIn())
-					startActivityForResult(getGamesClient().getLeaderboardIntent(getString(R.string.leaderboard_most_active)), 0);
-				else
-					Toast.makeText(getApplicationContext(), R.string.s42, Toast.LENGTH_SHORT).show();
-			}
+
 		}
 		return true;
 	}
@@ -446,12 +448,12 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 				v.findViewById(R.id.separator_little).setVisibility(childPosition == 0 ? View.GONE : View.VISIBLE);
 				v.findViewById(R.id.separator_big).setVisibility(childPosition == 0 ? View.VISIBLE : View.GONE);
 				if (activeNavChild == childPosition && activeNavSection == groupPosition)
-					v.setBackgroundColor(isDark ? Color.parseColor("#AA33B5E5") : Color.parseColor("#D3D3D3"));
-
-				if (groupPosition == 0 && childPosition == 3 && !isSignedIn()) {
+					((android.widget.TextView) v.findViewById(R.id.nav_title)).setTypeface(null, Typeface.BOLD);
+				if (!isSignedIn() && ((groupPosition == 0 && childPosition == 3) || (groupPosition == 1 && childPosition == 1) || (groupPosition == 1 && childPosition == 2))) {
 					((android.widget.TextView) v.findViewById(R.id.nav_title)).setTextColor(isDark ? Color.parseColor("#40FFFFFF") : Color.parseColor("#40000000"));
 				}
 			}
+
 			return v;
 		}
 
@@ -517,8 +519,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 		protected Void doInBackground(Void... params) {
 			try {
 				Thread.sleep(100);
-			}
-			catch (InterruptedException e) {
+			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 			return null;
@@ -1466,8 +1467,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 		protected Void doInBackground(Void... params) {
 			try {
 				Thread.sleep(4000);
-			}
-			catch (InterruptedException e) {
+			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 			return null;
@@ -1733,11 +1733,6 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 	public void signOutProcess() {
 		signOut();
 
-		if (moreOptions)
-			if (navSections.size() > 2) {
-				moreOptions = false;
-				navSections.remove(2);
-			}
 		navAdapter.notifyDataSetChanged();
 
 		// show sign-in button, hide the sign-out button
@@ -1944,8 +1939,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 				try {
 					publishProgress((i) + "");
 					Thread.sleep(1000);
-				}
-				catch (InterruptedException e) {
+				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
 			}
@@ -2438,16 +2432,9 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 		shouldShowDeco = false;
 		if (miDeco != null)
 			miDeco.setVisible(false);
-		if (moreOptions) {
-			if (navSections.size() > 2) {
-				navSections.remove(2);
-				moreOptions = false;
-			}
-			navAdapter.notifyDataSetChanged();
-		}
-	}
+		navAdapter.notifyDataSetChanged();
 
-	boolean moreOptions = false;
+	}
 
 	private RoomConfig.Builder makeBasicRoomConfigBuilder() {
 		return RoomConfig.builder(this).setMessageReceivedListener(this).setRoomStatusUpdateListener(this);
@@ -2462,16 +2449,6 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 			miDeco.setVisible(true);
 		// (your code here: update UI, enable functionality that depends on sign
 		// in, etc)
-		if (!moreOptions) {
-			ArrayList<NavigationItem> n3 = new ArrayList<MainActivity.NavigationItem>();
-			n3.add(new NavigationItem(isDark ? R.drawable.ic_action_spinner_achivmentdark : R.drawable.ic_action_spinner_achivment, getString(R.string.s37), 0));
-			n3.add(new NavigationItem(isDark ? R.drawable.ic_action_spinner_boarddarl : R.drawable.ic_action_spinner_board, getString(R.string.s38), 0));
-			NavigationSection s3 = new NavigationSection(getString(R.string.s41), n3);
-			navSections.add(s3);
-			navAdapter.notifyDataSetChanged();
-			mDrawerList.expandGroup(2);
-		}
-		moreOptions = true;
 		if (comeBackFromSettingsShouldSave) {
 			saveState();
 			comeBackFromSettingsShouldSave = false;
@@ -2788,6 +2765,18 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 
 		AlertDialog alert = builder.create();
 		alert.show();
+	}
+
+	@Override
+	public void onP2PConnected(String arg0) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void onP2PDisconnected(String arg0) {
+		// TODO Auto-generated method stub
+
 	}
 
 }

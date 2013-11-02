@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <string name="hello">Hello World, MorpionActivity!</string>
     <string name="app_name">Morpion 1vs1</string>
     <string name="newGame">Nouvelle partie</string>
@@ -113,8 +114,8 @@
     <string name="s25">Fermer la connexion</string>
     <string name="s26">Vous pouvez désactiver et réactiver le service bluetooth de l\'application en utilisant le bouton ci-dessous.</string>
     <string name="s27">Couper le BT</string>
-    <string name="s28">Couleur primaire</string>
-    <string name="s29">Couleur secondaire</string>
+    <string name="s28">Couleur</string>
+    <string name="s29">Couleur</string>
     <string name="s30"></string>
     <string name="s31">Contre l\'IA</string>
     <string name="s32">Bienvenue !</string>
@@ -143,13 +144,16 @@
     <string name="s53">Partie rapide</string>
     <string name="s54">Inviter un ami</string>
     <string name="s55">Voir les invitations</string>
-	<string name="s56">Jouer en ligne</string>
-	<string name="s57">Disponible après connexion avec Google+.</string>
-	<string name="s58">Mode en ligne requiert les Services Google Play.</string>
-	<string name="s59">Partager cette partie</string>
-	<string name="s60">Partage impossible</string>
-	<string name="s61">La partie en cours ne sera pas sauvegardée</string>
-	<string name="s62">Pour quitter, validez le schéma ci-dessous</string>
-	<string name="s63">Pourquoi ?!</string>
-	<string name="s64">Des testeurs opérant un cycle de validation très long ont mis en évidence que perdre sa partie en cours en cliquant par inadvertance sur Retour est très frustant ! Donc pour être sûr que vous vouliez quittez, vous devez confirmer votre première intention de quitter l\'application sans sauvegarder.</string>
+    <string name="s56">Jouer en ligne</string>
+    <string name="s57">Disponible après connexion avec Google+.</string>
+    <string name="s58">Mode en ligne requiert les Services Google Play.</string>
+    <string name="s59">Partager cette partie</string>
+    <string name="s60">Partage impossible</string>
+    <string name="s61">La partie en cours ne sera pas sauvegardée</string>
+    <string name="s62">Pour quitter, validez le schéma ci-dessous</string>
+    <string name="s63">Pourquoi ?!</string>
+    <string name="s64">Des testeurs opérant un cycle de validation très long ont mis en évidence que perdre sa partie en cours en cliquant par inadvertance sur Retour est très frustant ! Donc pour être sûr que vous vouliez quittez, vous devez confirmer votre première intention de quitter l\'application sans sauvegarder.</string>
+    <string name="s65">Thème</string>
+	<string name="s66">La couleur des X</string>
+	<string name="s67">La couleur des O</string>
 </resources>

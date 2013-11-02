@@ -179,38 +179,53 @@ public class GameView extends View {
 
 		ArrayList<Point> res = new ArrayList<Point>();
 
-		if (values[0][0] == values[0][1] && values[0][1] == values[0][2] && values[0][2] != MainActivity.NONE_PLAYER) {
-			res.add(new Point(0, 0));
-			res.add(new Point(0, 1));
-			res.add(new Point(0, 2));
-		} else if (values[1][0] == values[1][1] && values[1][1] == values[1][2] && values[1][2] != MainActivity.NONE_PLAYER) {
-			res.add(new Point(1, 0));
-			res.add(new Point(1, 1));
-			res.add(new Point(1, 2));
-		} else if (values[2][0] == values[2][1] && values[2][1] == values[2][2] && values[2][2] != MainActivity.NONE_PLAYER) {
-			res.add(new Point(2, 0));
-			res.add(new Point(2, 1));
-			res.add(new Point(2, 2));
-		} else if (values[0][0] == values[1][0] && values[1][0] == values[2][0] && values[2][0] != MainActivity.NONE_PLAYER) {
-			res.add(new Point(0, 0));
-			res.add(new Point(1, 0));
-			res.add(new Point(2, 0));
-		} else if (values[0][1] == values[1][1] && values[1][1] == values[2][1] && values[2][1] != MainActivity.NONE_PLAYER) {
-			res.add(new Point(0, 1));
-			res.add(new Point(1, 1));
-			res.add(new Point(2, 1));
-		} else if (values[0][2] == values[1][2] && values[1][2] == values[2][2] && values[2][2] != MainActivity.NONE_PLAYER) {
-			res.add(new Point(0, 2));
-			res.add(new Point(1, 2));
-			res.add(new Point(2, 2));
-		} else if (values[0][0] == values[1][1] && values[1][1] == values[2][2] && values[2][2] != MainActivity.NONE_PLAYER) {
-			res.add(new Point(0, 0));
-			res.add(new Point(1, 1));
-			res.add(new Point(2, 2));
-		} else if (values[2][0] == values[1][1] && values[1][1] == values[0][2] && values[0][2] != MainActivity.NONE_PLAYER) {
-			res.add(new Point(2, 0));
-			res.add(new Point(1, 1));
-			res.add(new Point(0, 2));
+		boolean allSame = true;
+		for (int i = 0; i < 3; i++) {
+			for (int j = 0; j < 3; j++) {
+				if (allSame) {
+					allSame = values[i][j] == values[0][0];
+					if (!allSame)
+						break;
+				}
+			}
+		}
+
+		if (!allSame) {
+			res = new ArrayList<Point>();
+
+			if (values[0][0] == values[0][1] && values[0][1] == values[0][2] && values[0][2] != MainActivity.NONE_PLAYER) {
+				res.add(new Point(0, 0));
+				res.add(new Point(0, 1));
+				res.add(new Point(0, 2));
+			} else if (values[1][0] == values[1][1] && values[1][1] == values[1][2] && values[1][2] != MainActivity.NONE_PLAYER) {
+				res.add(new Point(1, 0));
+				res.add(new Point(1, 1));
+				res.add(new Point(1, 2));
+			} else if (values[2][0] == values[2][1] && values[2][1] == values[2][2] && values[2][2] != MainActivity.NONE_PLAYER) {
+				res.add(new Point(2, 0));
+				res.add(new Point(2, 1));
+				res.add(new Point(2, 2));
+			} else if (values[0][0] == values[1][0] && values[1][0] == values[2][0] && values[2][0] != MainActivity.NONE_PLAYER) {
+				res.add(new Point(0, 0));
+				res.add(new Point(1, 0));
+				res.add(new Point(2, 0));
+			} else if (values[0][1] == values[1][1] && values[1][1] == values[2][1] && values[2][1] != MainActivity.NONE_PLAYER) {
+				res.add(new Point(0, 1));
+				res.add(new Point(1, 1));
+				res.add(new Point(2, 1));
+			} else if (values[0][2] == values[1][2] && values[1][2] == values[2][2] && values[2][2] != MainActivity.NONE_PLAYER) {
+				res.add(new Point(0, 2));
+				res.add(new Point(1, 2));
+				res.add(new Point(2, 2));
+			} else if (values[0][0] == values[1][1] && values[1][1] == values[2][2] && values[2][2] != MainActivity.NONE_PLAYER) {
+				res.add(new Point(0, 0));
+				res.add(new Point(1, 1));
+				res.add(new Point(2, 2));
+			} else if (values[2][0] == values[1][1] && values[1][1] == values[0][2] && values[0][2] != MainActivity.NONE_PLAYER) {
+				res.add(new Point(2, 0));
+				res.add(new Point(1, 1));
+				res.add(new Point(0, 2));
+			}
 		}
 		return res;
 	}

@@ -4,23 +4,15 @@
     android:layout_height="fill_parent"
     android:orientation="vertical" >
 
-    <ListView
+    <GridView
         android:id="@+id/listviewperso"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:visibility="gone" />
-
-    <ListView
-        android:id="@+id/listviewcards"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:background="#e2e2e2"
-        android:clipToPadding="false"
-        android:divider="@null"
-        android:dividerHeight="16dp"
-        android:padding="16dp"
-        android:scrollbarStyle="outsideOverlay"
-        android:visibility="gone"/>
+        android:numColumns="1"
+        android:paddingBottom="4dp"
+        android:paddingTop="4dp"
+        android:visibility="gone"
+        android:background="@color/second_grey" />
 
     <com.michaelpardo.android.widget.chartview.ChartView
         android:id="@+id/chart_view"
