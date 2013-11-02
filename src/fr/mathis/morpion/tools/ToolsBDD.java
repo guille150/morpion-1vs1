@@ -55,17 +55,21 @@ public class ToolsBDD {
 	}
 
 	public int getNextId(int id) {
-		int res = 0;
+		int res = -1;
 		Cursor c = bdd.query("partie", new String[] { "id" }, null, null, null, null, null);
 		if (c.getCount() == 0)
-			return 0;
+			return -1;
 		else {
 			c.moveToFirst();
-			res = c.getInt(0);
-			while (c.moveToNext()) {
-				if (id < c.getInt(0)) {
-					res = c.getInt(0);
-					break;
+			if (id < c.getInt(0)) {
+				res = c.getInt(0);
+			}
+			if (c.getCount() > 1) {
+				while (c.moveToNext()) {
+					if (id < c.getInt(0)) {
+						res = c.getInt(0);
+						break;
+					}
 				}
 			}
 			c.close();
@@ -74,22 +78,27 @@ public class ToolsBDD {
 	}
 
 	public int getPreviousId(int id) {
-		int res = 0;
+		int res = -1;
 		Cursor c = bdd.query("partie", new String[] { "id" }, null, null, null, null, null);
 		if (c.getCount() == 0)
-			return 0;
+			return -1;
 		else {
 			c.moveToLast();
-			res = c.getInt(0);
-			while (c.moveToPrevious()) {
-				if (id > c.getInt(0)) {
-					res = c.getInt(0);
-					break;
+			if (c.getInt(0) < id) {
+				res = c.getInt(0);
+			}
+			if (c.getCount() > 1) {
+				while (c.moveToPrevious()) {
+					if (c.getInt(0) < id) {
+						res = c.getInt(0);
+						break;
+					}
 				}
 			}
 			c.close();
 		}
 		return res;
+
 	}
 
 	public int getNbPartie() {

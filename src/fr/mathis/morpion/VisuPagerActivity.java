@@ -4,10 +4,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
@@ -28,7 +31,7 @@ import fr.mathis.morpion.tools.ToolsBDD;
 
 public class VisuPagerActivity extends SherlockFragmentActivity implements OnPageChangeListener {
 
-	private static int NUM_PAGES = 10;
+	private int NUM_PAGES = 10;
 	private ArrayList<Integer> indexs;
 	private ViewPager mPager;
 	private PagerAdapter mPagerAdapter;
@@ -60,7 +63,7 @@ public class VisuPagerActivity extends SherlockFragmentActivity implements OnPag
 	private void initiActivity() {
 
 		getSupportActionBar().setTitle("");
-		
+
 		setContentView(isDark ? R.layout.visupagedark : R.layout.visupage);
 		NUM_PAGES = ToolsBDD.getInstance(this).getNbPartie();
 		indexs = new ArrayList<Integer>();
@@ -104,18 +107,53 @@ public class VisuPagerActivity extends SherlockFragmentActivity implements OnPag
 
 		mPager = (ViewPager) findViewById(R.id.pager);
 		mPagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
+		
 		mPager.setAdapter(mPagerAdapter);
+		
 		mPager.setPageMargin((int) convertDpToPixel(9, this));
 		mPager.setPageMarginDrawable(isDark ? R.drawable.lineblue : R.drawable.linegraypager);
 
 		tabs = (PagerSlidingTabStrip) findViewById(R.id.tabs);
+
 		tabs.setViewPager(mPager);
 		tabs.setOnPageChangeListener(this);
 
-		mPager.setCurrentItem(pos);
+		mPager.setCurrentItem(0);
+		
+
 		indexs.add(pos);
+		
+		//mPager.setCurrentItem(pos, false);
+		new Async().execute(pos);
 	}
 
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+
+		super.onConfigurationChanged(newConfig);
+		new Async().execute(mPager.getCurrentItem());
+	}
+	
+	class Async extends AsyncTask<Integer, Void, Integer>
+	{
+		@Override
+		protected Integer doInBackground(Integer... params) {
+			try {
+				Thread.sleep(50);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			return params[0];
+		}
+		
+		@Override
+		protected void onPostExecute(Integer result) {
+			mPager.setCurrentItem(result, false);
+			super.onPostExecute(result);
+		}
+		
+	}
+	
 	private void changeColor(int newColor) {
 		tabs.setIndicatorColor(newColor);
 	}
@@ -202,7 +240,6 @@ public class VisuPagerActivity extends SherlockFragmentActivity implements OnPag
 
 	@Override
 	public void onPageSelected(int arg0) {
-
 		indexs.add(arg0);
 		HashMap<String, String> map = listItem.get(arg0);
 
@@ -213,6 +250,14 @@ public class VisuPagerActivity extends SherlockFragmentActivity implements OnPag
 		else {
 			changeColor(Color.parseColor(defaultColor + ""));
 		}
-	}
 
+		if ((arg0 == listItem.size() - 1 && ToolsBDD.getInstance(getApplicationContext()).getNextId(Integer.parseInt(map.get("num"))) != -1) || (arg0 == 0 && ToolsBDD.getInstance(getApplicationContext()).getPreviousId(Integer.parseInt(map.get("num"))) != -1)) {
+			Intent intent = new Intent(VisuPagerActivity.this, VisuPagerActivity.class);
+			intent.putExtra("id", Integer.parseInt(map.get("num")));
+			startActivity(intent);
+			overridePendingTransition(0, 0);
+			finish();
+			overridePendingTransition(0, 0);
+		}
+	}
 }

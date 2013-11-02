@@ -2,26 +2,18 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:orientation="vertical"
-    android:background="#161616" >
+    android:background="#161616"
+    android:orientation="vertical" >
 
-    <ListView
+    <GridView
         android:id="@+id/listviewperso"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:visibility="gone" />
-
-    <ListView
-        android:id="@+id/listviewcards"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:clipToPadding="false"
-        android:background="#000000"
-        android:divider="@null"
-        android:dividerHeight="16dp"
-        android:padding="16dp"
-        android:scrollbarStyle="outsideOverlay"
-        android:visibility="gone" />
+        android:numColumns="1"
+        android:paddingBottom="4dp"
+        android:paddingTop="4dp"
+        android:visibility="gone"
+        android:background="@color/second_greydark" />
 
     <com.michaelpardo.android.widget.chartview.ChartView
         android:id="@+id/chart_view"

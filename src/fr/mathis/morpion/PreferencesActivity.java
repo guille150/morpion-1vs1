@@ -9,17 +9,18 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.BaseAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
-import android.widget.Toast;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
+import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.MenuItem;
@@ -93,12 +94,42 @@ public class PreferencesActivity extends SherlockActivity implements OnCheckedCh
 
 		cbSaveEqual.setOnCheckedChangeListener(this);
 		cbTheme.setOnCheckedChangeListener(this);
-		
-		getSupportActionBar().setTitle(R.string.menupref);
-		
+
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+		findViewById(R.id.checkBoxSelectThemeContainer).setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				cbTheme.setChecked(!cbTheme.isChecked());
+			}
+		});
+
+		findViewById(R.id.checkBoxSaveEqualContainer).setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				cbSaveEqual.setChecked(!cbSaveEqual.isChecked());
+			}
+		});
+		
+		findViewById(R.id.spinner1Container).setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				spBlue.performClick();
+			}
+		});
+		
+		findViewById(R.id.spinner2Container).setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				spRed.performClick();
+			}
+		});
 	}
-	
+
 	@Override
 	public boolean onMenuItemSelected(int featureId, MenuItem item) {
 
@@ -111,7 +142,7 @@ public class PreferencesActivity extends SherlockActivity implements OnCheckedCh
 
 		return super.onMenuItemSelected(featureId, item);
 	}
-	
+
 	@Override
 	public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 		if (buttonView.getId() == R.id.checkBoxSaveEqual) {

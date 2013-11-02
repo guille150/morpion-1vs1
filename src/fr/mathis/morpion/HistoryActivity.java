@@ -34,6 +34,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.AbsListView;
@@ -42,12 +43,9 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.BaseAdapter;
 import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
-import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.FrameLayout;
+import android.widget.GridView;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.SimpleAdapter;
 import android.widget.Toast;
@@ -61,10 +59,6 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.github.espiandev.showcaseview.ShowcaseView;
 import com.github.espiandev.showcaseview.ShowcaseView.OnShowcaseEventListener;
-import com.haarman.listviewanimations.ArrayAdapter;
-import com.haarman.listviewanimations.itemmanipulation.OnDismissCallback;
-import com.haarman.listviewanimations.itemmanipulation.SwipeDismissAdapter;
-import com.haarman.listviewanimations.swinginadapters.prepared.SwingBottomInAnimationAdapter;
 import com.michaelpardo.android.widget.chartview.ChartView;
 import com.michaelpardo.android.widget.chartview.LinearSeries;
 import com.michaelpardo.android.widget.chartview.LinearSeries.LinearPoint;
@@ -83,13 +77,13 @@ import fr.mathis.morpion.tools.UndoBarController;
 import fr.mathis.morpion.tools.UndoBarController.UndoListener;
 import fr.mathis.morpion.views.GameView;
 
-public class HistoryActivity extends SherlockFragmentActivity implements OnItemLongClickListener, OnItemClickListener, OnNavigationListener, UndoListener, OnDismissCallback, HoverHandler {
+public class HistoryActivity extends SherlockFragmentActivity implements OnItemLongClickListener, OnItemClickListener, OnNavigationListener, UndoListener, HoverHandler {
 
 	static final int MENU_RESET = 0;
 	static final int MENU_SHARE = 2;
 	private static int currentId;
 	ArrayList<HashMap<String, String>> listItem;
-	private ListView lv;
+	private GridView lv;
 	Button visu;
 	Button effacer;
 	Dialog dialog;
@@ -102,8 +96,6 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 	Timer timer;
 	ShowcaseView sv;
 	int displayWidth = 2000;
-	ListView listViewcards;
-	GoogleCardsAdapter mGoogleCardsAdapter;
 	ArrayList<Integer> items;
 	PopupWindow popoup;
 	FrameLayout rightContainer;
@@ -123,7 +115,6 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 
 		ArrayList<AbMenu> data = new ArrayList<AbMenu>();
 		data.add(new AbMenu(isDark ? R.drawable.ic_action_spinner_listdark : R.drawable.ic_action_spinner_list, getString(R.string.m4), 1));
-		data.add(new AbMenu(isDark ? R.drawable.ic_action_spinner_carddark : R.drawable.ic_action_spinner_cards, getString(R.string.m5), 2));
 		data.add(new AbMenu(isDark ? R.drawable.ic_action_spinner_chartdark : R.drawable.ic_action_spinner_chart, getString(R.string.m6), 3));
 
 		AbMenuAdapter adapter = new AbMenuAdapter(context, R.layout.ab_spinner_item, data);
@@ -168,11 +159,8 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 			rightContainer.setVisibility(View.VISIBLE);
 		}
 
-		lv = (ListView) findViewById(R.id.listviewperso);
+		lv = (GridView) findViewById(R.id.listviewperso);
 		lv.setVisibility(View.VISIBLE);
-
-		listViewcards = (ListView) findViewById(R.id.listviewcards);
-		listViewcards.setVisibility(View.GONE);
 
 		chartView = (ChartView) findViewById(R.id.chart_view);
 		chartView.setVisibility(View.GONE);
@@ -190,7 +178,7 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 		}
 		lv.setOnItemLongClickListener(this);
 		lv.setOnItemClickListener(this);
-		lv.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+
 		if (listItem.size() > 100)
 			lv.setFastScrollEnabled(true);
 
@@ -264,7 +252,7 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 			share += " " + lost + " " + getString(R.string.share3);
 		}
 
-		mSchedule = new MyAdapter(this.getBaseContext(), listItem, R.layout.itemlistviewcustom, new String[] { "titre", "description", "num" }, new int[] { R.id.titre, R.id.description, R.id.num });
+		mSchedule = new MyAdapter(this.getBaseContext(), listItem, isDark ? R.layout.itemlistviewcustomdark : R.layout.itemlistviewcustom, new String[] { "titre", "description", "num" }, new int[] { R.id.titre, R.id.description, R.id.num });
 		lv.setAdapter(mSchedule);
 	}
 
@@ -347,71 +335,47 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 
 	@SuppressLint("NewApi")
 	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-		if (pos.size() == 0) {
+		setSwypeListener();
+		@SuppressWarnings("unchecked")
+		HashMap<String, String> map = (HashMap<String, String>) lv.getItemAtPosition(arg2);
+		String s = map.get("num");
+		String winner = map.get("winner");
+		currentId = Integer.parseInt(s.split("N°")[1].split(" ")[0]);
 
-			setSwypeListener();
-			@SuppressWarnings("unchecked")
-			HashMap<String, String> map = (HashMap<String, String>) lv.getItemAtPosition(arg2);
-			String s = map.get("num");
-			String winner = map.get("winner");
-			currentId = Integer.parseInt(s.split("N°")[1].split(" ")[0]);
-
-			if (rightContainer != null) {
-				FragmentManager fm = getSupportFragmentManager();
-				FragmentTransaction ft = fm.beginTransaction();
-				lastFragment = VisuFragment.newInstance(currentId);
-				ft.replace(R.id.container_right, lastFragment);
-				ft.commit();
-				rightContainer.setVisibility(View.VISIBLE);
-				if (chartView != null)
-					chartView.setVisibility(View.GONE);
-			} else {
-
-				Intent intent = new Intent(HistoryActivity.this, VisuPagerActivity.class);
-				intent.putExtra("id", HistoryActivity.currentId);
-
-				Bundle b = null;
-				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-
-					View view = arg1.findViewById(R.id.gameView1);
-
-					Bitmap bitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(), Bitmap.Config.ARGB_8888);
-					if (winner.compareTo("" + MainActivity.BLUE_PLAYER) == 0) {
-						bitmap.eraseColor(Color.parseColor(ColorHolder.getInstance(getApplicationContext()).getColor(MainActivity.BLUE_PLAYER)));
-						b = ActivityOptions.makeThumbnailScaleUpAnimation(view, bitmap, 0, 0).toBundle();
-					} else if (winner.compareTo("" + MainActivity.RED_PLAYER) == 0) {
-						bitmap.eraseColor(Color.parseColor(ColorHolder.getInstance(getApplicationContext()).getColor(MainActivity.RED_PLAYER)));
-						b = ActivityOptions.makeThumbnailScaleUpAnimation(view, bitmap, 0, 0).toBundle();
-					} else {
-						bitmap.eraseColor(isDark ? Color.DKGRAY : Color.LTGRAY);
-						b = ActivityOptions.makeThumbnailScaleUpAnimation(view, bitmap, 0, 0).toBundle();
-					}
-					startActivity(intent, b);
-				} else {
-					startActivity(intent);
-				}
-			}
-
+		if (rightContainer != null) {
+			FragmentManager fm = getSupportFragmentManager();
+			FragmentTransaction ft = fm.beginTransaction();
+			lastFragment = VisuFragment.newInstance(currentId);
+			ft.replace(R.id.container_right, lastFragment);
+			ft.commit();
+			rightContainer.setVisibility(View.VISIBLE);
+			if (chartView != null)
+				chartView.setVisibility(View.GONE);
 		} else {
-			if (!pos.contains(arg2)) {
-				pos.add(arg2);
-			} else {
-				pos = removeInt(pos, arg2);
-			}
 
-			if (pos.size() == 0) {
-				mActionMode.finish();
-				setSwypeListener();
-			} else {
-				removeSwypeListener();
-				if (mActionMode != null) {
-					if (pos.size() == 1)
-						mActionMode.setTitle(pos.size() + "");
-					else
-						mActionMode.setTitle(pos.size() + "");
+			Intent intent = new Intent(HistoryActivity.this, VisuPagerActivity.class);
+			intent.putExtra("id", HistoryActivity.currentId);
+
+			Bundle b = null;
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+
+				View view = arg1.findViewById(R.id.gameView1);
+
+				Bitmap bitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(), Bitmap.Config.ARGB_8888);
+				if (winner.compareTo("" + MainActivity.BLUE_PLAYER) == 0) {
+					bitmap.eraseColor(Color.parseColor(ColorHolder.getInstance(getApplicationContext()).getColor(MainActivity.BLUE_PLAYER)));
+					b = ActivityOptions.makeThumbnailScaleUpAnimation(view, bitmap, 0, 0).toBundle();
+				} else if (winner.compareTo("" + MainActivity.RED_PLAYER) == 0) {
+					bitmap.eraseColor(Color.parseColor(ColorHolder.getInstance(getApplicationContext()).getColor(MainActivity.RED_PLAYER)));
+					b = ActivityOptions.makeThumbnailScaleUpAnimation(view, bitmap, 0, 0).toBundle();
+				} else {
+					bitmap.eraseColor(isDark ? Color.DKGRAY : Color.LTGRAY);
+					b = ActivityOptions.makeThumbnailScaleUpAnimation(view, bitmap, 0, 0).toBundle();
 				}
+				startActivity(intent, b);
+			} else {
+				startActivity(intent);
 			}
-			mSchedule.notifyDataSetChanged();
 		}
 	}
 
@@ -448,7 +412,7 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 			setSwypeListener();
 		}
 		if (mActionMode != null) {
-			mActionMode.setTitle(pos.size()+"");
+			mActionMode.setTitle(pos.size() + "");
 			removeSwypeListener();
 		}
 		mSchedule.notifyDataSetChanged();
@@ -468,6 +432,11 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
 		super.onConfigurationChanged(newConfig);
+
+		if (rightContainer == null) {
+			int num = newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE ? 2 : 1;
+			lv.setNumColumns(num);
+		}
 	}
 
 	ArrayList<Integer> pos = new ArrayList<Integer>();
@@ -524,55 +493,51 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 
 			gv.setHoverHandler(HistoryActivity.this);
 
-			CheckBox cb = (CheckBox) v.findViewById(R.id.checkBox1);
-			final int posid = position;
-			cb.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-				public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-					int i = posid;
-					if (isChecked) {
-						if (pos.contains(i)) {
-
-						} else {
-							pos.add(i);
-							mSchedule.notifyDataSetChanged();
-						}
-					} else {
-						pos = removeInt(pos, i);
-						mSchedule.notifyDataSetChanged();
-					}
-
-					if (mActionMode != null) {
-						if (pos.size() == 1)
-							mActionMode.setTitle(pos.size()+"");
-						else
-							mActionMode.setTitle(pos.size()+"");
-						removeSwypeListener();
-						if (pos.size() == 0) {
-							setSwypeListener();
-							mActionMode.finish();
-						}
-					}
-
-				}
-			});
+			View selectorCheck = v.findViewById(R.id.cab_selector);
 
 			if (pos != null) {
 				if (pos.contains(position)) {
-					v.setBackgroundColor(isDark ? Color.rgb(19, 133, 173) : Color.LTGRAY);
-					cb.setChecked(true);
+					// v.setBackgroundColor(isDark ? Color.rgb(19, 133, 173) : Color.LTGRAY);
+					selectorCheck.setVisibility(View.VISIBLE);
+					gv.setVisibility(View.GONE);
 				} else {
-					v.setBackgroundColor(Color.TRANSPARENT);
-					cb.setChecked(false);
+					// v.setBackgroundColor(Color.TRANSPARENT);
+					selectorCheck.setVisibility(View.GONE);
+					gv.setVisibility(View.VISIBLE);
 				}
-				if (pos.size() != 0) {
-					cb.setVisibility(View.VISIBLE);
-				} else {
-					cb.setVisibility(View.GONE);
+				if (pos.size() == 0) {
+					selectorCheck.setVisibility(View.GONE);
+					gv.setVisibility(View.VISIBLE);
 				}
 			}
+
+			int winner = Integer.parseInt(listItem.get(position).get("winner"));
+			
+			if (winner == MainActivity.BLUE_PLAYER) {
+				selectorCheck.setBackgroundColor(Color.parseColor(ColorHolder.getInstance(getApplicationContext()).getColor(MainActivity.BLUE_PLAYER)));
+			} else if (winner == MainActivity.RED_PLAYER) {
+				selectorCheck.setBackgroundColor(Color.parseColor(ColorHolder.getInstance(getApplicationContext()).getColor(MainActivity.RED_PLAYER)));
+			} else {
+				selectorCheck.setBackgroundColor(isDark ? Color.rgb(19, 133, 173) : Color.LTGRAY);
+			}
+
+			final int indexForselector = position;
+			selectorCheck.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					onItemLongClick(null, null, indexForselector, 0);
+				}
+			});
+
+			gv.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					onItemLongClick(null, null, indexForselector, 0);
+				}
+			});
+
 			return v;
 		}
-
 	}
 
 	public class AbMenu {
@@ -655,7 +620,7 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 
 	public void animateToRight(final int pos, final boolean reload) {
 
-		int firstPosition = lv.getFirstVisiblePosition() - lv.getHeaderViewsCount();
+		int firstPosition = lv.getFirstVisiblePosition();
 		int wantedChild = pos - firstPosition;
 
 		if (wantedChild < 0 || wantedChild >= lv.getChildCount()) {
@@ -761,9 +726,6 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 			createList();
 		}
 		if (itemPosition == 1) {
-			createCards();
-		}
-		if (itemPosition == 2) {
 			if (ToolsBDD.getInstance(this).getNbPartie() >= 2) {
 				createChart();
 			} else {
@@ -771,7 +733,7 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 				getSupportActionBar().setSelectedNavigationItem(0);
 			}
 		}
-		if (itemPosition == 3) {
+		if (itemPosition == 2) {
 			finish();
 		}
 
@@ -788,8 +750,6 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 	private void createChart() {
 		if (rightContainer == null) {
 			lv.setVisibility(View.GONE);
-			listViewcards.setVisibility(View.GONE);
-
 		} else {
 			FragmentManager fm = getSupportFragmentManager();
 			FragmentTransaction ft = fm.beginTransaction();
@@ -843,136 +803,6 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 		chartView.addSeries(seriesGreen);
 	}
 
-	public void createCards() {
-
-		if (rightContainer != null) {
-			FragmentManager fm = getSupportFragmentManager();
-			FragmentTransaction ft = fm.beginTransaction();
-			lastFragment = RightFillerFragment.newInstance();
-			ft.replace(R.id.container_right, lastFragment);
-			ft.commit();
-			if (chartView != null)
-				chartView.setVisibility(View.GONE);
-			rightContainer.setVisibility(View.VISIBLE);
-		}
-
-		listViewcards.setVisibility(View.VISIBLE);
-		chartView.setVisibility(View.GONE);
-		lv.setVisibility(View.GONE);
-
-		mGoogleCardsAdapter = new GoogleCardsAdapter(this, isDark);
-		SwingBottomInAnimationAdapter swingBottomInAnimationAdapter = new SwingBottomInAnimationAdapter(new SwipeDismissAdapter(mGoogleCardsAdapter, this));
-		swingBottomInAnimationAdapter.setListView(listViewcards);
-
-		listViewcards.setAdapter(swingBottomInAnimationAdapter);
-		listViewcards.setOnItemClickListener(this);
-		items = new ArrayList<Integer>();
-		Cursor c = ToolsBDD.getInstance(this).getAllParties();
-		if (c == null || c.getCount() == 0) {
-			share = getString(R.string.sharetry);
-			c.close();
-		} else {
-			share = getString(R.string.app_name) + " - https://play.google.com/store/apps/details?id=fr.mathis.morpion - ";
-			int win = 0;
-			int lost = 0;
-			int equal = 0;
-			c.moveToFirst();
-			for (int i = 0; i < c.getCount(); i++) {
-				int n = c.getInt(1);
-				if (n == MainActivity.BLUE_PLAYER) {
-					win++;
-				} else if (n == MainActivity.RED_PLAYER) {
-					lost++;
-				} else {
-					equal++;
-				}
-				items.add(i);
-				c.moveToNext();
-			}
-			c.close();
-			share += (win + lost + equal) + " " + getString(R.string.share1);
-			share += " " + win + " " + getString(R.string.share2);
-			share += " " + lost + " " + getString(R.string.share);
-		}
-		mGoogleCardsAdapter.addAll(items);
-
-	}
-
-	private static class GoogleCardsAdapter extends ArrayAdapter<Integer> {
-
-		private Context mContext;
-		private boolean isDark;
-
-		public GoogleCardsAdapter(Context context, boolean isDark) {
-			mContext = context;
-			this.isDark = isDark;
-		}
-
-		@Override
-		public View getView(int position, View convertView, ViewGroup parent) {
-			View view = convertView;
-			if (view == null) {
-				view = LayoutInflater.from(mContext).inflate(isDark ? R.layout.activity_googlecards_carddark : R.layout.activity_googlecards_card, parent, false);
-			}
-
-			ImageView cercle = (ImageView) view.findViewById(R.id.imageViewcerclewinner);
-			ImageView croix = (ImageView) view.findViewById(R.id.imageViewcroixwinner);
-
-			cercle.setImageResource(ColorHolder.getInstance(mContext).getDrawable(MainActivity.RED_PLAYER));
-			croix.setImageResource(ColorHolder.getInstance(mContext).getDrawable(MainActivity.BLUE_PLAYER));
-
-			String textViewTitle = "";
-			String result = "";
-
-			Cursor c = ToolsBDD.getInstance(mContext).getAllParties();
-			c.moveToFirst();
-			for (int i = 0; i < c.getCount(); i++) {
-				if (i == position) {
-					int n = c.getInt(1);
-					if (n == MainActivity.BLUE_PLAYER) {
-						cercle.setVisibility(View.INVISIBLE);
-						croix.setVisibility(View.VISIBLE);
-						textViewTitle = mContext.getString(R.string.win);
-					} else if (n == MainActivity.RED_PLAYER) {
-						cercle.setVisibility(View.VISIBLE);
-						croix.setVisibility(View.INVISIBLE);
-						textViewTitle = mContext.getString(R.string.loose);
-					} else {
-						textViewTitle = mContext.getString(R.string.equal);
-						cercle.setVisibility(View.INVISIBLE);
-						croix.setVisibility(View.INVISIBLE);
-					}
-					textViewTitle = c.getInt(0) + " - " + textViewTitle;
-					result = c.getString(2);
-				}
-				c.moveToNext();
-			}
-			c.close();
-
-			int[][] val = new int[3][3];
-			int tooker = 0;
-			for (int i = 0; i < 3; i++) {
-				for (int j = 0; j < 3; j++) {
-					try {
-						val[i][j] = Integer.parseInt(result.split(",")[tooker]);
-					} catch (Exception e) {
-						val[i][j] = MainActivity.NONE_PLAYER;
-					}
-					tooker++;
-				}
-			}
-
-			GameView gv = (GameView) view.findViewById(R.id.gameView1);
-			gv.setMode(GameView.MODE_NOT_INTERACTIVE);
-			gv.setDark(isDark);
-			gv.setAlignement(GameView.STYLE_CENTER_BOTH);
-			gv.setValues(val, MainActivity.BLUE_PLAYER);
-			gv.setShowWinner(true);
-
-			return view;
-		}
-	}
-
 	int saveId = -1;
 	int saveWinner = -1;
 	String saveDisposition = "";
@@ -983,7 +813,6 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 
 		ToolsBDD.getInstance(this).insertPartie(saveId, saveWinner, saveDisposition);
 		if (saveFromCards) {
-			mGoogleCardsAdapter.clear();
 			items.clear();
 
 			Cursor c = ToolsBDD.getInstance(this).getAllParties();
@@ -1013,8 +842,6 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 				share += " " + win + " " + getString(R.string.share2);
 				share += " " + lost + " " + getString(R.string.share);
 			}
-			mGoogleCardsAdapter.addAll(items);
-			mGoogleCardsAdapter.notifyDataSetChanged();
 		} else {
 			HashMap<String, String> map = new HashMap<String, String>();
 
@@ -1059,34 +886,6 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 	}
 
 	@Override
-	public void onDismiss(ListView listView, int[] reverseSortedPositions) {
-		int id = 0;
-
-		for (int position : reverseSortedPositions) {
-			mGoogleCardsAdapter.remove(mGoogleCardsAdapter.getItem(position));
-		}
-		mGoogleCardsAdapter.notifyDataSetChanged();
-
-		Cursor c = ToolsBDD.getInstance(getApplicationContext()).getAllParties();
-		c.moveToFirst();
-		for (int i = 0; i < c.getCount(); i++) {
-			if (i == reverseSortedPositions[0]) {
-				id = c.getInt(0);
-				saveWinner = c.getInt(1);
-				saveDisposition = c.getString(2);
-			}
-			c.moveToNext();
-		}
-		c.close();
-
-		ToolsBDD.getInstance(getApplicationContext()).removePartie(id);
-		saveId = id;
-		saveFromCards = true;
-
-		mUndoBarController.showUndoBar(false, getString(R.string.undobar_sample_message), null);
-	}
-
-	@Override
 	public void give(MotionEvent ev, GameView gv) {
 		if (android.os.Build.VERSION.SDK_INT > android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
 			if (ev.getAction() == MotionEvent.ACTION_HOVER_ENTER) {
@@ -1109,7 +908,7 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 				// set window at position
 				int[] xy = new int[2];
 				gv.getLocationOnScreen(xy);
-				popoup.showAtLocation(this.getWindow().getDecorView(), Gravity.LEFT | Gravity.TOP, xy[0] + (int) MainActivity.convertDpToPixel(0, getApplicationContext()) + gv.getWidth(), xy[1] - gv.getHeight() / 2 - getSupportActionBar().getHeight());
+				popoup.showAtLocation(this.getWindow().getDecorView(), Gravity.RIGHT | Gravity.TOP, xy[0] + gv.getWidth(), xy[1] + gv.getHeight() / 2 - ((int) convertDpToPixel(95, getApplicationContext())));
 				popoup.update();
 			}
 			if (ev.getAction() == MotionEvent.ACTION_HOVER_MOVE) {

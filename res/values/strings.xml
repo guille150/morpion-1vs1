@@ -46,7 +46,7 @@
     <string name="share1"> games : </string>
     <string name="share2"> victories, </string>
     <string name="share3"> defeats.</string>
-    <string name="resethistory">History clear.</string>
+    <string name="resethistory">History cleared.</string>
     <string name="sharewith">Share with</string>
     <string name="whattodo">What do you want to do ?</string>
     <string name="reset">Reset</string>
@@ -115,8 +115,8 @@
     <string name="s25">Close the connection</string>
     <string name="s26">You can turn on and off the bluetooth service with the button below.</string>
     <string name="s27">Stop service</string>
-    <string name="s28">Primary color</string>
-    <string name="s29">Secondary color</string>
+    <string name="s28">Color</string>
+    <string name="s29">Color</string>
     <string name="s30">c</string>
     <string name="s31">Against AI</string>
     <string name="s32">Welcome !</string>
@@ -154,8 +154,8 @@
 	<string name="s62">To exit, validate the pattern below</string>
 	<string name="s63">What\'s that ?!</string>
 	<string name="s64">Some testers from a long validation process pointed out that it can be really frustating to press the back button and lose the current game. So to be sure you didn\'t miss touched the back key, you need to confirm your first intention to exit without saving.</string>
-	<string name="s65"></string>
-	<string name="s66"></string>
-	<string name="s67"></string>
+	<string name="s65">Theme</string>
+	<string name="s66">X\'s color</string>
+	<string name="s67">O\'s color</string>
 	<string name="s68"></string>
 </resources>
