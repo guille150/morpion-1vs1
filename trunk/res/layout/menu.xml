@@ -136,6 +136,7 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/background_selector"
+            android:baselineAligned="false"
             android:gravity="center_vertical"
             android:orientation="horizontal"
             android:paddingBottom="16dp"
@@ -166,10 +167,13 @@
                     android:textSize="16sp" />
             </LinearLayout>
 
-            <Spinner
-                android:id="@+id/spinner1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+            <LinearLayout
+                android:id="@+id/colorBlue"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginRight="8dp"
+                android:orientation="vertical" >
+            </LinearLayout>
         </LinearLayout>
 
         <LinearLayout
@@ -185,6 +189,7 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/background_selector"
+            android:baselineAligned="false"
             android:gravity="center_vertical"
             android:orientation="horizontal"
             android:paddingBottom="16dp"
@@ -215,10 +220,13 @@
                     android:textSize="16sp" />
             </LinearLayout>
 
-            <Spinner
-                android:id="@+id/spinner2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+            <LinearLayout
+                android:id="@+id/colorRed"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginRight="8dp"
+                android:orientation="vertical" >
+            </LinearLayout>
         </LinearLayout>
     </LinearLayout>
 

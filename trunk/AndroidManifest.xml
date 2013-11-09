@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="fr.mathis.morpion"
     android:installLocation="preferExternal"
-    android:versionCode="48"
+    android:versionCode="49"
     android:versionName="2.14" >
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -18,9 +18,9 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
-        
-        <meta-data android:name="com.google.android.gms.version" android:value="4030500" />
-        
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="4030500" />
         <meta-data
             android:name="com.google.android.gms.games.APP_ID"
             android:value="@string/app_id" />
@@ -73,7 +73,8 @@
             android:resource="@dimen/app_minimumsize_h" />
 
         <activity
-            android:name="VisuPagerActivity" android:configChanges="keyboardHidden|orientation|screenSize">
+            android:name="VisuPagerActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" >
         </activity>
         <activity
             android:name="DeviceListActivity"
@@ -81,6 +82,11 @@
             android:theme="@style/AppThemeDialog" >
         </activity>
         <activity android:name="PreferencesActivity" >
+        </activity>
+        <activity
+            android:name="ColorSelectorActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:theme="@style/AppThemeDialog" >
         </activity>
     </application>
 

@@ -1,39 +1,39 @@
 package fr.mathis.morpion;
 
-import java.util.List;
-
-import android.app.Activity;
+import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.graphics.drawable.ShapeDrawable;
+import android.graphics.drawable.shapes.OvalShape;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemSelectedListener;
-import android.widget.BaseAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.LinearLayout;
-import android.widget.Spinner;
-import android.widget.SpinnerAdapter;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.MenuItem;
 
 import fr.mathis.morpion.tools.ColorHolder;
+import fr.mathis.morpion.tools.Tools;
 
 public class PreferencesActivity extends SherlockActivity implements OnCheckedChangeListener {
 
+	public static int CODE_COLORSELECTOR_BLUE = 0;
+	public static int CODE_COLORSELECTOR_RED = 1;
+
 	private CheckBox cbSaveEqual;
 	private CheckBox cbTheme;
-	private Spinner spBlue;
-	private Spinner spRed;
+	private LinearLayout colorBlue;
+	private LinearLayout colorRed;
 
+	@SuppressWarnings("deprecation")
+	@SuppressLint("NewApi")
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		SharedPreferences mgr = PreferenceManager.getDefaultSharedPreferences(this);
@@ -51,46 +51,36 @@ public class PreferencesActivity extends SherlockActivity implements OnCheckedCh
 
 		cbSaveEqual = (CheckBox) findViewById(R.id.checkBoxSaveEqual);
 		cbTheme = (CheckBox) findViewById(R.id.checkBoxSelectTheme);
-		spBlue = (Spinner) findViewById(R.id.spinner1);
-		spRed = (Spinner) findViewById(R.id.spinner2);
+		colorBlue = (LinearLayout) findViewById(R.id.colorBlue);
+		colorRed = (LinearLayout) findViewById(R.id.colorRed);
+
+		ShapeDrawable circleBlue = new ShapeDrawable(new OvalShape());
+		circleBlue.getPaint().setColor(Color.parseColor(ColorHolder.getAllColor().get(ColorHolder.getInstance(getApplicationContext()).getColorIndex(MainActivity.BLUE_PLAYER))));
+		circleBlue.setBounds(0, 0, Tools.convertDpToPixel(48), Tools.convertDpToPixel(48));
+		int sdk = android.os.Build.VERSION.SDK_INT;
+		if (sdk < android.os.Build.VERSION_CODES.JELLY_BEAN) {
+			colorBlue.setBackgroundDrawable(circleBlue);
+		} else {
+			colorBlue.setBackground(circleBlue);
+		}
+
+		ShapeDrawable circleRed = new ShapeDrawable(new OvalShape());
+		circleRed.getPaint().setColor(Color.parseColor(ColorHolder.getAllColor().get(ColorHolder.getInstance(getApplicationContext()).getColorIndex(MainActivity.RED_PLAYER))));
+		circleRed.setBounds(0, 0, Tools.convertDpToPixel(48), Tools.convertDpToPixel(48));
+
+		if (sdk < android.os.Build.VERSION_CODES.JELLY_BEAN) {
+			colorRed.setBackgroundDrawable(circleRed);
+		} else {
+			colorRed.setBackground(circleRed);
+		}
 
 		if (save) {
 			cbSaveEqual.setChecked(true);
 		}
 
-		if (isDark)
+		if (isDark) {
 			cbTheme.setChecked(true);
-
-		spBlue.setAdapter(new MySpinnerAdapter(this, ColorHolder.getAllColor()));
-		spBlue.setOnItemSelectedListener(new OnItemSelectedListener() {
-
-			@Override
-			public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-				ColorHolder.getInstance(getApplicationContext()).save(MainActivity.BLUE_PLAYER, arg2);
-			}
-
-			@Override
-			public void onNothingSelected(AdapterView<?> arg0) {
-				ColorHolder.getInstance(getApplicationContext()).save(MainActivity.BLUE_PLAYER, 0);
-			}
-		});
-		spBlue.setSelection(ColorHolder.getInstance(getApplicationContext()).getColorIndex(MainActivity.BLUE_PLAYER));
-
-		spRed.setAdapter(new MySpinnerAdapter(this, ColorHolder.getAllColor()));
-		spRed.setOnItemSelectedListener(new OnItemSelectedListener() {
-
-			@Override
-			public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-				ColorHolder.getInstance(getApplicationContext()).save(MainActivity.RED_PLAYER, arg2);
-			}
-
-			@Override
-			public void onNothingSelected(AdapterView<?> arg0) {
-				ColorHolder.getInstance(getApplicationContext()).save(MainActivity.RED_PLAYER, 9);
-			}
-
-		});
-		spRed.setSelection(ColorHolder.getInstance(getApplicationContext()).getColorIndex(MainActivity.RED_PLAYER));
+		}
 
 		cbSaveEqual.setOnCheckedChangeListener(this);
 		cbTheme.setOnCheckedChangeListener(this);
@@ -112,20 +102,28 @@ public class PreferencesActivity extends SherlockActivity implements OnCheckedCh
 				cbSaveEqual.setChecked(!cbSaveEqual.isChecked());
 			}
 		});
-		
+
 		findViewById(R.id.spinner1Container).setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
-				spBlue.performClick();
+				Intent i = new Intent(PreferencesActivity.this, ColorSelectorActivity.class);
+				Bundle b = new Bundle();
+				b.putInt("player", MainActivity.BLUE_PLAYER);
+				i.putExtras(b);
+				startActivityForResult(i, CODE_COLORSELECTOR_BLUE);
 			}
 		});
-		
+
 		findViewById(R.id.spinner2Container).setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
-				spRed.performClick();
+				Intent i = new Intent(PreferencesActivity.this, ColorSelectorActivity.class);
+				Bundle b = new Bundle();
+				b.putInt("player", MainActivity.RED_PLAYER);
+				i.putExtras(b);
+				startActivityForResult(i, CODE_COLORSELECTOR_BLUE);
 			}
 		});
 	}
@@ -162,53 +160,30 @@ public class PreferencesActivity extends SherlockActivity implements OnCheckedCh
 		}
 	}
 
-	public class MySpinnerAdapter extends BaseAdapter implements SpinnerAdapter {
-		private Activity activity;
-		private List<String> list_bsl;
+	@SuppressWarnings("deprecation")
+	@SuppressLint("NewApi")
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		ShapeDrawable circleBlue = new ShapeDrawable(new OvalShape());
+		circleBlue.getPaint().setColor(Color.parseColor(ColorHolder.getAllColor().get(ColorHolder.getInstance(getApplicationContext()).getColorIndex(MainActivity.BLUE_PLAYER))));
+		circleBlue.setBounds(0, 0, Tools.convertDpToPixel(36), Tools.convertDpToPixel(36));
 
-		public MySpinnerAdapter(Activity activity, List<String> list_bsl) {
-			this.activity = activity;
-			this.list_bsl = list_bsl;
+		int sdk = android.os.Build.VERSION.SDK_INT;
+		if (sdk < android.os.Build.VERSION_CODES.JELLY_BEAN) {
+			colorBlue.setBackgroundDrawable(circleBlue);
+		} else {
+			colorBlue.setBackground(circleBlue);
 		}
 
-		public int getCount() {
-			return list_bsl.size();
-		}
+		ShapeDrawable circleRed = new ShapeDrawable(new OvalShape());
+		circleRed.getPaint().setColor(Color.parseColor(ColorHolder.getAllColor().get(ColorHolder.getInstance(getApplicationContext()).getColorIndex(MainActivity.RED_PLAYER))));
+		circleRed.setBounds(0, 0, Tools.convertDpToPixel(36), Tools.convertDpToPixel(36));
 
-		public Object getItem(int position) {
-			return list_bsl.get(position);
+		if (sdk < android.os.Build.VERSION_CODES.JELLY_BEAN) {
+			colorRed.setBackgroundDrawable(circleRed);
+		} else {
+			colorRed.setBackground(circleRed);
 		}
-
-		public long getItemId(int position) {
-			return list_bsl.hashCode();
-		}
-
-		public View getView(int position, View convertView, ViewGroup parent) {
-
-			View spinView;
-			if (convertView == null) {
-				LayoutInflater inflater = activity.getLayoutInflater();
-				spinView = inflater.inflate(R.layout.item_spinner_color, null);
-			} else {
-				spinView = convertView;
-			}
-			LinearLayout layout = (LinearLayout) spinView;
-			layout.setBackgroundColor(Color.parseColor((String) getItem(position)));
-			return spinView;
-		}
-
-		@Override
-		public View getDropDownView(int position, View convertView, ViewGroup parent) {
-			View spinView;
-			if (convertView == null) {
-				LayoutInflater inflater = activity.getLayoutInflater();
-				spinView = inflater.inflate(R.layout.item_spinner_color, null);
-			} else {
-				spinView = convertView;
-			}
-			LinearLayout layout = (LinearLayout) spinView;
-			layout.setBackgroundColor(Color.parseColor((String) getItem(position)));
-			return spinView;
-		}
+		super.onActivityResult(requestCode, resultCode, data);
 	}
 }
