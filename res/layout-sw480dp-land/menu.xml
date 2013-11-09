@@ -1,139 +1,226 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+ android:layout_width="600dp"
     android:layout_height="fill_parent"
-    android:gravity="center_horizontal" >
+    android:layout_gravity="center_horizontal" >
 
-    <RelativeLayout
-        android:layout_width="600dp"
-        android:layout_height="fill_parent" >
-
-        <CheckBox
-            android:id="@+id/checkBoxSaveEqual"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignBaseline="@+id/textView1"
-            android:layout_alignBottom="@+id/textView1"
-            android:layout_alignParentRight="true"
-            android:layout_marginRight="15dp"
-            android:text="@string/empty" />
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingBottom="16dp"
+        android:paddingLeft="24dp"
+        android:paddingRight="24dp"
+        android:paddingTop="16dp" >
 
         <TextView
             android:id="@+id/textView2"
-            android:layout_width="wrap_content"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_alignLeft="@+id/textView1"
-            android:layout_alignParentTop="true"
-            android:layout_marginTop="15dp"
-            android:text="@string/preference" />
+            android:layout_marginBottom="4dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:text="@string/preference"
+            android:textColor="#515151"
+            android:textSize="14sp"
+            android:textStyle="bold" />
 
         <LinearLayout
             android:id="@+id/linearLayout1"
-            android:layout_width="200dp"
-            android:layout_height="1dp"
-            android:layout_alignLeft="@+id/textView2"
-            android:layout_alignRight="@+id/checkBoxSaveEqual"
-            android:layout_below="@+id/textView2"
+            android:layout_width="fill_parent"
+            android:layout_height="2dp"
             android:background="@drawable/linegray"
             android:orientation="vertical" >
         </LinearLayout>
 
-        <TextView
-            android:id="@+id/textView1"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:id="@+id/checkBoxSaveEqualContainer"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_below="@+id/linearLayout1"
-            android:layout_marginLeft="19dp"
-            android:layout_marginTop="15dp"
-            android:text="@string/saveText" />
+            android:background="@drawable/background_selector"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingBottom="16dp"
+            android:paddingTop="16dp" >
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical" >
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginRight="8dp"
+                    android:text="@string/m2"
+                    android:textColor="#000000"
+                    android:textSize="18sp" />
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginRight="8dp"
+                    android:text="@string/saveText"
+                    android:textColor="#515151"
+                    android:textSize="16sp" />
+            </LinearLayout>
+
+            <CheckBox
+                android:id="@+id/checkBoxSaveEqual"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/empty" />
+        </LinearLayout>
 
         <LinearLayout
             android:id="@+id/LinearLayout01"
-            android:layout_width="200dp"
-            android:layout_height="1dp"
-            android:layout_alignLeft="@+id/textView1"
-            android:layout_alignRight="@+id/checkBoxSaveEqual"
-            android:layout_below="@+id/checkBoxSaveEqual"
-            android:layout_marginTop="15dp"
+            android:layout_width="fill_parent"
+            android:layout_height="@dimen/threeP"
             android:background="@drawable/linegraylight"
             android:orientation="vertical" >
         </LinearLayout>
 
-        <CheckBox
-            android:id="@+id/checkBoxSelectTheme"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:id="@+id/checkBoxSelectThemeContainer"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_alignBaseline="@+id/textView3"
-            android:layout_alignBottom="@+id/textView3"
-            android:layout_alignParentRight="true"
-            android:layout_marginRight="15dp"
-            android:text="@string/empty" />
+            android:background="@drawable/background_selector"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingBottom="16dp"
+            android:paddingTop="16dp" >
 
-        <TextView
-            android:id="@+id/textView3"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_below="@+id/LinearLayout01"
-            android:layout_marginLeft="19dp"
-            android:layout_marginTop="15dp"
-            android:text="@string/chossetheme" />
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical" >
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginRight="8dp"
+                    android:text="@string/s65"
+                    android:textColor="#000000"
+                    android:textSize="18sp" />
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginRight="8dp"
+                    android:text="@string/chossetheme"
+                    android:textColor="#515151"
+                    android:textSize="16sp" />
+            </LinearLayout>
+
+            <CheckBox
+                android:id="@+id/checkBoxSelectTheme"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/empty" />
+        </LinearLayout>
 
         <LinearLayout
             android:id="@+id/LinearLayout02"
-            android:layout_width="200dp"
-            android:layout_height="1dp"
-            android:layout_alignLeft="@+id/textView1"
-            android:layout_alignRight="@+id/checkBoxSaveEqual"
-            android:layout_below="@+id/checkBoxSelectTheme"
-            android:layout_marginTop="15dp"
+            android:layout_width="fill_parent"
+            android:layout_height="@dimen/threeP"
             android:background="@drawable/linegraylight"
             android:orientation="vertical" >
         </LinearLayout>
 
-        <TextView
-            android:id="@+id/textView4"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:id="@+id/spinner1Container"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_alignLeft="@+id/LinearLayout02"
-            android:layout_below="@+id/LinearLayout02"
-            android:layout_marginTop="15dp"
-            android:text="@string/s28" />
+            android:background="@drawable/background_selector"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingBottom="16dp"
+            android:paddingTop="16dp" >
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical" >
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginRight="8dp"
+                    android:text="@string/s28"
+                    android:textColor="#000000"
+                    android:textSize="18sp" />
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginRight="8dp"
+                    android:text="@string/s66"
+                    android:textColor="#515151"
+                    android:textSize="16sp" />
+            </LinearLayout>
+
+            <Spinner
+                android:id="@+id/spinner1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
 
         <LinearLayout
             android:id="@+id/LinearLayout03"
-            android:layout_width="200dp"
-            android:layout_height="1dp"
-            android:layout_alignLeft="@+id/textView1"
-            android:layout_alignRight="@+id/checkBoxSaveEqual"
-            android:layout_below="@+id/spinner1"
-            android:layout_marginTop="15dp"
+            android:layout_width="fill_parent"
+            android:layout_height="@dimen/threeP"
             android:background="@drawable/linegraylight"
             android:orientation="vertical" >
         </LinearLayout>
 
-        <TextView
-            android:id="@+id/textView5"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:id="@+id/spinner2Container"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_alignLeft="@+id/LinearLayout03"
-            android:layout_below="@+id/LinearLayout03"
-            android:layout_marginTop="16dp"
-            android:text="@string/s29" />
+            android:background="@drawable/background_selector"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingBottom="16dp"
+            android:paddingTop="16dp" >
 
-        <Spinner
-            android:id="@+id/spinner2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignRight="@+id/spinner1"
-            android:layout_alignTop="@+id/textView5" />
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical" >
 
-        <Spinner
-            android:id="@+id/spinner1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignRight="@+id/checkBoxSaveEqual"
-            android:layout_alignTop="@+id/textView4" />
-    </RelativeLayout>
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginRight="8dp"
+                    android:text="@string/s29"
+                    android:textColor="#000000"
+                    android:textSize="18sp" />
 
-</LinearLayout>
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginRight="8dp"
+                    android:text="@string/s67"
+                    android:textColor="#515151"
+                    android:textSize="16sp" />
+            </LinearLayout>
+
+            <Spinner
+                android:id="@+id/spinner2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+    </LinearLayout>
+
+</ScrollView>

@@ -156,4 +156,9 @@
     <string name="s65">Thème</string>
 	<string name="s66">La couleur des X</string>
 	<string name="s67">La couleur des O</string>
+	<string name="s68">Vous</string>
+	<string name="s69">IA / Ami</string>
+	<string name="s70">ÉVOLUTION DES VICTOIRES</string>
+	<string name="s71">MEILLEUR JOUEUR</string>
+	<string name="s72">RÉPARTITION DES RÉSULTATS</string>
 </resources>

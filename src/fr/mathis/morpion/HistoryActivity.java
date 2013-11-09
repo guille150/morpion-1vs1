@@ -57,8 +57,10 @@ import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.ActionMode;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
-import com.github.espiandev.showcaseview.ShowcaseView;
-import com.github.espiandev.showcaseview.ShowcaseView.OnShowcaseEventListener;
+import com.echo.holographlibrary.Bar;
+import com.echo.holographlibrary.BarGraph;
+import com.echo.holographlibrary.PieGraph;
+import com.echo.holographlibrary.PieSlice;
 import com.michaelpardo.android.widget.chartview.ChartView;
 import com.michaelpardo.android.widget.chartview.LinearSeries;
 import com.michaelpardo.android.widget.chartview.LinearSeries.LinearPoint;
@@ -71,7 +73,6 @@ import fr.mathis.morpion.fragments.RightFillerFragment;
 import fr.mathis.morpion.fragments.VisuFragment;
 import fr.mathis.morpion.interfaces.HoverHandler;
 import fr.mathis.morpion.tools.ColorHolder;
-import fr.mathis.morpion.tools.StateHolder;
 import fr.mathis.morpion.tools.ToolsBDD;
 import fr.mathis.morpion.tools.UndoBarController;
 import fr.mathis.morpion.tools.UndoBarController.UndoListener;
@@ -91,10 +92,10 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 	MyAdapter mSchedule;
 	ActionMode mActionMode;
 	ChartView chartView;
+	View statContainer;
 	private UndoBarController mUndoBarController;
 	public boolean isDark;
 	Timer timer;
-	ShowcaseView sv;
 	int displayWidth = 2000;
 	ArrayList<Integer> items;
 	PopupWindow popoup;
@@ -139,8 +140,8 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 			lastFragment = RightFillerFragment.newInstance();
 			ft.replace(R.id.container_right, lastFragment);
 			ft.commit();
-			if (chartView != null)
-				chartView.setVisibility(View.GONE);
+			if (statContainer != null)
+				statContainer.setVisibility(View.GONE);
 			rightContainer.setVisibility(View.VISIBLE);
 		}
 
@@ -154,16 +155,17 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 			lastFragment = RightFillerFragment.newInstance();
 			ft.replace(R.id.container_right, lastFragment);
 			ft.commit();
-			if (chartView != null)
-				chartView.setVisibility(View.GONE);
+			if (statContainer != null)
+				statContainer.setVisibility(View.GONE);
 			rightContainer.setVisibility(View.VISIBLE);
 		}
 
 		lv = (GridView) findViewById(R.id.listviewperso);
 		lv.setVisibility(View.VISIBLE);
 
-		chartView = (ChartView) findViewById(R.id.chart_view);
-		chartView.setVisibility(View.GONE);
+		statContainer = findViewById(R.id.statContainer);
+
+		statContainer.setVisibility(View.GONE);
 
 		mUndoBarController = new UndoBarController(findViewById(R.id.undobar), this);
 
@@ -183,30 +185,6 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 			lv.setFastScrollEnabled(true);
 
 		setSwypeListener();
-
-		TypedValue tv = new TypedValue();
-		this.getTheme().resolveAttribute(R.attr.actionBarSize, tv, true);
-		int actionBarHeight = getResources().getDimensionPixelSize(tv.resourceId);
-
-		if (!StateHolder.GetMemorizedValue("swype", this)) {
-			ShowcaseView.ConfigOptions co = new ShowcaseView.ConfigOptions();
-			co.hideOnClickOutside = true;
-
-			sv = ShowcaseView.insertShowcaseView(actionBarHeight * 2, actionBarHeight * 2, this, R.string.sc1, R.string.sc2, co);
-			sv.animateGesture(0, 0, +600, 0);
-			new Async().execute();
-			sv.setOnShowcaseEventListener(new OnShowcaseEventListener() {
-				@Override
-				public void onShowcaseViewShow(ShowcaseView showcaseView) {
-				}
-
-				@Override
-				public void onShowcaseViewHide(ShowcaseView showcaseView) {
-					StateHolder.MemorizeValue("swype", true, getApplicationContext());
-				}
-			});
-
-		}
 	}
 
 	public void reloadItems() {
@@ -256,26 +234,6 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 		lv.setAdapter(mSchedule);
 	}
 
-	class Async extends AsyncTask<Void, Void, Void> {
-
-		@Override
-		protected Void doInBackground(Void... params) {
-			try {
-				Thread.sleep(4000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			return null;
-		}
-
-		@Override
-		protected void onPostExecute(Void result) {
-			if (sv != null)
-				sv.animateGesture(0, 0, +600, 0);
-			super.onPostExecute(result);
-		}
-	}
-
 	private void setSwypeListener() {
 
 		if (swipeList == null) {
@@ -283,10 +241,6 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 				public SwipeDismissList.Undoable onDismiss(AbsListView listView, final int position) {
 					mSchedule.remove(listItem.get(position));
 					mSchedule.notifyDataSetChanged();
-					if (sv != null) {
-						sv.hide();
-						sv = null;
-					}
 					return null;
 				}
 			};
@@ -349,8 +303,8 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 			ft.replace(R.id.container_right, lastFragment);
 			ft.commit();
 			rightContainer.setVisibility(View.VISIBLE);
-			if (chartView != null)
-				chartView.setVisibility(View.GONE);
+			if (statContainer != null)
+				statContainer.setVisibility(View.GONE);
 		} else {
 
 			Intent intent = new Intent(HistoryActivity.this, VisuPagerActivity.class);
@@ -512,7 +466,7 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 			}
 
 			int winner = Integer.parseInt(listItem.get(position).get("winner"));
-			
+
 			if (winner == MainActivity.BLUE_PLAYER) {
 				selectorCheck.setBackgroundColor(Color.parseColor(ColorHolder.getInstance(getApplicationContext()).getColor(MainActivity.BLUE_PLAYER)));
 			} else if (winner == MainActivity.RED_PLAYER) {
@@ -758,7 +712,11 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 
 			rightContainer.setVisibility(View.GONE);
 		}
-		chartView.setVisibility(View.VISIBLE);
+
+		statContainer.setVisibility(View.VISIBLE);
+		chartView = (ChartView) findViewById(R.id.chart_view);
+		BarGraph bargraph = (BarGraph) findViewById(R.id.bargraph);
+
 		chartView.setGridLineColor(isDark ? Color.rgb(19, 133, 173) : Color.BLACK);
 		chartView.setGridLinesVertical(0);
 		chartView.setGridLinesHorizontal(0);
@@ -797,10 +755,78 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 			c.moveToNext();
 		}
 		c.close();
-
+		chartView.clearSeries();
 		chartView.addSeries(seriesBlue);
 		chartView.addSeries(seriesRed);
 		chartView.addSeries(seriesGreen);
+
+		// bar
+		ArrayList<Bar> points = new ArrayList<Bar>();
+		Bar d = new Bar();
+		d.setColor(Color.parseColor(ColorHolder.getInstance(this).getColor(MainActivity.BLUE_PLAYER)));
+		d.setValue(bluecount);
+		Bar d2 = new Bar();
+		d2.setColor(Color.parseColor(ColorHolder.getInstance(this).getColor(MainActivity.RED_PLAYER)));
+		d2.setValue(redcount);
+		Bar d3 = new Bar();
+		d3.setColor(isDark ? Color.LTGRAY : Color.DKGRAY);
+		d3.setValue(greencount);
+
+		points.add(d);
+		points.add(d3);
+		points.add(d2);
+
+		bargraph.setBars(points);
+
+		// pie
+		PieGraph pieBlue = (PieGraph) findViewById(R.id.pieBlue);
+		pieBlue.setSlices(new ArrayList<PieSlice>());
+		PieSlice slice = new PieSlice();
+		slice.setColor(isDark ? Color.BLACK : Color.WHITE);
+		slice.setValue(redcount + greencount);
+		pieBlue.addSlice(slice);
+		slice = new PieSlice();
+		slice.setColor(Color.parseColor(ColorHolder.getInstance(this).getColor(MainActivity.BLUE_PLAYER)));
+		slice.setValue(bluecount);
+		pieBlue.addSlice(slice);
+
+		PieGraph pieRed = (PieGraph) findViewById(R.id.pieRed);
+		pieRed.setSlices(new ArrayList<PieSlice>());
+		slice = new PieSlice();
+		slice.setColor(isDark ? Color.BLACK : Color.WHITE);
+		slice.setValue(bluecount + greencount);
+		pieRed.addSlice(slice);
+		slice = new PieSlice();
+		slice.setColor(Color.parseColor(ColorHolder.getInstance(this).getColor(MainActivity.RED_PLAYER)));
+		slice.setValue(redcount);
+		pieRed.addSlice(slice);
+
+		PieGraph pieTie = (PieGraph) findViewById(R.id.pieTie);
+		pieTie.setSlices(new ArrayList<PieSlice>());
+		slice = new PieSlice();
+		slice.setColor(isDark ? Color.BLACK : Color.WHITE);
+		slice.setValue(bluecount + redcount);
+		pieTie.addSlice(slice);
+		slice = new PieSlice();
+		slice.setColor(isDark ? Color.LTGRAY : Color.DKGRAY);
+		slice.setValue(greencount);
+		pieTie.addSlice(slice);
+
+		PieGraph pieAll = (PieGraph) findViewById(R.id.pieAll);
+		pieAll.setSlices(new ArrayList<PieSlice>());
+		slice = new PieSlice();
+		slice.setColor(Color.parseColor(ColorHolder.getInstance(this).getColor(MainActivity.BLUE_PLAYER)));
+		slice.setValue(bluecount);
+		pieAll.addSlice(slice);
+		slice = new PieSlice();
+		slice.setColor(isDark ? Color.LTGRAY : Color.DKGRAY);
+		slice.setValue(greencount);
+		pieAll.addSlice(slice);
+		slice = new PieSlice();
+		slice.setColor(Color.parseColor(ColorHolder.getInstance(this).getColor(MainActivity.RED_PLAYER)));
+		slice.setValue(redcount);
+
+		pieAll.addSlice(slice);
 	}
 
 	int saveId = -1;
