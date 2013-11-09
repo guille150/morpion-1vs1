@@ -57,12 +57,100 @@
         android:paddingTop="16dp" >
     </FrameLayout>
 
-    <com.michaelpardo.android.widget.chartview.ChartView
-        android:id="@+id/chart_view"
-        android:layout_width="0dp"
+    <ScrollView
+        android:id="@+id/statContainer"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_margin="8dp"
-        android:layout_weight="2"
-        android:visibility="gone" />
+        android:visibility="gone" >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp" >
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="8dp"
+                android:text="@string/s72"
+                android:textColor="#a0a0a0"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                android:orientation="horizontal" >
+
+                <com.echo.holographlibrary.PieGraph
+                    android:id="@+id/pieBlue"
+                    android:layout_width="0dp"
+                    android:layout_height="80dp"
+                    android:layout_marginRight="6dp"
+                    android:layout_weight="1" />
+
+                <com.echo.holographlibrary.PieGraph
+                    android:id="@+id/pieTie"
+                    android:layout_width="0dp"
+                    android:layout_height="80dp"
+                    android:layout_marginLeft="6dp"
+                    android:layout_marginRight="6dp"
+                    android:layout_weight="1" />
+
+                <com.echo.holographlibrary.PieGraph
+                    android:id="@+id/pieRed"
+                    android:layout_width="0dp"
+                    android:layout_height="80dp"
+                    android:layout_marginLeft="6dp"
+                    android:layout_weight="1" />
+            </LinearLayout>
+
+            <com.echo.holographlibrary.PieGraph
+                android:id="@+id/pieAll"
+                android:layout_width="fill_parent"
+                android:layout_height="150dp"
+                android:layout_marginLeft="6dp" />
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="4dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="8dp"
+                android:layout_marginTop="24dp"
+                android:text="@string/s70"
+                android:textColor="#a0a0a0"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <com.michaelpardo.android.widget.chartview.ChartView
+                android:id="@+id/chart_view"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:layout_margin="8dp" />
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="4dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="8dp"
+                android:layout_marginTop="24dp"
+                android:text="@string/s71"
+                android:textColor="#a0a0a0"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <com.echo.holographlibrary.BarGraph
+                android:id="@+id/bargraph"
+                android:layout_width="match_parent"
+                android:layout_height="150dp"
+                android:layout_margin="8dp" />
+        </LinearLayout>
+    </ScrollView>
 
 </LinearLayout>

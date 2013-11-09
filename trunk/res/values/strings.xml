@@ -157,5 +157,9 @@
 	<string name="s65">Theme</string>
 	<string name="s66">X\'s color</string>
 	<string name="s67">O\'s color</string>
-	<string name="s68"></string>
+	<string name="s68">You</string>
+	<string name="s69">AI / Friend</string>
+	<string name="s70">VICTORIES OVER TIME</string>
+	<string name="s71">MOST VICTORIOUS</string>
+	<string name="s72">RESULTS REPARTITION</string>
 </resources>

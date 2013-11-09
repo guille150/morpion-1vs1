@@ -265,8 +265,10 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 		ArrayList<NavigationItem> n2 = new ArrayList<MainActivity.NavigationItem>();
 		n2.add(new NavigationItem(isDark ? R.drawable.ic_action_spinner_savedark : R.drawable.ic_action_spinner_save, getString(R.string.m2), 0));
 		// n2.add(new NavigationItem(isDark ? R.drawable.ic_action_spinner_partiehelpdark : R.drawable.ic_action_spinner_partiehelp, getString(R.string.m3), 0));
-		n2.add(new NavigationItem(isDark ? R.drawable.ic_action_spinner_achivmentdark : R.drawable.ic_action_spinner_achivment, getString(R.string.s37), 0));
-		n2.add(new NavigationItem(isDark ? R.drawable.ic_action_spinner_boarddarl : R.drawable.ic_action_spinner_board, getString(R.string.s38), 0));
+		if (GooglePlayServicesUtil.isGooglePlayServicesAvailable(getApplicationContext()) == ConnectionResult.SUCCESS) {
+			n2.add(new NavigationItem(isDark ? R.drawable.ic_action_spinner_achivmentdark : R.drawable.ic_action_spinner_achivment, getString(R.string.s37), 0));
+			n2.add(new NavigationItem(isDark ? R.drawable.ic_action_spinner_boarddarl : R.drawable.ic_action_spinner_board, getString(R.string.s38), 0));
+		}
 
 		NavigationSection s2 = new NavigationSection(getString(R.string.s40), n2);
 		navSections.add(s2);
