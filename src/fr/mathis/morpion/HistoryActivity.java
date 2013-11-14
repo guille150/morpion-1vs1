@@ -148,28 +148,9 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 	}
 
 	public void createList() {
-
-		if (rightContainer != null) {
-			FragmentManager fm = getSupportFragmentManager();
-			FragmentTransaction ft = fm.beginTransaction();
-			lastFragment = RightFillerFragment.newInstance();
-			ft.replace(R.id.container_right, lastFragment);
-			ft.commit();
-			if (statContainer != null)
-				statContainer.setVisibility(View.GONE);
-			rightContainer.setVisibility(View.VISIBLE);
-		}
-
-		lv = (GridView) findViewById(R.id.listviewperso);
-		lv.setVisibility(View.VISIBLE);
-
-		statContainer = findViewById(R.id.statContainer);
-
-		statContainer.setVisibility(View.GONE);
-
-		mUndoBarController = new UndoBarController(findViewById(R.id.undobar), this);
-
-		listItem = new ArrayList<HashMap<String, String>>();
+		initViews();
+		
+		
 		Cursor c = ToolsBDD.getInstance(this).getAllParties();
 		if (c == null || c.getCount() == 0) {
 			c.close();
@@ -701,7 +682,33 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 		return px;
 	}
 
+	private void initViews()
+	{
+		if (rightContainer != null) {
+			FragmentManager fm = getSupportFragmentManager();
+			FragmentTransaction ft = fm.beginTransaction();
+			lastFragment = RightFillerFragment.newInstance();
+			ft.replace(R.id.container_right, lastFragment);
+			ft.commit();
+			if (statContainer != null)
+				statContainer.setVisibility(View.GONE);
+			rightContainer.setVisibility(View.VISIBLE);
+		}
+
+		lv = (GridView) findViewById(R.id.listviewperso);
+		lv.setVisibility(View.VISIBLE);
+
+		statContainer = findViewById(R.id.statContainer);
+		statContainer.setVisibility(View.GONE);
+
+		mUndoBarController = new UndoBarController(findViewById(R.id.undobar), this);
+
+				
+	}
+	
 	private void createChart() {
+		initViews();
+		
 		if (rightContainer == null) {
 			lv.setVisibility(View.GONE);
 		} else {
