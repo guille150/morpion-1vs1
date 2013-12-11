@@ -1,10 +1,5 @@
 <resources>
 
-    <!--
-        Base application theme for API 14+. This theme completely replaces
-        AppBaseTheme from BOTH res/values/styles.xml and
-        res/values-v11/styles.xml on API 14+ devices.
-    -->
     <style name="AppTheme" parent="@style/Theme.Sherlock.Light">
         <item name="android:actionBarItemBackground">@drawable/selectable_background_apptheme</item>
         <item name="android:popupMenuStyle">@style/PopupMenu.Apptheme</item>
@@ -15,9 +10,12 @@
         <item name="android:actionModeBackground">@drawable/cab_background_top_apptheme</item>
         <item name="android:actionModeSplitBackground">@drawable/cab_background_bottom_apptheme</item>
         <item name="android:actionModeCloseButtonStyle">@style/ActionButton.CloseMode.Apptheme</item>
+        <item name="android:checkboxStyle">@style/CheckBoxAppTheme</item>
+        <item name="android:spinnerDropDownItemStyle">@style/SpinnerDropDownItemAppTheme</item>
     </style>
 
     <style name="AppThemeDark" parent="@style/Theme.Sherlock">
+        <item name="android:checkboxStyle">@style/CheckBoxAppThemeDark</item>
         <item name="android:actionBarItemBackground">@drawable/selectable_background_appthemedark</item>
         <item name="android:popupMenuStyle">@style/PopupMenu.Appthemedark</item>
         <item name="android:dropDownListViewStyle">@style/DropDownListView.Appthemedark</item>
@@ -27,6 +25,7 @@
         <item name="android:actionModeBackground">@drawable/cab_background_top_appthemedark</item>
         <item name="android:actionModeSplitBackground">@drawable/cab_background_bottom_appthemedark</item>
         <item name="android:actionModeCloseButtonStyle">@style/ActionButton.CloseMode.Appthemedark</item>
+        <item name="android:spinnerDropDownItemStyle">@style/SpinnerDropDownItemAppThemeDark</item>
     </style>
 
     <style name="AppThemeDialog" parent="@style/Theme.Sherlock.Light.Dialog"></style>
@@ -67,6 +66,22 @@
     <style name="Theme.Apptheme.Widget" parent="@style/Theme.Sherlock">
         <item name="android:popupMenuStyle">@style/PopupMenu.Apptheme</item>
         <item name="android:dropDownListViewStyle">@style/DropDownListView.Apptheme</item>
+    </style>
+
+    <style name="CheckBoxAppThemeDark" parent="android:Widget.CompoundButton.CheckBox">
+        <item name="android:button">@drawable/btn_check_holo_dark</item>
+    </style>
+
+    <style name="CheckBoxAppTheme" parent="android:Widget.CompoundButton.CheckBox">
+        <item name="android:button">@drawable/btn_check_holo_light</item>
+    </style>
+
+    <style name="SpinnerDropDownItemAppThemeDark" parent="android:Widget.DropDownItem.Spinner">
+        <item name="android:checkMark">@drawable/btn_radio_holo_dark</item>
+    </style>
+
+    <style name="SpinnerDropDownItemAppTheme" parent="android:Widget.DropDownItem.Spinner">
+        <item name="android:checkMark">@drawable/btn_radio_holo_light</item>
     </style>
 
 </resources>
