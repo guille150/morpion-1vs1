@@ -1,18 +1,22 @@
 <resources>
 
     <style name="AppTheme" parent="@style/Theme.Sherlock.Light">
+        <item name="android:checkboxStyle">@style/CheckBoxAppTheme</item>
         <item name="android:editTextBackground">@drawable/edit_text_holo_light</item>
         <item name="android:listChoiceIndicatorMultiple">@drawable/btn_check_holo_light</item>
         <item name="android:buttonStyle">@style/ButtonAppTheme</item>
         <item name="android:imageButtonStyle">@style/ImageButtonAppTheme</item>
         <item name="android:dropDownSpinnerStyle">@style/SpinnerAppTheme</item>
+        <item name="android:spinnerDropDownItemStyle">@style/SpinnerDropDownItemAppTheme</item>
     </style>
 
     <style name="AppThemeDark" parent="@style/Theme.Sherlock">
+        <item name="android:checkboxStyle">@style/CheckBoxAppThemeDark</item>
         <item name="android:listChoiceIndicatorMultiple">@drawable/btn_check_holo_dark</item>
         <item name="android:buttonStyle">@style/ButtonAppThemeDark</item>
         <item name="android:imageButtonStyle">@style/ImageButtonAppThemeDark</item>
         <item name="android:dropDownSpinnerStyle">@style/SpinnerAppThemeDark</item>
+        <item name="android:spinnerDropDownItemStyle">@style/SpinnerDropDownItemAppThemeDark</item>
     </style>
 
     <style name="AppThemeDialog" parent="@style/Theme.Sherlock.Light.Dialog">
@@ -52,6 +56,22 @@
 
     <style name="ImageButtonAppThemeDark" parent="android:Widget.Holo.ImageButton">
         <item name="android:background">@drawable/btn_default_holo_dark</item>
+    </style>
+
+    <style name="CheckBoxAppThemeDark" parent="android:Widget.CompoundButton.CheckBox">
+        <item name="android:button">@drawable/btn_check_holo_dark</item>
+    </style>
+
+    <style name="CheckBoxAppTheme" parent="android:Widget.CompoundButton.CheckBox">
+        <item name="android:button">@drawable/btn_check_holo_light</item>
+    </style>
+
+    <style name="SpinnerDropDownItemAppThemeDark" parent="android:Widget.DropDownItem.Spinner">
+        <item name="android:checkMark">@drawable/btn_radio_holo_dark</item>
+    </style>
+
+    <style name="SpinnerDropDownItemAppTheme" parent="android:Widget.DropDownItem.Spinner">
+        <item name="android:checkMark">@drawable/btn_radio_holo_light</item>
     </style>
 
 </resources>
