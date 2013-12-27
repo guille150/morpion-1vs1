@@ -54,8 +54,6 @@
     <string name="sure">Voulez-vous supprimer l\'historique ?</string>
     <string name="resume">Résumé n°</string>
     <string name="game">Partie n°</string>
-    <string name="blue">Tour : X</string>
-    <string name="red">Tour : O</string>
     <string name="over">Terminé</string>
     <string name="saved">Partie sauvegardée dans l\'historique</string>
     <string name="ctrlz">Annuler</string>

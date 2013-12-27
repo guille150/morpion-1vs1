@@ -20,7 +20,10 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -34,9 +37,11 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
+import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -127,6 +132,23 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		getSupportActionBar().setDisplayShowTitleEnabled(false);
 		setContentView(isDark ? R.layout.listviewcustomdark : R.layout.listviewcustom);
+
+		generateActionBarIcon();
+		final View iconL = findViewById(R.id.gameViewForIcon);
+		ViewTreeObserver vto = iconL.getViewTreeObserver();
+		vto.addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
+			@SuppressWarnings("deprecation")
+			@SuppressLint("NewApi")
+			@Override
+			public void onGlobalLayout() {
+				generateActionBarIcon();
+				if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN)
+					iconL.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+				else
+					iconL.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+			}
+		});
+
 		if (findViewById(R.id.container_right) != null)
 			rightContainer = (FrameLayout) findViewById(R.id.container_right);
 		DisplayMetrics metrics = new DisplayMetrics();
@@ -147,10 +169,31 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 
 	}
 
+	private void generateActionBarIcon() {
+
+		GameView vGame = (GameView) findViewById(R.id.gameViewForIcon);
+		int[][] values = new int[][] { new int[] { MainActivity.RED_PLAYER, MainActivity.RED_PLAYER, MainActivity.BLUE_PLAYER }, new int[] { MainActivity.BLUE_PLAYER, MainActivity.BLUE_PLAYER, MainActivity.RED_PLAYER }, new int[] { MainActivity.RED_PLAYER, MainActivity.BLUE_PLAYER, MainActivity.RED_PLAYER } };
+		vGame.setValues(values, MainActivity.BLUE_PLAYER);
+		vGame.loadcolors();
+		vGame.setStrikeWidth(1);
+
+		View v = findViewById(R.id.IconContainer);
+		if (v.getWidth() != 0 && v.getHeight() != 0) {
+			Bitmap returnedBitmap = Bitmap.createBitmap(v.getWidth(), v.getHeight(), Bitmap.Config.ARGB_8888);
+			Canvas canvas = new Canvas(returnedBitmap);
+			Drawable bgDrawable = v.getBackground();
+			if (bgDrawable != null)
+				bgDrawable.draw(canvas);
+			v.draw(canvas);
+
+			Drawable d = new BitmapDrawable(getResources(), returnedBitmap);
+			getSupportActionBar().setIcon(d);
+		}
+	}
+
 	public void createList() {
 		initViews();
-		
-		
+
 		Cursor c = ToolsBDD.getInstance(this).getAllParties();
 		if (c == null || c.getCount() == 0) {
 			c.close();
@@ -682,8 +725,7 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 		return px;
 	}
 
-	private void initViews()
-	{
+	private void initViews() {
 		if (rightContainer != null) {
 			FragmentManager fm = getSupportFragmentManager();
 			FragmentTransaction ft = fm.beginTransaction();
@@ -703,12 +745,11 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 
 		mUndoBarController = new UndoBarController(findViewById(R.id.undobar), this);
 
-				
 	}
-	
+
 	private void createChart() {
 		initViews();
-		
+
 		if (rightContainer == null) {
 			lv.setVisibility(View.GONE);
 		} else {

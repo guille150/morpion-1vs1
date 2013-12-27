@@ -22,9 +22,9 @@ public class ColorHolder {
 		this.c = c;
 		settings = PreferenceManager.getDefaultSharedPreferences(c);
 		drawableBluePlayer = getAllBlueDrawable().get(settings.getInt("colorblue", 0));
-		drawableRedPlayer = getAllRedDrawable().get(settings.getInt("colorred", 9));
+		drawableRedPlayer = getAllRedDrawable().get(settings.getInt("colorred", 6));
 		colorBluePlayer = getAllColor().get(settings.getInt("colorblue", 0));
-		colorRedPlayer = getAllColor().get(settings.getInt("colorred", 9));
+		colorRedPlayer = getAllColor().get(settings.getInt("colorred", 6));
 	}
 
 	public static ColorHolder getInstance(Context c) {
@@ -114,9 +114,9 @@ public class ColorHolder {
 		editor.commit();
 
 		drawableBluePlayer = getAllBlueDrawable().get(settings.getInt("colorblue", 0));
-		drawableRedPlayer = getAllRedDrawable().get(settings.getInt("colorred", 9));
+		drawableRedPlayer = getAllRedDrawable().get(settings.getInt("colorred", 6));
 		colorBluePlayer = getAllColor().get(settings.getInt("colorblue", 0));
-		colorRedPlayer = getAllColor().get(settings.getInt("colorred", 9));
+		colorRedPlayer = getAllColor().get(settings.getInt("colorred", 6));
 	}
 
 	public int getColorIndex(int player_id) {

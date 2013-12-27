@@ -16,9 +16,12 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Typeface;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -40,6 +43,8 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
+import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.WindowManager;
 import android.view.animation.AlphaAnimation;
 import android.widget.AdapterView;
@@ -51,6 +56,7 @@ import android.widget.ExpandableListView.OnChildClickListener;
 import android.widget.ExpandableListView.OnGroupClickListener;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -128,7 +134,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 	private int activeNavChild = 0;
 	private DrawerLayout mDrawerLayout;
 	private ExpandableListView mDrawerList;
-	TextView playerText;
+	LinearLayout playerText;
 	ImageButton[][] tabIB;
 	int[][] tabVal;
 	int turn = BLUE_PLAYER;
@@ -194,6 +200,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 		getSupportActionBar().setTitle(R.string.s31);
 		activContext = this;
 		setContentView(isDark ? R.layout.main_layout_dark : R.layout.main_layout);
+
 		setSupportProgressBarIndeterminateVisibility(false);
 		container = (FrameLayout) findViewById(R.id.container);
 		initDrawer();
@@ -201,6 +208,28 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 		createNewGameAI();
 		if (!StateHolder.GetMemorizedValue("showwelcomedrawer", this) || android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
 			new Async().execute();
+		}
+	}
+
+	private void generateActionBarIcon() {
+
+		GameView vGame = (GameView) findViewById(R.id.gameViewForIcon);
+		int[][] values = new int[][] { new int[] { RED_PLAYER, RED_PLAYER, BLUE_PLAYER }, new int[] { BLUE_PLAYER, BLUE_PLAYER, RED_PLAYER }, new int[] { RED_PLAYER, BLUE_PLAYER, RED_PLAYER } };
+		vGame.setValues(values, BLUE_PLAYER);
+		vGame.loadcolors();
+		vGame.setStrikeWidth(1);
+
+		View v = findViewById(R.id.IconContainer);
+		if (v.getWidth() != 0 && v.getHeight() != 0) {
+			Bitmap returnedBitmap = Bitmap.createBitmap(v.getWidth(), v.getHeight(), Bitmap.Config.ARGB_8888);
+			Canvas canvas = new Canvas(returnedBitmap);
+			Drawable bgDrawable = v.getBackground();
+			if (bgDrawable != null)
+				bgDrawable.draw(canvas);
+			v.draw(canvas);
+
+			Drawable d = new BitmapDrawable(getResources(), returnedBitmap);
+			getSupportActionBar().setIcon(d);
 		}
 	}
 
@@ -328,7 +357,6 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 
 			if (groupPosition == 0 && childPosition == 3) {
 				if (isSignedIn()) {
-					getSupportActionBar().setIcon(R.drawable.two_player);
 					createOnlineScreen();
 				} else {
 					Toast.makeText(getApplicationContext(), R.string.s57, Toast.LENGTH_SHORT).show();
@@ -336,11 +364,9 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 				}
 			}
 			if (groupPosition == 0 && childPosition == 0) {
-				getSupportActionBar().setIcon(R.drawable.ic_launcher);
 				createNewGame();
 			}
 			if (groupPosition == 1 && childPosition == 0) {
-				getSupportActionBar().setIcon(R.drawable.ic_launcher);
 				if (0 != ToolsBDD.getInstance(this).getNbPartie()) {
 					Intent intent = new Intent(MainActivity.this, HistoryActivity.class);
 					startActivityForResult(intent, ACTIVITY_HISTORY);
@@ -355,10 +381,8 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 			 * 
 			 * if (m != null) { m.getItem(0).setVisible(false); } } else
 			 */if (groupPosition == 0 && childPosition == 1) {
-				getSupportActionBar().setIcon(R.drawable.two_player);
 				startBluetooth();
 			} else if (groupPosition == 0 && childPosition == 2) {
-				getSupportActionBar().setIcon(R.drawable.ic_launcher);
 				createNewGameAI();
 			}
 
@@ -629,6 +653,22 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 		container.removeAllViews();
 		container.addView(child);
 
+		generateActionBarIcon();
+		final View iconL = findViewById(R.id.gameViewForIcon);
+		ViewTreeObserver vto = iconL.getViewTreeObserver();
+		vto.addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
+			@SuppressWarnings("deprecation")
+			@SuppressLint("NewApi")
+			@Override
+			public void onGlobalLayout() {
+				generateActionBarIcon();
+				if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN)
+					iconL.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+				else
+					iconL.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+			}
+		});
+		
 		nbGame = ToolsBDD.getInstance(this).getNbPartieNumber() + 1;
 		TextView tv1 = (TextView) findViewById(R.id.welcomeGame);
 		tv1.setText(getString(R.string.game) + nbGame);
@@ -640,7 +680,8 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 		gv.setAlignement(GameView.STYLE_TOP_VERTICAL_CENTER_HORIZONTAL);
 		gv.invalidate();
 		finishedAI = false;
-		playerText = (TextView) findViewById(R.id.playerText);
+		playerText = (LinearLayout) findViewById(R.id.playerText);
+		playerText.setVisibility(View.INVISIBLE);
 
 		for (int i = 0; i < 3; i++) {
 			for (int j = 0; j < 3; j++) {
@@ -668,6 +709,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 				checkWinner(i, j, false, true, false);
 				if (!finishedAI)
 					makeTheAIPlay(i, j);
+				generateActionBarIcon();
 			}
 		});
 
@@ -675,15 +717,9 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 			computerStarted = true;
 			makeTheAIPlay(-1, -1);
 			turn = BLUE_PLAYER;
-
-			displayNextTurn();
-			displayNextTurn();
 		} else {
 			computerStarted = false;
 			turn = BLUE_PLAYER;
-
-			displayNextTurn();
-			displayNextTurn();
 		}
 
 		gv.setValues(tabVal, turn);
@@ -827,6 +863,23 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 
 		container.removeAllViews();
 		container.addView(child);
+		
+		generateActionBarIcon();
+		final View iconL = findViewById(R.id.gameViewForIcon);
+		ViewTreeObserver vto = iconL.getViewTreeObserver();
+		vto.addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
+			@SuppressWarnings("deprecation")
+			@SuppressLint("NewApi")
+			@Override
+			public void onGlobalLayout() {
+				generateActionBarIcon();
+				if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN)
+					iconL.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+				else
+					iconL.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+			}
+		});
+		
 		getSupportActionBar().setTitle(R.string.s44);
 		View quick = child.findViewById(R.id.onlineQuickMatch);
 		quick.setOnClickListener(new OnClickListener() {
@@ -1020,6 +1073,23 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 
 			container.removeAllViews();
 			container.addView(child);
+			
+			generateActionBarIcon();
+			final View iconL = findViewById(R.id.gameViewForIcon);
+			ViewTreeObserver vto = iconL.getViewTreeObserver();
+			vto.addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
+				@SuppressWarnings("deprecation")
+				@SuppressLint("NewApi")
+				@Override
+				public void onGlobalLayout() {
+					generateActionBarIcon();
+					if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN)
+						iconL.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+					else
+						iconL.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+				}
+			});
+			
 			activeNavSection = 0;
 			activeNavChild = 1;
 			getSupportActionBar().setTitle(navSections.get(activeNavSection).items.get(activeNavChild).title);
@@ -1268,6 +1338,22 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 		container.removeAllViews();
 		container.addView(child);
 
+		generateActionBarIcon();
+		final View iconL = findViewById(R.id.gameViewForIcon);
+		ViewTreeObserver vto = iconL.getViewTreeObserver();
+		vto.addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
+			@SuppressWarnings("deprecation")
+			@SuppressLint("NewApi")
+			@Override
+			public void onGlobalLayout() {
+				generateActionBarIcon();
+				if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN)
+					iconL.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+				else
+					iconL.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+			}
+		});
+		
 		nbGame = ToolsBDD.getInstance(this).getNbPartieNumber() + 1;
 		TextView tv1 = (TextView) findViewById(R.id.welcomeGame);
 		tv1.setText(getString(R.string.game) + nbGame);
@@ -1279,7 +1365,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 		gv.setAlignement(GameView.STYLE_TOP_VERTICAL_CENTER_HORIZONTAL);
 		gv.invalidate();
 
-		playerText = (TextView) findViewById(R.id.playerText);
+		playerText = (LinearLayout) findViewById(R.id.playerText);
 		tabIB = new ImageButton[3][3];
 		tabVal = new int[3][3];
 
@@ -1293,12 +1379,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 
 		displayNextTurn();
 		turn = BLUE_PLAYER;
-		if (!isDark)
-			playerText.setTextColor(Color.rgb(0, 0, 0));
-		else {
-			playerText.setTextColor(Color.rgb(255, 255, 255));
-		}
-		playerText.setText(R.string.s17);
+		playerText.setVisibility(View.INVISIBLE);
 
 		if (m != null) {
 			m.getItem(0).setVisible(false);
@@ -1423,6 +1504,22 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 		container.removeAllViews();
 		container.addView(child);
 
+		generateActionBarIcon();
+		final View iconL = findViewById(R.id.gameViewForIcon);
+		ViewTreeObserver vto = iconL.getViewTreeObserver();
+		vto.addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
+			@SuppressWarnings("deprecation")
+			@SuppressLint("NewApi")
+			@Override
+			public void onGlobalLayout() {
+				generateActionBarIcon();
+				if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN)
+					iconL.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+				else
+					iconL.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+			}
+		});
+		
 		nbGame = ToolsBDD.getInstance(this).getNbPartieNumber() + 1;
 		TextView tv1 = (TextView) findViewById(R.id.welcomeGame);
 		tv1.setText(getString(R.string.game) + nbGame);
@@ -1434,7 +1531,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 		gv.setAlignement(GameView.STYLE_TOP_VERTICAL_CENTER_HORIZONTAL);
 		gv.invalidate();
 
-		playerText = (TextView) findViewById(R.id.playerText);
+		playerText = (LinearLayout) findViewById(R.id.playerText);
 		tabIB = new ImageButton[3][3];
 		tabVal = new int[3][3];
 
@@ -1612,25 +1709,41 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 	}
 
 	public void displayNextTurn() {
-		if (turn == RED_PLAYER) {
-			playerText.setText(" " + getString(R.string.blue));
-			turn = BLUE_PLAYER;
-			playerText.setTextColor(Color.parseColor(ColorHolder.getInstance(this).getColor(BLUE_PLAYER)));
-		} else {
-			playerText.setText(" " + getString(R.string.red));
-			turn = RED_PLAYER;
-			playerText.setTextColor(Color.parseColor(ColorHolder.getInstance(this).getColor(RED_PLAYER)));
-		}
 
+		playerText.setVisibility(View.VISIBLE);
+		if (turn == RED_PLAYER) {
+			turn = BLUE_PLAYER;
+			playerText.setBackgroundColor(Color.parseColor(ColorHolder.getInstance(this).getColor(BLUE_PLAYER)));
+		} else {
+			turn = RED_PLAYER;
+			playerText.setBackgroundColor(Color.parseColor(ColorHolder.getInstance(this).getColor(RED_PLAYER)));
+		}
+		playerText.invalidate();
 	}
 
 	@SuppressLint("NewApi")
 	public void createNewGame() {
 		userMightNotWantToLeave = false;
 		View child = getLayoutInflater().inflate(isDark ? R.layout.game_aidark : R.layout.game_ai, null);
-		getSupportActionBar().setIcon(R.drawable.two_player);
 		container.removeAllViews();
 		container.addView(child);
+		
+		generateActionBarIcon();
+		final View iconL = findViewById(R.id.gameViewForIcon);
+		ViewTreeObserver vto = iconL.getViewTreeObserver();
+		vto.addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
+			@SuppressWarnings("deprecation")
+			@SuppressLint("NewApi")
+			@Override
+			public void onGlobalLayout() {
+				generateActionBarIcon();
+				if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN)
+					iconL.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+				else
+					iconL.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+			}
+		});		
+		
 		SharedPreferences mgr = PreferenceManager.getDefaultSharedPreferences(this);
 		final boolean isDark = mgr.getBoolean("isDark", false);
 
@@ -1646,7 +1759,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 		gv.invalidate();
 		gv.invalidate();
 
-		playerText = (TextView) findViewById(R.id.playerText);
+		playerText = (LinearLayout) findViewById(R.id.playerText);
 		tabIB = new ImageButton[3][3];
 		tabVal = new int[3][3];
 
@@ -1697,6 +1810,10 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 			gv.invalidate();
 		}
 
+		if (findViewById(R.id.gameViewForIcon) != null) {
+			generateActionBarIcon();
+		}
+
 		View b1 = findViewById(R.id.imageViewPrems);
 		View b2 = findViewById(R.id.imageView2);
 		View b3 = findViewById(R.id.imageView3);
@@ -1716,7 +1833,8 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 				congratsContainer.setBackgroundColor(isDark ? Color.DKGRAY : Color.LTGRAY);
 			}
 		}
-		playerText.setTextColor(Color.parseColor(ColorHolder.getInstance(this).getColor(turn)));
+
+		playerText.setBackgroundColor(Color.parseColor(ColorHolder.getInstance(this).getColor(turn)));
 
 		Button btnBTVisible = (Button) findViewById(R.id.buttonBTVisible);
 		if (btnBTVisible != null)
@@ -1829,11 +1947,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 		}
 		nbGame++;
 		if (!fromBT) {
-			playerText.setText(R.string.over);
-			if (isDark)
-				playerText.setTextColor(Color.WHITE);
-			else
-				playerText.setTextColor(Color.DKGRAY);
+			playerText.setVisibility(View.INVISIBLE);
 		}
 
 		gv.setMode(GameView.MODE_NOT_INTERACTIVE);
@@ -2563,7 +2677,6 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 
 	@Override
 	public void onLeftRoom(int arg0, String arg1) {
-		// TODO Auto-generated method stub
 
 	}
 
@@ -2694,7 +2807,6 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 
 	@Override
 	public void onConnectedToRoom(Room arg0) {
-		// TODO Auto-generated method stub
 		myroom = arg0;
 		roomId = arg0.getRoomId();
 	}
@@ -2711,25 +2823,21 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 
 	@Override
 	public void onPeerInvitedToRoom(Room arg0, List<String> arg1) {
-		// TODO Auto-generated method stub
 
 	}
 
 	@Override
 	public void onPeerJoined(Room arg0, List<String> arg1) {
-		// TODO Auto-generated method stub
 
 	}
 
 	@Override
 	public void onRoomAutoMatching(Room arg0) {
-		// TODO Auto-generated method stub
 
 	}
 
 	@Override
 	public void onRoomConnecting(Room arg0) {
-		// TODO Auto-generated method stub
 
 	}
 
@@ -2771,13 +2879,11 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 
 	@Override
 	public void onP2PConnected(String arg0) {
-		// TODO Auto-generated method stub
 
 	}
 
 	@Override
 	public void onP2PDisconnected(String arg0) {
-		// TODO Auto-generated method stub
 
 	}
 

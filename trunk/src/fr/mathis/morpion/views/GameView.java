@@ -31,10 +31,10 @@ public class GameView extends View {
 	public static int STYLE_CENTER_BOTH = 5;
 	public static int STYLE_TOP_VERTICAL_CENTER_HORIZONTAL = 6;
 
-	private int _viewHeight;
-	private int _viewWidth;
-	private int rHeight;
-	private int rWidth;
+	protected int _viewHeight;
+	protected int _viewWidth;
+	protected int rHeight;
+	protected int rWidth;
 	Context context;
 	int barcolor = Color.LTGRAY;
 	int bluepayercolor = Color.BLUE;
@@ -46,7 +46,7 @@ public class GameView extends View {
 	int style = STYLE_TOP_VERTICAL;
 	Paint _paint;
 	boolean isDark = false;
-	float strikeWidth = 2;
+	int strikeWidth = 2;
 	int nextTurn = MainActivity.BLUE_PLAYER;
 	boolean showWinner = false;
 	boolean isHoveredMode = false;
@@ -71,7 +71,7 @@ public class GameView extends View {
 		redplayercolor = Color.parseColor(ColorHolder.getInstance(context).getColor(MainActivity.RED_PLAYER));
 		bluedrawable = BitmapFactory.decodeResource(context.getResources(), ColorHolder.getInstance(context).getDrawable(MainActivity.BLUE_PLAYER));
 		reddrawable = BitmapFactory.decodeResource(context.getResources(), ColorHolder.getInstance(context).getDrawable(MainActivity.RED_PLAYER));
-
+		strikeWidth = (convertDpToPixel(2, context) == 0 ? 1 : convertDpToPixel(2, context));
 	}
 
 	public static int convertDpToPixel(float dp, Context context) {
@@ -114,8 +114,8 @@ public class GameView extends View {
 
 		_paint.setColor(barcolor);
 		for (int i = 1; i < 3; i++) {
-			canvas.drawRect(new Rect(xOffset + _viewWidth * i / 3 - (convertDpToPixel(strikeWidth, context) == 0 ? 1 : convertDpToPixel(strikeWidth, context)), yOffset + 0, xOffset + _viewWidth * i / 3 + (convertDpToPixel(strikeWidth, context) == 0 ? 1 : convertDpToPixel(strikeWidth, context)), yOffset + _viewHeight), _paint);
-			canvas.drawRect(new Rect(xOffset + 0, yOffset + _viewHeight * i / 3 - (convertDpToPixel(strikeWidth, context) == 0 ? 1 : convertDpToPixel(strikeWidth, context)), xOffset + _viewWidth, yOffset + _viewHeight * i / 3 + (convertDpToPixel(strikeWidth, context) == 0 ? 1 : convertDpToPixel(strikeWidth, context))), _paint);
+			canvas.drawRect(new Rect(xOffset + _viewWidth * i / 3 - strikeWidth, yOffset + 0, xOffset + _viewWidth * i / 3 + strikeWidth, yOffset + _viewHeight), _paint);
+			canvas.drawRect(new Rect(xOffset + 0, yOffset + _viewHeight * i / 3 - strikeWidth, xOffset + _viewWidth, yOffset + _viewHeight * i / 3 + strikeWidth), _paint);
 		}
 
 		if (downI != -1 && downY != -1) {
@@ -124,44 +124,23 @@ public class GameView extends View {
 			else
 				_paint.setColor(redplayercolor);
 			_paint.setAlpha(isDark ? 80 : 40);
-			int offset = (convertDpToPixel(strikeWidth, context) == 0 ? 1 : convertDpToPixel(strikeWidth, context));
+			int offset = strikeWidth;
 			canvas.drawRect(new Rect(xOffset + _viewWidth * downI / 3 + (downI == 0 ? 0 : offset), yOffset + _viewHeight * downY / 3 + (downY == 0 ? 0 : offset), xOffset + _viewWidth * (downI + 1) / 3 - (downI == 2 ? 0 : offset), yOffset + _viewHeight * (downY + 1) / 3 - (downY == 2 ? 0 : offset)), _paint);
 			_paint.setAlpha(255);
-		}
-
-		if (showWinner && !isHoveredMode) {
-
-			ArrayList<Point> wins = checkWinner();
-
-			for (Point p : wins) {
-				int res = values[p.x][p.y];
-
-				int v = p.y;
-				p.y = p.x;
-				p.x = v;
-
-				if (res != MainActivity.NONE_PLAYER) {
-					if (res == MainActivity.BLUE_PLAYER)
-						_paint.setColor(bluepayercolor);
-					else
-						_paint.setColor(redplayercolor);
-					_paint.setAlpha(isDark ? 160 : 80);
-					int offset = (convertDpToPixel(strikeWidth, context) == 0 ? 1 : convertDpToPixel(strikeWidth, context));
-					canvas.drawRect(new Rect(xOffset + _viewWidth * p.x / 3 + (p.x == 0 ? 0 : offset), yOffset + _viewHeight * p.y / 3 + (p.y == 0 ? 0 : offset), xOffset + _viewWidth * (p.x + 1) / 3 - (p.x == 2 ? 0 : offset), yOffset + _viewHeight * (p.y + 1) / 3 - (p.y == 2 ? 0 : offset)), _paint);
-					_paint.setAlpha(255);
-				}
-			}
 		}
 
 		if (values != null) {
 			for (int i = 0; i < 3; i++) {
 				for (int j = 0; j < 3; j++) {
 					if (values[i][j] == MainActivity.BLUE_PLAYER) {
-						canvas.drawBitmap(bluedrawable, new Rect(0, 0, bluedrawable.getWidth(), bluedrawable.getHeight()), new Rect(xOffset + _viewWidth * j / 3 + _viewHeight / (15), yOffset + _viewHeight * i / 3 + _viewHeight / (15), xOffset + _viewWidth * (j + 1) / 3 - _viewHeight / (15), yOffset + _viewHeight * (i + 1) / 3 - _viewHeight / (15)), _paint);
+						_paint.setColor(bluepayercolor);
+						canvas.drawRect(new Rect(xOffset + _viewWidth * j / 3 + (j == 0 ? 0 : strikeWidth), yOffset + _viewHeight * i / 3 +(i == 0 ? 0 : strikeWidth), xOffset + _viewWidth * (j + 1) / 3 - (j == 2 ? 0 : strikeWidth), yOffset + _viewHeight * (i + 1) / 3 - (i == 2 ? 0 : strikeWidth)), _paint);
 					}
 					if (values[i][j] == MainActivity.RED_PLAYER) {
-						canvas.drawBitmap(reddrawable, new Rect(0, 0, bluedrawable.getWidth(), bluedrawable.getHeight()), new Rect(xOffset + _viewWidth * j / 3 + _viewHeight / (15), yOffset + _viewHeight * i / 3 + _viewHeight / (15), xOffset + _viewWidth * (j + 1) / 3 - _viewHeight / (15), yOffset + _viewHeight * (i + 1) / 3 - _viewHeight / (15)), _paint);
+						_paint.setColor(redplayercolor);
+						canvas.drawRect(new Rect(xOffset + _viewWidth * j / 3 + (j == 0 ? 0 : strikeWidth), yOffset + _viewHeight * i / 3 +(i == 0 ? 0 : strikeWidth), xOffset + _viewWidth * (j + 1) / 3 - (j == 2 ? 0 : strikeWidth), yOffset + _viewHeight * (i + 1) / 3 - (i == 2 ? 0 : strikeWidth)), _paint);
 					}
+					
 				}
 
 			}
@@ -175,6 +154,7 @@ public class GameView extends View {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private ArrayList<Point> checkWinner() {
 
 		ArrayList<Point> res = new ArrayList<Point>();
@@ -445,7 +425,7 @@ public class GameView extends View {
 		return strikeWidth;
 	}
 
-	public void setStrikeWidth(float strikeWidth) {
+	public void setStrikeWidth(int strikeWidth) {
 		this.strikeWidth = strikeWidth;
 	}
 
