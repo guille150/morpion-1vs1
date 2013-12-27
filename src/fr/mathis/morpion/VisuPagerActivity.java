@@ -3,13 +3,18 @@ package fr.mathis.morpion;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -20,6 +25,9 @@ import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.util.DisplayMetrics;
+import android.view.View;
+import android.view.ViewTreeObserver;
+import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.MenuItem;
@@ -28,6 +36,7 @@ import com.astuetz.viewpager.extensions.PagerSlidingTabStrip;
 import fr.mathis.morpion.fragments.VisuFragment;
 import fr.mathis.morpion.tools.ColorHolder;
 import fr.mathis.morpion.tools.ToolsBDD;
+import fr.mathis.morpion.views.GameView;
 
 public class VisuPagerActivity extends SherlockFragmentActivity implements OnPageChangeListener {
 
@@ -65,6 +74,23 @@ public class VisuPagerActivity extends SherlockFragmentActivity implements OnPag
 		getSupportActionBar().setTitle("");
 
 		setContentView(isDark ? R.layout.visupagedark : R.layout.visupage);
+		
+		generateActionBarIcon();
+		final View iconL = findViewById(R.id.gameViewForIcon);
+		ViewTreeObserver vto = iconL.getViewTreeObserver();
+		vto.addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
+			@SuppressWarnings("deprecation")
+			@SuppressLint("NewApi")
+			@Override
+			public void onGlobalLayout() {
+				generateActionBarIcon();
+				if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN)
+					iconL.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+				else
+					iconL.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+			}
+		});
+		
 		NUM_PAGES = ToolsBDD.getInstance(this).getNbPartie();
 		indexs = new ArrayList<Integer>();
 
@@ -127,6 +153,28 @@ public class VisuPagerActivity extends SherlockFragmentActivity implements OnPag
 		new Async().execute(pos);
 	}
 
+	private void generateActionBarIcon() {
+
+		GameView vGame = (GameView) findViewById(R.id.gameViewForIcon);
+		int[][] values = new int[][] { new int[] { MainActivity.RED_PLAYER, MainActivity.RED_PLAYER, MainActivity.BLUE_PLAYER }, new int[] { MainActivity.BLUE_PLAYER, MainActivity.BLUE_PLAYER, MainActivity.RED_PLAYER }, new int[] { MainActivity.RED_PLAYER, MainActivity.BLUE_PLAYER, MainActivity.RED_PLAYER } };
+		vGame.setValues(values, MainActivity.BLUE_PLAYER);
+		vGame.loadcolors();
+		vGame.setStrikeWidth(1);
+
+		View v = findViewById(R.id.IconContainer);
+		if (v.getWidth() != 0 && v.getHeight() != 0) {
+			Bitmap returnedBitmap = Bitmap.createBitmap(v.getWidth(), v.getHeight(), Bitmap.Config.ARGB_8888);
+			Canvas canvas = new Canvas(returnedBitmap);
+			Drawable bgDrawable = v.getBackground();
+			if (bgDrawable != null)
+				bgDrawable.draw(canvas);
+			v.draw(canvas);
+
+			Drawable d = new BitmapDrawable(getResources(), returnedBitmap);
+			getSupportActionBar().setIcon(d);
+		}
+	}
+	
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
 

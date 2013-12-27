@@ -54,8 +54,6 @@
     <string name="sure">Do you want to delete the history ?</string>
     <string name="resume">Game n°</string>
     <string name="game">Game n°</string>
-    <string name="blue">Next turn: X</string>
-    <string name="red">Next turn: O</string>
     <string name="over"> It\'s over.</string>
     <string name="saved">Result saved.</string>
     <string name="restart">Restart</string>

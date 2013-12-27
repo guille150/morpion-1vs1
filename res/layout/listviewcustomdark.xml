@@ -4,6 +4,24 @@
     android:layout_height="fill_parent"
     android:orientation="vertical" >
 
+    <LinearLayout
+        android:id="@+id/IconContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="4dp"
+        android:visibility="invisible" >
+
+        <fr.mathis.morpion.views.GameView
+            android:id="@+id/gameViewForIcon"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:clickable="false"
+            android:focusable="false"
+            android:focusableInTouchMode="false"
+            android:visibility="visible" >
+        </fr.mathis.morpion.views.GameView>
+    </LinearLayout>
+
     <GridView
         android:id="@+id/listviewperso"
         android:layout_width="fill_parent"

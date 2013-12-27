@@ -2,122 +2,145 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent" >
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="@dimen/borderPadding"
-        android:layout_marginRight="@dimen/borderPadding"
-        android:orientation="vertical" >
-
-        <Button
-            android:id="@+id/buttonOnline"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:layout_marginTop="8dp"
-            android:text="@string/s56"
-            android:textColor="#FFFFFF"
-            android:visibility="visible" />
+        android:layout_height="wrap_content" >
 
         <LinearLayout
-            android:id="@+id/tohidewhenno"
-            android:layout_width="fill_parent"
-            android:layout_height="1.4dp"
-            android:background="@color/bluehighlighteddark"
-            android:orientation="vertical"
-            android:paddingBottom="16dp" >
+            android:id="@+id/IconContainer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="4dp"
+            android:visibility="invisible" >
+
+            <fr.mathis.morpion.views.GameView
+                android:id="@+id/gameViewForIcon"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:clickable="false"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
+                android:visibility="visible" >
+            </fr.mathis.morpion.views.GameView>
         </LinearLayout>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:layout_marginTop="8dp"
-            android:fontFamily="sans-serif-condansed"
-            android:text="@string/s18"
-            android:textAppearance="?android:attr/textAppearanceLarge" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:fontFamily="sans-serif-condansed"
-            android:text="@string/s19"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:fontFamily="sans-serif-light"
-            android:text="@string/s20" />
-
-        <Button
-            android:id="@+id/buttonBTVisible"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:text="@string/s21"
-            android:textColor="#FFFFFF" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:fontFamily="sans-serif-condansed"
-            android:text="@string/s22"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:fontFamily="sans-serif-light"
-            android:text="@string/s23" >
-        </TextView>
-
-        <Button
-            android:id="@+id/buttonBTSearch"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:text="@string/s24"
-            android:textColor="#FFFFFF" />
 
         <LinearLayout
             android:layout_width="fill_parent"
-            android:layout_height="1dp"
-            android:layout_marginBottom="16dp"
-            android:background="@drawable/linegray"
-            android:visibility="gone" >
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/borderPadding"
+            android:layout_marginRight="@dimen/borderPadding"
+            android:orientation="vertical" >
+
+            <Button
+                android:id="@+id/buttonOnline"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:layout_marginTop="8dp"
+                android:text="@string/s56"
+                android:textColor="#FFFFFF"
+                android:visibility="visible" />
+
+            <LinearLayout
+                android:id="@+id/tohidewhenno"
+                android:layout_width="fill_parent"
+                android:layout_height="1.4dp"
+                android:background="@color/bluehighlighteddark"
+                android:orientation="vertical"
+                android:paddingBottom="16dp" >
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:layout_marginTop="8dp"
+                android:fontFamily="sans-serif-condansed"
+                android:text="@string/s18"
+                android:textAppearance="?android:attr/textAppearanceLarge" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:fontFamily="sans-serif-condansed"
+                android:text="@string/s19"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:fontFamily="sans-serif-light"
+                android:text="@string/s20" />
+
+            <Button
+                android:id="@+id/buttonBTVisible"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:text="@string/s21"
+                android:textColor="#FFFFFF" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:fontFamily="sans-serif-condansed"
+                android:text="@string/s22"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:fontFamily="sans-serif-light"
+                android:text="@string/s23" >
+            </TextView>
+
+            <Button
+                android:id="@+id/buttonBTSearch"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:text="@string/s24"
+                android:textColor="#FFFFFF" />
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="1dp"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/linegray"
+                android:visibility="gone" >
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:fontFamily="sans-serif-condansed"
+                android:text="@string/s25"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:visibility="gone" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:fontFamily="sans-serif-light"
+                android:text="@string/s26"
+                android:visibility="gone" >
+            </TextView>
+
+            <Button
+                android:id="@+id/buttonBTCut"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:text="@string/s3"
+                android:textColor="#FFFFFF"
+                android:visibility="gone" />
         </LinearLayout>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:fontFamily="sans-serif-condansed"
-            android:text="@string/s25"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:visibility="gone" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:fontFamily="sans-serif-light"
-            android:text="@string/s26"
-            android:visibility="gone" >
-        </TextView>
-
-        <Button
-            android:id="@+id/buttonBTCut"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:text="@string/s3"
-            android:textColor="#FFFFFF"
-            android:visibility="gone" />
-    </LinearLayout>
+    </RelativeLayout>
 
 </ScrollView>
