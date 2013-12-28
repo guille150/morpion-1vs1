@@ -1,41 +1,119 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:orientation="vertical" >
+<android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/drawer_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
 
-    <com.astuetz.viewpager.extensions.PagerSlidingTabStrip
-        android:id="@+id/tabs"
-        android:layout_width="match_parent"
-        android:layout_height="48dip"
-        android:background="@drawable/background_tabs" />
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:orientation="vertical" >
+
+        <com.astuetz.viewpager.extensions.PagerSlidingTabStrip
+            android:id="@+id/tabs"
+            android:layout_width="match_parent"
+            android:layout_height="48dip"
+            android:background="@drawable/background_tabs" />
+
+        <RelativeLayout
+            android:layout_width="fill_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" >
+
+            <LinearLayout
+                android:id="@+id/IconContainer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="4dp"
+                android:visibility="invisible" >
+
+                <fr.mathis.morpion.views.GameView
+                    android:id="@+id/gameViewForIcon"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:clickable="false"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:visibility="visible" >
+                </fr.mathis.morpion.views.GameView>
+            </LinearLayout>
+
+            <android.support.v4.view.ViewPager
+                android:id="@+id/pager"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent" />
+        </RelativeLayout>
+    </LinearLayout>
 
     <RelativeLayout
-        android:layout_width="fill_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1" >
+        android:id="@+id/left_drawer"
+        android:layout_width="240dp"
+        android:layout_height="fill_parent"
+        android:layout_gravity="start"
+        android:background="#EEE"
+        android:orientation="vertical" >
+
+        <ExpandableListView
+            android:id="@+id/left_drawerlist"
+            android:layout_width="240dp"
+            android:layout_height="fill_parent"
+            android:layout_above="@+id/layoutConnexion"
+            android:choiceMode="singleChoice"
+            android:groupIndicator="@null" />
 
         <LinearLayout
-            android:id="@+id/IconContainer"
-            android:layout_width="wrap_content"
+            android:id="@+id/layoutConnexion"
+            android:layout_width="240dp"
             android:layout_height="wrap_content"
-            android:padding="4dp"
-            android:visibility="invisible" >
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:background="#DDD"
+            android:gravity="center"
+            android:orientation="vertical" >
 
-            <fr.mathis.morpion.views.GameView
-                android:id="@+id/gameViewForIcon"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:clickable="false"
-                android:focusable="false"
-                android:focusableInTouchMode="false"
-                android:visibility="visible" >
-            </fr.mathis.morpion.views.GameView>
+            <com.google.android.gms.common.SignInButton
+                android:id="@+id/sign_in_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp" >
+            </com.google.android.gms.common.SignInButton>
+
+            <LinearLayout
+                android:id="@+id/layoutPlayService"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingBottom="8dp"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:paddingTop="8dp"
+                android:visibility="gone" >
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/s58"
+                    android:textSize="16sp" />
+
+                <LinearLayout
+                    android:layout_width="1.4dp"
+                    android:layout_height="match_parent"
+                    android:background="#60ffffff"
+                    android:orientation="vertical"
+                    android:paddingBottom="8dp"
+                    android:paddingTop="8dp" >
+                </LinearLayout>
+
+                <ImageButton
+                    android:id="@+id/playgo"
+                    style="@style/Widget.Sherlock.ActionButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="fill_parent"
+                    android:contentDescription="@string/app_name"
+                    android:src="@drawable/ic_icon_play" />
+            </LinearLayout>
         </LinearLayout>
-
-        <android.support.v4.view.ViewPager
-            android:id="@+id/pager"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent" />
     </RelativeLayout>
 
-</LinearLayout>
+</android.support.v4.widget.DrawerLayout>
