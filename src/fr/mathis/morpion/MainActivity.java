@@ -118,6 +118,8 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 	private static final int REQUEST_PREF = 7;
 	private static final int REQUEST_PATERN = 37;
 	private static final int ACTIVITY_HISTORY = 36;
+	public static final String ACTIVITY_HISTORY_RES_GROUP = "p1";
+	public static final String ACTIVITY_HISTORY_RES_GROUP_CHILD = "p2";
 	final static int RC_INVITATION_INBOX = 10001;
 	final static int RC_SELECT_PLAYERS = 10000;
 	final static int RC_WAITING_ROOM = 10002;
@@ -178,6 +180,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 	Room myroom = null;
 	ProgressDialog progress;
 	GameHandler onlineHandler;
+	int[] pendingAction;
 
 	public MainActivity() {
 		super(BaseGameActivity.CLIENT_APPSTATE | BaseGameActivity.CLIENT_GAMES);
@@ -369,18 +372,16 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 			if (groupPosition == 1 && childPosition == 0) {
 				if (0 != ToolsBDD.getInstance(this).getNbPartie()) {
 					Intent intent = new Intent(MainActivity.this, HistoryActivity.class);
+					intent.putExtra("isSigned", isSignedIn());
 					startActivityForResult(intent, ACTIVITY_HISTORY);
+					overridePendingTransition(0, 0);
 				} else {
 					Toast.makeText(this, R.string.nohistory, Toast.LENGTH_SHORT).show();
 					onItemClick(null, null, 0, 0);
 					forseFirst = true;
 				}
 			}
-			/*
-			 * if (groupPosition == 1 && childPosition == 1) { getSupportActionBar().setIcon(R.drawable.ic_launcher); View child = getLayoutInflater().inflate(isDark ? R.layout.helpdark : R.layout.help, null); container.removeAllViews(); container.addView(child);
-			 * 
-			 * if (m != null) { m.getItem(0).setVisible(false); } } else
-			 */if (groupPosition == 0 && childPosition == 1) {
+			if (groupPosition == 0 && childPosition == 1) {
 				startBluetooth();
 			} else if (groupPosition == 0 && childPosition == 2) {
 				createNewGameAI();
@@ -406,6 +407,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 					activeNavChild = childPosition;
 					activeNavSection = groupPosition;
 					navAdapter.notifyDataSetChanged();
+					getSupportActionBar().setDisplayShowTitleEnabled(true);
 					getSupportActionBar().setTitle(navSections.get(activeNavSection).items.get(activeNavChild).title);
 				}
 				if (shouldCloseDrawer && mDrawerLayout != null)
@@ -537,6 +539,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 		}
 		if (!isPlayingOnline)
 			new ShowMenuAsync().execute();
+
 	}
 
 	class ShowMenuAsync extends AsyncTask<Void, Void, Void> {
@@ -555,6 +558,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 		protected void onPostExecute(Void result) {
 			if (m != null)
 				m.getItem(0).setVisible(shouldRestartBeVisible);
+			getSupportActionBar().setDisplayShowTitleEnabled(true);
 			super.onPostExecute(result);
 		}
 	}
@@ -569,6 +573,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 				m.getItem(0).setVisible(false);
 			}
 		}
+		getSupportActionBar().setDisplayShowTitleEnabled(false);
 	}
 
 	@Override
@@ -668,7 +673,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 					iconL.getViewTreeObserver().removeOnGlobalLayoutListener(this);
 			}
 		});
-		
+
 		nbGame = ToolsBDD.getInstance(this).getNbPartieNumber() + 1;
 		TextView tv1 = (TextView) findViewById(R.id.welcomeGame);
 		tv1.setText(getString(R.string.game) + nbGame);
@@ -863,7 +868,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 
 		container.removeAllViews();
 		container.addView(child);
-		
+
 		generateActionBarIcon();
 		final View iconL = findViewById(R.id.gameViewForIcon);
 		ViewTreeObserver vto = iconL.getViewTreeObserver();
@@ -879,7 +884,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 					iconL.getViewTreeObserver().removeOnGlobalLayoutListener(this);
 			}
 		});
-		
+
 		getSupportActionBar().setTitle(R.string.s44);
 		View quick = child.findViewById(R.id.onlineQuickMatch);
 		quick.setOnClickListener(new OnClickListener() {
@@ -1073,7 +1078,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 
 			container.removeAllViews();
 			container.addView(child);
-			
+
 			generateActionBarIcon();
 			final View iconL = findViewById(R.id.gameViewForIcon);
 			ViewTreeObserver vto = iconL.getViewTreeObserver();
@@ -1089,7 +1094,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 						iconL.getViewTreeObserver().removeOnGlobalLayoutListener(this);
 				}
 			});
-			
+
 			activeNavSection = 0;
 			activeNavChild = 1;
 			getSupportActionBar().setTitle(navSections.get(activeNavSection).items.get(activeNavChild).title);
@@ -1353,7 +1358,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 					iconL.getViewTreeObserver().removeOnGlobalLayoutListener(this);
 			}
 		});
-		
+
 		nbGame = ToolsBDD.getInstance(this).getNbPartieNumber() + 1;
 		TextView tv1 = (TextView) findViewById(R.id.welcomeGame);
 		tv1.setText(getString(R.string.game) + nbGame);
@@ -1437,6 +1442,21 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 		case ACTIVITY_HISTORY:
 			comeBackFromSettingsShouldSave = true;
 			comeBackFromHistoryShouldAchievement = true;
+
+			if (resultCode == Activity.RESULT_OK) {
+				int p1, p2;
+				p1 = data.getIntExtra(ACTIVITY_HISTORY_RES_GROUP, -1);
+				p2 = data.getIntExtra(ACTIVITY_HISTORY_RES_GROUP_CHILD, -1);
+
+				if (p1 == 100 && p2 == 100) {
+					finish();
+				} else if ((p1 == 0 && p2 == 3) || (p1 == 1 && p2 == 1) || (p1 == 1 && p2 == 2)) {
+					pendingAction = new int[] { p1, p2 };
+				} else {
+					onChildClick(null, null, p1, p2, 0);
+				}
+			}
+
 			break;
 
 		case RC_INVITATION_INBOX:
@@ -1519,7 +1539,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 					iconL.getViewTreeObserver().removeOnGlobalLayoutListener(this);
 			}
 		});
-		
+
 		nbGame = ToolsBDD.getInstance(this).getNbPartieNumber() + 1;
 		TextView tv1 = (TextView) findViewById(R.id.welcomeGame);
 		tv1.setText(getString(R.string.game) + nbGame);
@@ -1727,7 +1747,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 		View child = getLayoutInflater().inflate(isDark ? R.layout.game_aidark : R.layout.game_ai, null);
 		container.removeAllViews();
 		container.addView(child);
-		
+
 		generateActionBarIcon();
 		final View iconL = findViewById(R.id.gameViewForIcon);
 		ViewTreeObserver vto = iconL.getViewTreeObserver();
@@ -1742,8 +1762,8 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 				else
 					iconL.getViewTreeObserver().removeOnGlobalLayoutListener(this);
 			}
-		});		
-		
+		});
+
 		SharedPreferences mgr = PreferenceManager.getDefaultSharedPreferences(this);
 		final boolean isDark = mgr.getBoolean("isDark", false);
 
@@ -2599,7 +2619,12 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 
 				// go to game screen
 			}
+		navAdapter.notifyDataSetChanged();
 
+		if (pendingAction != null) {
+			onChildClick(null, null, pendingAction[0], pendingAction[1], 0);
+			pendingAction = null;
+		}
 	}
 
 	ArrayList<byte[]> dataSaved;
