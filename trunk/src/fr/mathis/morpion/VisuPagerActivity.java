@@ -73,9 +73,9 @@ public class VisuPagerActivity extends SherlockFragmentActivity implements OnPag
 	ArrayList<NavigationSection> navSections;
 	private DrawerLayout mDrawerLayout;
 	private ExpandableListView mDrawerList;
-	NavigationAdapter navAdapter;
+	public static NavigationAdapter navAdapter;
 	Menu m;
-	boolean isSignedIn = false;
+	public static boolean isSignedIn = false;
 	int premsIndex = -1;
 
 	public static float convertDpToPixel(float dp, Context context) {
@@ -135,7 +135,6 @@ public class VisuPagerActivity extends SherlockFragmentActivity implements OnPag
 			}
 		});
 
-		NUM_PAGES = ToolsBDD.getInstance(this).getNbPartie();
 		indexs = new ArrayList<Integer>();
 
 		int pos = 0;

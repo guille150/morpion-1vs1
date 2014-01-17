@@ -1,7 +1,7 @@
 <resources>
 
     <color name="bluehighlighted">#D3D3D3</color>
-    <color name="bluehighlighteddark">#33B5E5</color>
+    <color name="bluehighlighteddark">#AA33B5E5</color>
     <color name="pressed_appthemedark">#CC33B5E5</color>
     <color name="pressed_apptheme">#CC33B5E5</color>
     <color name="second_grey">#ffE5E5E5</color>

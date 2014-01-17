@@ -153,11 +153,12 @@
 	<string name="s63">What\'s that ?!</string>
 	<string name="s64">Some testers from a long validation process pointed out that it can be really frustating to press the back button and lose the current game. So to be sure you didn\'t miss touched the back key, you need to confirm your first intention to exit without saving.</string>
 	<string name="s65">Theme</string>
-	<string name="s66">X\'s color</string>
-	<string name="s67">O\'s color</string>
+	<string name="s66">First player color</string>
+	<string name="s67">Second player color</string>
 	<string name="s68">You</string>
 	<string name="s69">AI / Friend</string>
 	<string name="s70">VICTORIES OVER TIME</string>
 	<string name="s71">MOST VICTORIOUS</string>
 	<string name="s72">RESULTS REPARTITION</string>
+	<string name="s73">Nothing to see here yet</string>
 </resources>

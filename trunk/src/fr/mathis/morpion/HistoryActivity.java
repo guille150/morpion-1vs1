@@ -89,11 +89,13 @@ import com.nineoldandroids.animation.Animator;
 import com.nineoldandroids.animation.AnimatorListenerAdapter;
 
 import de.timroes.swipetodismiss.SwipeDismissList;
+import de.timroes.swipetodismiss.SwipeDismissList.SwipeDirection;
 import de.timroes.swipetodismiss.SwipeDismissList.UndoMode;
 import fr.mathis.morpion.fragments.RightFillerFragment;
 import fr.mathis.morpion.fragments.VisuFragment;
 import fr.mathis.morpion.interfaces.HoverHandler;
 import fr.mathis.morpion.tools.ColorHolder;
+import fr.mathis.morpion.tools.StateHolder;
 import fr.mathis.morpion.tools.ToolsBDD;
 import fr.mathis.morpion.tools.UndoBarController;
 import fr.mathis.morpion.tools.UndoBarController.UndoListener;
@@ -128,9 +130,10 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 	ArrayList<NavigationSection> navSections;
 	private DrawerLayout mDrawerLayout;
 	private ExpandableListView mDrawerList;
-	NavigationAdapter navAdapter;
+	public static NavigationAdapter navAdapter;
 	Menu m;
-	boolean isSignedIn = false;
+	public static boolean isSignedIn = false;
+	boolean shouldFinish = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -143,16 +146,22 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 
 		Context context = getSupportActionBar().getThemedContext();
 
-		ArrayList<AbMenu> data = new ArrayList<AbMenu>();
-		data.add(new AbMenu(isDark ? R.drawable.ic_action_spinner_listdark : R.drawable.ic_action_spinner_list, getString(R.string.m4), 1));
-		data.add(new AbMenu(isDark ? R.drawable.ic_action_spinner_chartdark : R.drawable.ic_action_spinner_chart, getString(R.string.m6), 3));
-
-		AbMenuAdapter adapter = new AbMenuAdapter(context, R.layout.ab_spinner_item, data);
-
-		getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
-		getSupportActionBar().setListNavigationCallbacks(adapter, this);
-
 		setContentView(isDark ? R.layout.listviewcustomdark : R.layout.listviewcustom);
+		Cursor c = ToolsBDD.getInstance(this).getAllParties();
+		if (c == null || c.getCount() == 0) {
+			c.close();
+
+			showNoData();
+		} else {
+			ArrayList<AbMenu> data = new ArrayList<AbMenu>();
+			data.add(new AbMenu(isDark ? R.drawable.ic_action_spinner_listdark : R.drawable.ic_action_spinner_list, getString(R.string.m4), 1));
+			data.add(new AbMenu(isDark ? R.drawable.ic_action_spinner_chartdark : R.drawable.ic_action_spinner_chart, getString(R.string.m6), 3));
+
+			AbMenuAdapter adapter = new AbMenuAdapter(context, R.layout.ab_spinner_item, data);
+
+			getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
+			getSupportActionBar().setListNavigationCallbacks(adapter, this);
+		}
 
 		generateActionBarIcon();
 		final View iconL = findViewById(R.id.gameViewForIcon);
@@ -195,8 +204,19 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 		getSupportActionBar().setHomeButtonEnabled(true);
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		getSupportActionBar().setDisplayShowTitleEnabled(false);
+
+		StateHolder.MemorizeValue(MainActivity.STATE_SECTION, 1, getApplicationContext());
+		StateHolder.MemorizeValue(MainActivity.STATE_CHILD, 0, getApplicationContext());
+		StateHolder.MemorizeValue(MainActivity.STATE_ACTIVE, true, getApplicationContext());
 	}
-	
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		if (rightContainer != null)
+			finish();
+	}
+
 	@Override
 	protected void onPostCreate(Bundle savedInstanceState) {
 		super.onPostCreate(savedInstanceState);
@@ -274,8 +294,16 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 			showClosedIcon();
 			mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close) {
 				public void onDrawerClosed(View view) {
-					supportInvalidateOptionsMenu();
-					showClosedIcon();
+
+					if (shouldFinish) {
+						finish();
+						overridePendingTransition(0, 0);
+						shouldFinish = false;
+					}
+					else {
+						supportInvalidateOptionsMenu();
+						showClosedIcon();
+					}
 				}
 
 				public void onDrawerOpened(View drawerView) {
@@ -608,8 +636,21 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 		if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
 			getSupportActionBar().setDisplayHomeAsUpEnabled(false);
 		}
-		getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
+
+		boolean domode = listItem != null && listItem.size() > 0;
+		if (!domode) {
+			Cursor c = ToolsBDD.getInstance(this).getAllParties();
+			if (c == null || c.getCount() == 0) {
+				c.close();
+				domode = false;
+			} else {
+				domode = true;
+			}
+		}
+
+		getSupportActionBar().setNavigationMode(domode ? ActionBar.NAVIGATION_MODE_LIST : ActionBar.NAVIGATION_MODE_STANDARD);
 		new ShowMenuAsync().execute();
+
 	}
 
 	private void showOpenedIcon() {
@@ -637,8 +678,9 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 
 		@Override
 		protected void onPostExecute(Void result) {
-			if (m != null)
+			if (m != null) {
 				m.getItem(0).setVisible(true);
+			}
 			super.onPostExecute(result);
 		}
 	}
@@ -688,22 +730,20 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 
 	public void createList() {
 		initViews();
+		reloadItems();
 
-		Cursor c = ToolsBDD.getInstance(this).getAllParties();
-		if (c == null || c.getCount() == 0) {
-			c.close();
-			share = getString(R.string.sharetry);
+		if (listItem.size() == 0) {
+
 		} else {
-			c.close();
-			reloadItems();
+
+			lv.setOnItemLongClickListener(this);
+			lv.setOnItemClickListener(this);
+
+			if (listItem.size() > 100)
+				lv.setFastScrollEnabled(true);
+
+			setSwypeListener();
 		}
-		lv.setOnItemLongClickListener(this);
-		lv.setOnItemClickListener(this);
-
-		if (listItem.size() > 100)
-			lv.setFastScrollEnabled(true);
-
-		setSwypeListener();
 	}
 
 	public void reloadItems() {
@@ -750,7 +790,8 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 		}
 
 		mSchedule = new MyAdapter(this.getBaseContext(), listItem, isDark ? R.layout.itemlistviewcustomdark : R.layout.itemlistviewcustom, new String[] { "titre", "description", "num" }, new int[] { R.id.titre, R.id.description, R.id.num });
-		lv.setAdapter(mSchedule);
+		if (lv != null)
+			lv.setAdapter(mSchedule);
 	}
 
 	private void setSwypeListener() {
@@ -760,11 +801,13 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 				public SwipeDismissList.Undoable onDismiss(AbsListView listView, final int position) {
 					mSchedule.remove(listItem.get(position));
 					mSchedule.notifyDataSetChanged();
+
 					return null;
 				}
 			};
 
 			swipeList = new SwipeDismissList(lv, callback, UndoMode.SINGLE_UNDO);
+			swipeList.setSwipeDirection(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE ? SwipeDirection.START : SwipeDirection.BOTH);
 		} else
 			swipeList.setSwipeDisabled(false);
 	}
@@ -790,7 +833,7 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 
 		if (item.getTitle().toString().compareTo(getString(R.string.reset)) == 0) {
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
-			builder.setTitle(R.string.sure).setPositiveButton(R.string.yes, dialogClickListener).setNegativeButton(R.string.no, dialogClickListener).show();
+			builder.setMessage(R.string.sure).setPositiveButton(R.string.yes, dialogClickListener).setNegativeButton(R.string.no, dialogClickListener).show();
 			return true;
 		} else {
 			int itemId = item.getItemId();
@@ -806,8 +849,42 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 
 	private void resetHistory() {
 		ToolsBDD.getInstance(this).resetTable();
-		Toast.makeText(this, R.string.resethistory, Toast.LENGTH_LONG).show();
-		finish();
+		showNoData();
+	}
+
+	private void showNoData() {
+		if (statContainer != null)
+			statContainer.setVisibility(View.GONE);
+		if (lv != null && mSchedule != null) {
+			lv.setVisibility(View.VISIBLE);
+			while (listItem.size() > 0)
+				listItem.remove(0);
+			mSchedule.notifyDataSetChanged();
+		}
+		findViewById(R.id.nodata).setVisibility(View.VISIBLE);
+		findViewById(R.id.nodata).setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Intent output = new Intent();
+				output.putExtra(MainActivity.ACTIVITY_HISTORY_RES_GROUP, 0);
+				output.putExtra(MainActivity.ACTIVITY_HISTORY_RES_GROUP_CHILD, 0);
+				setResult(RESULT_OK, output);
+				finish();
+			}
+		});
+
+		GameView gvNoData = (GameView) findViewById(R.id.nodatagameview);
+		gvNoData.setStrikeWidth(GameView.convertDpToPixel(1, getApplicationContext()));
+		getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
+	}
+
+	private void showData() {
+		if (statContainer != null)
+			statContainer.setVisibility(View.INVISIBLE);
+		if (lv != null)
+			lv.setVisibility(View.VISIBLE);
+		findViewById(R.id.nodata).setVisibility(View.GONE);
+		getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
 	}
 
 	@SuppressLint("NewApi")
@@ -833,7 +910,7 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 			Intent intent = new Intent(HistoryActivity.this, VisuPagerActivity.class);
 			intent.putExtra("id", HistoryActivity.currentId);
 			intent.putExtra("isSigned", isSignedIn);
-			
+
 			Bundle b = null;
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
 
@@ -917,12 +994,13 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 		if (rightContainer == null) {
 			int num = newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE ? 2 : 1;
 			lv.setNumColumns(num);
+			swipeList.setSwipeDirection(newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE ? SwipeDirection.START : SwipeDirection.BOTH);
 		}
 	}
 
 	ArrayList<Integer> pos = new ArrayList<Integer>();
 
-	private class MyAdapter extends SimpleAdapter {
+	class MyAdapter extends SimpleAdapter {
 
 		public MyAdapter(Context context, List<? extends Map<String, ?>> data, int resource, String[] from, int[] to) {
 			super(context, data, resource, from, to);
@@ -944,6 +1022,10 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 
 			listItem.remove(item);
 			notifyDataSetChanged();
+			if (listItem == null || listItem.size() == 0)
+				showNoData();
+			else
+				showData();
 		}
 
 		@Override
@@ -1243,6 +1325,8 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 		lv = (GridView) findViewById(R.id.listviewperso);
 		lv.setVisibility(View.VISIBLE);
 
+		lv.setNumColumns(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE ? 2 : 1);
+
 		statContainer = findViewById(R.id.statContainer);
 		statContainer.setVisibility(View.GONE);
 
@@ -1283,7 +1367,7 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 		seriesGreen.setLineColor(isDark ? Color.WHITE : Color.BLACK);
 		seriesGreen.setLineWidth(convertDpToPixel(1.5f, getApplicationContext()));
 
-		Cursor c = ToolsBDD.getInstance(this).getAllParties();
+		Cursor c = ToolsBDD.getInstance(this).getAllPartiesWithSync();
 		c.moveToFirst();
 
 		int bluecount = 0;
@@ -1445,6 +1529,10 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 
 			listItem.add(findCorrectPlace(map), map);
 			mSchedule.notifyDataSetChanged();
+			if (listItem == null || listItem.size() == 0)
+				showNoData();
+			else
+				showData();
 		}
 	}
 
@@ -1510,8 +1598,13 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 			output.putExtra(MainActivity.ACTIVITY_HISTORY_RES_GROUP, arg2);
 			output.putExtra(MainActivity.ACTIVITY_HISTORY_RES_GROUP_CHILD, arg3);
 			setResult(RESULT_OK, output);
-			finish();
-			overridePendingTransition(0, 0);
+			shouldFinish = true;
+			if (mDrawerLayout != null)
+				mDrawerLayout.closeDrawer(GravityCompat.START);
+			else {
+				finish();
+				overridePendingTransition(0, 0);
+			}
 		}
 
 		return true;
@@ -1533,14 +1626,20 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 			break;
 		}
 	}
-	
+
 	@Override
 	public void onBackPressed() {
-		Intent output = new Intent();
-		output.putExtra(MainActivity.ACTIVITY_HISTORY_RES_GROUP, 100);
-		output.putExtra(MainActivity.ACTIVITY_HISTORY_RES_GROUP_CHILD, 100);
-		setResult(RESULT_OK, output);
-		finish();
+
+		if (rightContainer == null) {
+			Intent output = new Intent();
+			output.putExtra(MainActivity.ACTIVITY_HISTORY_RES_GROUP, 100);
+			output.putExtra(MainActivity.ACTIVITY_HISTORY_RES_GROUP_CHILD, 100);
+			setResult(RESULT_OK, output);
+			finish();
+		} else {
+			super.onBackPressed();
+		}
+
 	}
 
 }

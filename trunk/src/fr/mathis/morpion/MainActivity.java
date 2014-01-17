@@ -90,6 +90,10 @@ import fr.mathis.morpion.views.GameView.GameHandler;
 @SuppressLint("HandlerLeak")
 public class MainActivity extends BaseGameActivity implements OnClickListener, OnItemClickListener, OnChildClickListener, OnStateLoadedListener, RoomUpdateListener, RealTimeMessageReceivedListener, RoomStatusUpdateListener, OnInvitationReceivedListener {
 
+	public static final String STATE_ACTIVE = "active";
+	public static final String STATE_SECTION = "activeSection";
+	public static final String STATE_CHILD = "activeChild";
+
 	public static final int RED_PLAYER = 4;
 	public static final int BLUE_PLAYER = 3;
 	public static final int NONE_PLAYER = 5;
@@ -181,6 +185,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 	ProgressDialog progress;
 	GameHandler onlineHandler;
 	int[] pendingAction;
+	boolean shouldOpenHistory = false;
 
 	public MainActivity() {
 		super(BaseGameActivity.CLIENT_APPSTATE | BaseGameActivity.CLIENT_GAMES);
@@ -203,15 +208,40 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 		getSupportActionBar().setTitle(R.string.s31);
 		activContext = this;
 		setContentView(isDark ? R.layout.main_layout_dark : R.layout.main_layout);
-
 		setSupportProgressBarIndeterminateVisibility(false);
 		container = (FrameLayout) findViewById(R.id.container);
+
 		initDrawer();
-		createNewGame();
-		createNewGameAI();
+		init();
+
+		if (StateHolder.GetMemorizedValue(STATE_ACTIVE, getApplicationContext())) {
+
+			int iSection = StateHolder.GetMemorizedValueInt(STATE_SECTION, getApplicationContext());
+			int iChild = StateHolder.GetMemorizedValueInt(STATE_CHILD, getApplicationContext());
+
+			if (iSection == 0 && iChild == 3) {
+				pendingAction = new int[] { iSection, iChild };
+			} else if (iSection == 1 && iChild == 0) {
+				onChildClick(null, null, 0, 0, 0);
+				onChildClick(null, null, iSection, iChild, 0);
+			} else {
+				if (iSection == 0 && iChild == 1) {
+					iChild = 2;
+				}
+				onChildClick(null, null, iSection, iChild, 0);
+			}
+		} else {
+			createNewGameAI();
+		}
 		if (!StateHolder.GetMemorizedValue("showwelcomedrawer", this) || android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
 			new Async().execute();
 		}
+	}
+
+	public void init() {
+		playerText = (LinearLayout) findViewById(R.id.playerText);
+		tabIB = new ImageButton[3][3];
+		tabVal = new int[3][3];
 	}
 
 	private void generateActionBarIcon() {
@@ -325,8 +355,17 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 			showClosedIcon();
 			mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close) {
 				public void onDrawerClosed(View view) {
-					supportInvalidateOptionsMenu();
-					showClosedIcon();
+					if (shouldOpenHistory) {
+						Intent intent = new Intent(MainActivity.this, HistoryActivity.class);
+						intent.putExtra("isSigned", isSignedIn());
+						startActivityForResult(intent, ACTIVITY_HISTORY);
+						overridePendingTransition(0, 0);
+						shouldOpenHistory = false;
+					}
+					else {
+						supportInvalidateOptionsMenu();
+						showClosedIcon();
+					}
 				}
 
 				public void onDrawerOpened(View drawerView) {
@@ -370,15 +409,13 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 				createNewGame();
 			}
 			if (groupPosition == 1 && childPosition == 0) {
-				if (0 != ToolsBDD.getInstance(this).getNbPartie()) {
+				if (mDrawerLayout == null) {
 					Intent intent = new Intent(MainActivity.this, HistoryActivity.class);
 					intent.putExtra("isSigned", isSignedIn());
 					startActivityForResult(intent, ACTIVITY_HISTORY);
 					overridePendingTransition(0, 0);
 				} else {
-					Toast.makeText(this, R.string.nohistory, Toast.LENGTH_SHORT).show();
-					onItemClick(null, null, 0, 0);
-					forseFirst = true;
+					shouldOpenHistory = true;
 				}
 			}
 			if (groupPosition == 0 && childPosition == 1) {
@@ -900,7 +937,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 
 			@Override
 			public void onClick(View v) {
-				progress = ProgressDialog.show(activContext, getString(R.string.s49), getString(R.string.s50), true);
+				progress = ProgressDialog.show(activContext, null, getString(R.string.s50), true);
 				Intent intent = getGamesClient().getInvitationInboxIntent();
 				startActivityForResult(intent, RC_INVITATION_INBOX);
 				if (progress != null && progress.isShowing())
@@ -913,7 +950,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 
 			@Override
 			public void onClick(View v) {
-				progress = ProgressDialog.show(activContext, getString(R.string.s49), getString(R.string.s50), true);
+				progress = ProgressDialog.show(activContext, null, getString(R.string.s50), true);
 				Intent intent = getGamesClient().getSelectPlayersIntent(1, 1);
 				startActivityForResult(intent, RC_SELECT_PLAYERS);
 				if (progress != null && progress.isShowing())
@@ -942,7 +979,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 
 			getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-			progress = ProgressDialog.show(this, getString(R.string.s49), getString(R.string.s50), true);
+			progress = ProgressDialog.show(this, null, getString(R.string.s50), true);
 		} else {
 
 		}
@@ -1457,6 +1494,11 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 				}
 			}
 
+			nbGame = ToolsBDD.getInstance(this).getNbPartieNumber() + 1;
+			TextView tv1 = (TextView) findViewById(R.id.welcomeGame);
+			if (tv1 != null)
+				tv1.setText(getString(R.string.game) + nbGame);
+
 			break;
 
 		case RC_INVITATION_INBOX:
@@ -1747,7 +1789,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 		View child = getLayoutInflater().inflate(isDark ? R.layout.game_aidark : R.layout.game_ai, null);
 		container.removeAllViews();
 		container.addView(child);
-
+		init();
 		generateActionBarIcon();
 		final View iconL = findViewById(R.id.gameViewForIcon);
 		ViewTreeObserver vto = iconL.getViewTreeObserver();
@@ -1778,10 +1820,6 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 		gv.setAlignement(GameView.STYLE_TOP_VERTICAL_CENTER_HORIZONTAL);
 		gv.invalidate();
 		gv.invalidate();
-
-		playerText = (LinearLayout) findViewById(R.id.playerText);
-		tabIB = new ImageButton[3][3];
-		tabVal = new int[3][3];
 
 		for (int i = 0; i < 3; i++) {
 			for (int j = 0; j < 3; j++) {
@@ -1854,7 +1892,8 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 			}
 		}
 
-		playerText.setBackgroundColor(Color.parseColor(ColorHolder.getInstance(this).getColor(turn)));
+		if (playerText != null)
+			playerText.setBackgroundColor(Color.parseColor(ColorHolder.getInstance(this).getColor(turn)));
 
 		Button btnBTVisible = (Button) findViewById(R.id.buttonBTVisible);
 		if (btnBTVisible != null)
@@ -2114,6 +2153,10 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 		if (oneGameHasBeenPlayedWeCanSave)
 			saveState();
 		super.onPause();
+
+		StateHolder.MemorizeValue(STATE_SECTION, activeNavSection, getApplicationContext());
+		StateHolder.MemorizeValue(STATE_CHILD, activeNavChild, getApplicationContext());
+		StateHolder.MemorizeValue(STATE_ACTIVE, true, getApplicationContext());
 	}
 
 	public void saveState() {
@@ -2624,6 +2667,15 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 		if (pendingAction != null) {
 			onChildClick(null, null, pendingAction[0], pendingAction[1], 0);
 			pendingAction = null;
+		}
+		if (HistoryActivity.navAdapter != null) {
+			HistoryActivity.isSignedIn = true;
+			HistoryActivity.navAdapter.notifyDataSetChanged();
+		}
+
+		if (VisuPagerActivity.navAdapter != null) {
+			VisuPagerActivity.isSignedIn = true;
+			VisuPagerActivity.navAdapter.notifyDataSetChanged();
 		}
 	}
 

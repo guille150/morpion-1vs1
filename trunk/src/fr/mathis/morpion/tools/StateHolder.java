@@ -16,4 +16,16 @@ public class StateHolder {
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(c);
 		return settings.getBoolean(name, false);
 	}
+	
+	public static void MemorizeValue(String name, int value, Context c) {
+		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(c);
+		SharedPreferences.Editor editor = settings.edit();
+		editor.putInt(name, value);
+		editor.commit();
+	}
+	
+	public static int GetMemorizedValueInt(String name, Context c) {
+		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(c);
+		return settings.getInt(name, -1);
+	}
 }
