@@ -152,11 +152,12 @@
     <string name="s63">Pourquoi ?!</string>
     <string name="s64">Des testeurs opérant un cycle de validation très long ont mis en évidence que perdre sa partie en cours en cliquant par inadvertance sur Retour est très frustant ! Donc pour être sûr que vous vouliez quittez, vous devez confirmer votre première intention de quitter l\'application sans sauvegarder.</string>
     <string name="s65">Thème</string>
-	<string name="s66">La couleur des X</string>
-	<string name="s67">La couleur des O</string>
+	<string name="s66">Votre couleur</string>
+	<string name="s67">Couleur de l\'advsersaire</string>
 	<string name="s68">Vous</string>
 	<string name="s69">IA / Ami</string>
 	<string name="s70">ÉVOLUTION DES VICTOIRES</string>
 	<string name="s71">MEILLEUR JOUEUR</string>
 	<string name="s72">RÉPARTITION DES RÉSULTATS</string>
+	<string name="s73">Jouer une partie</string>
 </resources>

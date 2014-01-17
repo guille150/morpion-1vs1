@@ -56,17 +56,17 @@ public class ToolsBDD {
 
 	public int getNextId(int id) {
 		int res = -1;
-		Cursor c = bdd.query("partie", new String[] { "id" }, null, null, null, null, null);
+		Cursor c = bdd.query("partie", new String[] { "id", "disposition" }, null, null, null, null, null);
 		if (c.getCount() == 0)
 			return -1;
 		else {
 			c.moveToFirst();
-			if (id < c.getInt(0)) {
+			if (id < c.getInt(0) && c.getString(1).compareTo("3,3,5,3,5,4,5,4,4") != 0 && c.getString(1).compareTo("3,3,3,3,3,3,3,3,3") != 0 && c.getString(1).compareTo("4,4,4,4,4,4,4,4,4") != 0) {
 				res = c.getInt(0);
 			}
 			if (c.getCount() > 1) {
 				while (c.moveToNext()) {
-					if (id < c.getInt(0)) {
+					if (id < c.getInt(0) && c.getString(1).compareTo("3,3,5,3,5,4,5,4,4") != 0 && c.getString(1).compareTo("3,3,3,3,3,3,3,3,3") != 0 && c.getString(1).compareTo("4,4,4,4,4,4,4,4,4") != 0) {
 						res = c.getInt(0);
 						break;
 					}
@@ -141,7 +141,12 @@ public class ToolsBDD {
 	}
 
 	public Cursor getAllParties() {
-		Cursor c = bdd.query("partie", new String[] { "id", "winner", "disposition" }, null, null, null, null, null);
+		Cursor c = bdd.rawQuery("SELECT id, winner, disposition FROM partie WHERE disposition NOT LIKE '3,3,3,3,3,3,3,3,3' AND disposition NOT LIKE '4,4,4,4,4,4,4,4,4' AND disposition NOT LIKE '3,3,5,3,5,4,5,4,4'", null);
+		return c;
+	}
+	
+	public Cursor getAllPartiesWithSync() {
+		Cursor c = bdd.rawQuery("SELECT id, winner, disposition FROM partie ", null);
 		return c;
 	}
 

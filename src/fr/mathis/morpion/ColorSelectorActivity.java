@@ -10,6 +10,7 @@ import android.preference.PreferenceManager;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.Window;
@@ -33,9 +34,13 @@ public class ColorSelectorActivity extends SherlockActivity {
 		super.onCreate(savedInstanceState);
 
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
-		setContentView(isDark ?  R.layout.activity_colorselectordark : R.layout.activity_colorselector);
+		setContentView(isDark ? R.layout.activity_colorselectordark : R.layout.activity_colorselector);
 
 		final int playerId = getIntent().getExtras().getInt("player");
+
+		TextView tvTitle = (TextView) findViewById(R.id.tvTitle);
+		if (playerId == MainActivity.RED_PLAYER)
+			tvTitle.setText(getString(R.string.s67));
 
 		colors = new LinearLayout[12];
 
@@ -72,8 +77,8 @@ public class ColorSelectorActivity extends SherlockActivity {
 
 				@Override
 				public void onClick(View v) {
-					((LinearLayout)colors[currentColorIndex].getChildAt(0)).getChildAt(0).setVisibility(View.GONE);
-					((LinearLayout)colors[finalIndex].getChildAt(0)).getChildAt(0).setVisibility(View.VISIBLE);
+					((LinearLayout) colors[currentColorIndex].getChildAt(0)).getChildAt(0).setVisibility(View.GONE);
+					((LinearLayout) colors[finalIndex].getChildAt(0)).getChildAt(0).setVisibility(View.VISIBLE);
 					ColorHolder.getInstance(getApplicationContext()).save(playerId, finalIndex);
 					finish();
 				}
@@ -81,7 +86,7 @@ public class ColorSelectorActivity extends SherlockActivity {
 
 			if (currentColorIndex == i) {
 
-				((LinearLayout)colors[i].getChildAt(0)).getChildAt(0).setVisibility(View.VISIBLE);
+				((LinearLayout) colors[i].getChildAt(0)).getChildAt(0).setVisibility(View.VISIBLE);
 			}
 		}
 

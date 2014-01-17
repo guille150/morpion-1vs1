@@ -40,6 +40,37 @@
             android:visibility="gone" />
 
         <LinearLayout
+            android:id="@+id/nodata"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:background="@drawable/background_selector"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:visibility="gone" >
+
+            <fr.mathis.morpion.views.GameView
+                android:id="@+id/nodatagameview"
+                android:layout_width="72dp"
+                android:layout_height="72dp"
+                android:clickable="false"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
+                android:visibility="visible" >
+            </fr.mathis.morpion.views.GameView>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:fontFamily="sans-serif-light"
+                android:text="@string/s73"
+                android:textColor="#808080"
+                android:textSize="18sp" />
+        </LinearLayout>
+
+        <LinearLayout
             android:id="@+id/undobar"
             style="@style/UndoBar"
             android:layout_alignParentBottom="true"

@@ -2,7 +2,8 @@
     style="@style/AppThemeDark"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:orientation="vertical" >
+    android:orientation="vertical" 
+    android:background="#161616">
 
     <LinearLayout
         android:layout_width="fill_parent"

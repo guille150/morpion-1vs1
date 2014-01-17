@@ -123,7 +123,7 @@ public class ColorHolder {
 		if (player_id == MainActivity.BLUE_PLAYER)
 			return settings.getInt("colorblue", 0);
 		else
-			return settings.getInt("colorred", 9);
+			return settings.getInt("colorred", 6);
 	}
 
 }
