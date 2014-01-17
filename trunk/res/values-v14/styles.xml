@@ -33,7 +33,7 @@
     <style name="AppThemeDialogDark" parent="@style/Theme.Sherlock.Dialog"></style>
 
     <style name="ActionBar.Solid.Appthemedark" parent="@style/Widget.Sherlock.ActionBar.Solid">
-        <item name="android:background">@drawable/ab_background_textured_appthemedark</item>
+        <item name="android:background">@drawable/ab_solid_appthemedark</item>
         <item name="android:backgroundStacked">@drawable/ab_stacked_solid_appthemedark</item>
         <item name="android:backgroundSplit">@drawable/ab_background_textured_appthemedark</item>
         <item name="android:progressBarStyle">@style/ProgressBar.Appthemedark</item>
