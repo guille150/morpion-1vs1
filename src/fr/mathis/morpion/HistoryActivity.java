@@ -64,6 +64,7 @@ import android.widget.ExpandableListView.OnGroupClickListener;
 import android.widget.FrameLayout;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
@@ -134,6 +135,7 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 	Menu m;
 	public static boolean isSignedIn = false;
 	boolean shouldFinish = false;
+	int selectedIndex = -1;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -299,8 +301,7 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 						finish();
 						overridePendingTransition(0, 0);
 						shouldFinish = false;
-					}
-					else {
+					} else {
 						supportInvalidateOptionsMenu();
 						showClosedIcon();
 					}
@@ -800,6 +801,17 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 			SwipeDismissList.OnDismissCallback callback = new SwipeDismissList.OnDismissCallback() {
 				public SwipeDismissList.Undoable onDismiss(AbsListView listView, final int position) {
 					mSchedule.remove(listItem.get(position));
+					selectedIndex = -1;
+					if (rightContainer != null) {
+						FragmentManager fm = getSupportFragmentManager();
+						FragmentTransaction ft = fm.beginTransaction();
+						lastFragment = RightFillerFragment.newInstance();
+						ft.replace(R.id.container_right, lastFragment);
+						ft.commit();
+						if (statContainer != null)
+							statContainer.setVisibility(View.GONE);
+						rightContainer.setVisibility(View.VISIBLE);
+					}
 					mSchedule.notifyDataSetChanged();
 
 					return null;
@@ -905,6 +917,8 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 			rightContainer.setVisibility(View.VISIBLE);
 			if (statContainer != null)
 				statContainer.setVisibility(View.GONE);
+			selectedIndex = arg2;
+			mSchedule.notifyDataSetChanged();
 		} else {
 
 			Intent intent = new Intent(HistoryActivity.this, VisuPagerActivity.class);
@@ -1098,6 +1112,20 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 					onItemLongClick(null, null, indexForselector, 0);
 				}
 			});
+
+			LinearLayout llIndicator = (LinearLayout) v.findViewById(R.id.tabletIndicator);
+			if (selectedIndex == position && rightContainer != null) {
+				llIndicator.setVisibility(View.VISIBLE);
+				if (winner == MainActivity.BLUE_PLAYER) {
+					llIndicator.setBackgroundColor(Color.parseColor(ColorHolder.getInstance(getApplicationContext()).getColor(MainActivity.BLUE_PLAYER)));
+				} else if (winner == MainActivity.RED_PLAYER) {
+					llIndicator.setBackgroundColor(Color.parseColor(ColorHolder.getInstance(getApplicationContext()).getColor(MainActivity.RED_PLAYER)));
+				} else {
+					llIndicator.setBackgroundColor(Color.LTGRAY);
+				}
+			} else {
+				llIndicator.setVisibility(View.INVISIBLE);
+			}
 
 			return v;
 		}
@@ -1325,7 +1353,8 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 		lv = (GridView) findViewById(R.id.listviewperso);
 		lv.setVisibility(View.VISIBLE);
 
-		lv.setNumColumns(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE ? 2 : 1);
+		if (rightContainer == null)
+			lv.setNumColumns(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE ? 2 : 1);
 
 		statContainer = findViewById(R.id.statContainer);
 		statContainer.setVisibility(View.GONE);
@@ -1531,8 +1560,7 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 			mSchedule.notifyDataSetChanged();
 			if (listItem == null || listItem.size() == 0)
 				showNoData();
-			else
-				showData();
+
 		}
 	}
 

@@ -31,9 +31,9 @@
             android:visibility="gone" >
 
             <ImageView
-                android:contentDescription="@string/nothing"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:contentDescription="@string/nothing"
                 android:src="@drawable/ic_navigation_accept" />
         </LinearLayout>
     </RelativeLayout>
@@ -54,15 +54,16 @@
 
             <TextView
                 android:id="@+id/titre"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="fill_parent"
+                android:layout_weight="1"
                 android:fontFamily="sans-serif-light"
                 android:textColor="#333333"
                 android:textSize="25sp" />
 
             <TextView
                 android:id="@+id/num"
-                android:layout_width="fill_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="fill_parent"
                 android:layout_gravity="right"
                 android:layout_marginRight="10dp"
@@ -70,13 +71,21 @@
                 android:gravity="top|right"
                 android:textColor="#333333"
                 android:textSize="20sp" />
+
+            <LinearLayout
+                android:id="@+id/tabletIndicator"
+                android:layout_width="2dp"
+                android:layout_height="fill_parent"
+                android:orientation="horizontal"
+                android:visibility="invisible" >
+            </LinearLayout>
         </LinearLayout>
 
         <TextView
             android:id="@+id/description"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
-            android:paddingRight="4dp"
+            android:paddingRight="2dp"
             android:textColor="#AAAAAA" />
     </LinearLayout>
 
