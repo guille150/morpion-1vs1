@@ -9,7 +9,7 @@
         android:layout_height="fill_parent"
         android:orientation="vertical" >
 
-        <LinearLayout
+        <RelativeLayout
             android:id="@+id/IconContainer"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -18,14 +18,28 @@
 
             <fr.mathis.morpion.views.GameView
                 android:id="@+id/gameViewForIcon"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
+                android:layout_width="42dp"
+                android:layout_height="42dp"
+                android:layout_centerInParent="true"
                 android:clickable="false"
                 android:focusable="false"
-                android:focusableInTouchMode="false"
-                android:visibility="visible" >
+                android:focusableInTouchMode="false" >
             </fr.mathis.morpion.views.GameView>
-        </LinearLayout>
+
+            <ImageView
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_centerInParent="true"
+                android:contentDescription="@string/empty"
+                android:src="@drawable/ic_launcher_custom" />
+
+            <ImageView
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_centerInParent="true"
+                android:contentDescription="@string/empty"
+                android:src="@drawable/ic_launcher_custom_overlay" />
+        </RelativeLayout>
 
         <GridView
             android:id="@+id/listviewperso"

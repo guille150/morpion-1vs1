@@ -3,12 +3,12 @@
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/card_big_dark"
+    android:baselineAligned="false"
     android:orientation="horizontal"
     android:paddingBottom="6dp"
     android:paddingLeft="8dp"
     android:paddingRight="8dp"
-    android:paddingTop="4dp"
-    android:baselineAligned="false" >
+    android:paddingTop="4dp" >
 
     <RelativeLayout
         android:layout_width="70dp"
@@ -54,7 +54,8 @@
 
             <TextView
                 android:id="@+id/titre"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 android:layout_height="fill_parent"
                 android:fontFamily="sans-serif-light"
                 android:textColor="#dddddd"
@@ -62,7 +63,7 @@
 
             <TextView
                 android:id="@+id/num"
-                android:layout_width="fill_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="fill_parent"
                 android:layout_gravity="right"
                 android:layout_marginRight="10dp"
@@ -70,6 +71,14 @@
                 android:gravity="top|right"
                 android:textColor="#dddddd"
                 android:textSize="20sp" />
+
+            <LinearLayout
+                android:id="@+id/tabletIndicator"
+                android:layout_width="2dp"
+                android:layout_height="fill_parent"
+                android:orientation="horizontal"
+                android:visibility="invisible" >
+            </LinearLayout>
         </LinearLayout>
 
         <TextView

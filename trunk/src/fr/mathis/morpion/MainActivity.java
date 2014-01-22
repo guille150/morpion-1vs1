@@ -186,6 +186,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 	GameHandler onlineHandler;
 	int[] pendingAction;
 	boolean shouldOpenHistory = false;
+	boolean isPreferedPage = false;
 
 	public MainActivity() {
 		super(BaseGameActivity.CLIENT_APPSTATE | BaseGameActivity.CLIENT_GAMES);
@@ -223,6 +224,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 				pendingAction = new int[] { iSection, iChild };
 			} else if (iSection == 1 && iChild == 0) {
 				onChildClick(null, null, 0, 0, 0);
+				isPreferedPage = true;
 				onChildClick(null, null, iSection, iChild, 0);
 			} else {
 				if (iSection == 0 && iChild == 1) {
@@ -361,8 +363,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 						startActivityForResult(intent, ACTIVITY_HISTORY);
 						overridePendingTransition(0, 0);
 						shouldOpenHistory = false;
-					}
-					else {
+					} else {
 						supportInvalidateOptionsMenu();
 						showClosedIcon();
 					}
@@ -409,7 +410,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 				createNewGame();
 			}
 			if (groupPosition == 1 && childPosition == 0) {
-				if (mDrawerLayout == null) {
+				if (mDrawerLayout == null || isPreferedPage) {
 					Intent intent = new Intent(MainActivity.this, HistoryActivity.class);
 					intent.putExtra("isSigned", isSignedIn());
 					startActivityForResult(intent, ACTIVITY_HISTORY);
@@ -417,6 +418,8 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 				} else {
 					shouldOpenHistory = true;
 				}
+
+				isPreferedPage = false;
 			}
 			if (groupPosition == 0 && childPosition == 1) {
 				startBluetooth();
