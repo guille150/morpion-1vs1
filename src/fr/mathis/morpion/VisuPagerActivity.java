@@ -103,21 +103,18 @@ public class VisuPagerActivity extends SherlockFragmentActivity implements OnPag
 	private void initiActivity() {
 		boolean wasNew = true;
 		if (mPager != null && mPagerAdapter != null) {
-//			mPager.removeAllViews();
-//			NUM_PAGES = 0;
-//			mPagerAdapter.notifyDataSetChanged();
-//			NUM_PAGES = 10;
+			// mPager.removeAllViews();
+			// NUM_PAGES = 0;
+			// mPagerAdapter.notifyDataSetChanged();
+			// NUM_PAGES = 10;
 			wasNew = false;
-		}
-		else {
+		} else {
 			setContentView(isDark ? R.layout.visupagedark : R.layout.visupage);
 			mPagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
 		}
 
 		isSignedIn = getIntent().getBooleanExtra("isSigned", false);
 		getSupportActionBar().setTitle("");
-
-		
 
 		generateActionBarIcon();
 		final View iconL = findViewById(R.id.gameViewForIcon);
@@ -174,7 +171,6 @@ public class VisuPagerActivity extends SherlockFragmentActivity implements OnPag
 		NUM_PAGES = listItem.size();
 
 		mPager = (ViewPager) findViewById(R.id.pager);
-		
 
 		mPager.setAdapter(mPagerAdapter);
 
@@ -187,6 +183,10 @@ public class VisuPagerActivity extends SherlockFragmentActivity implements OnPag
 		tabs.setOnPageChangeListener(this);
 
 		mPager.setCurrentItem(0);
+		
+		HashMap<String, String> map2 = listItem.get(0);
+		int n = Integer.parseInt(map2.get("winner"));
+		changeColor(Color.parseColor(ColorHolder.getInstance(getApplicationContext()).getColor(n)));
 
 		indexs.add(pos);
 
@@ -198,7 +198,7 @@ public class VisuPagerActivity extends SherlockFragmentActivity implements OnPag
 
 		// mPager.setCurrentItem(pos, false);
 		new Async().execute(pos);
-		if(!wasNew)
+		if (!wasNew)
 			mPagerAdapter.notifyDataSetChanged();
 	}
 
@@ -695,6 +695,7 @@ public class VisuPagerActivity extends SherlockFragmentActivity implements OnPag
 
 		super.onConfigurationChanged(newConfig);
 		new Async().execute(mPager.getCurrentItem());
+		mPagerAdapter.notifyDataSetChanged();
 	}
 
 	class Async extends AsyncTask<Integer, Void, Integer> {

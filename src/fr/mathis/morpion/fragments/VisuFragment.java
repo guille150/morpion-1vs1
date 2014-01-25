@@ -1,10 +1,8 @@
 package fr.mathis.morpion.fragments;
 
-import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -14,15 +12,10 @@ import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore.Images;
-import android.view.Display;
 import android.view.LayoutInflater;
-import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
-import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.widget.ImageButton;
-import android.widget.ScrollView;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockFragment;
@@ -143,54 +136,6 @@ public class VisuFragment extends SherlockFragment {
 		gv.setShowWinner(true);
 
 		return v;
-	}
-
-	public void recalculateSize() {
-		final ScrollView sc = (ScrollView) v.findViewById(R.id.layoutswipe);
-		ViewTreeObserver vto = sc.getViewTreeObserver();
-		final Display display = getActivity().getWindowManager().getDefaultDisplay();
-		vto.addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
-
-			@SuppressLint("NewApi")
-			@SuppressWarnings("deprecation")
-			@Override
-			public void onGlobalLayout() {
-
-				ViewTreeObserver obs = sc.getViewTreeObserver();
-
-				w = sc.getWidth();
-
-				int h = sc.getHeight();
-
-				if (h < w)
-					w = h;
-				int ratio = 3;
-
-				if (android.os.Build.VERSION.SDK_INT > Build.VERSION_CODES.ECLAIR_MR1) {
-					if (display.getRotation() == Surface.ROTATION_0)
-						ratio = 3;
-				} else {
-					if (display.getOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
-						ratio = 3;
-				}
-
-				for (int i = 0; i < 3; i++) {
-					for (int j = 0; j < 3; j++) {
-						tabIB[i][j].setMinimumWidth((w) / ratio);
-						tabIB[i][j].setMinimumHeight((w) / ratio);
-						tabIB[i][j].setMaxWidth((w) / ratio);
-						tabIB[i][j].setMaxHeight((w) / ratio);
-						tabIB[i][j].invalidate();
-					}
-				}
-
-				if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-					obs.removeOnGlobalLayoutListener(this);
-				} else {
-					obs.removeGlobalOnLayoutListener(this);
-				}
-			}
-		});
 	}
 
 }

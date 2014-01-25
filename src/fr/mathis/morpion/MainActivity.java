@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -55,7 +56,6 @@ import android.widget.ExpandableListView;
 import android.widget.ExpandableListView.OnChildClickListener;
 import android.widget.ExpandableListView.OnGroupClickListener;
 import android.widget.FrameLayout;
-import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -87,6 +87,7 @@ import fr.mathis.morpion.tools.ToolsBDD;
 import fr.mathis.morpion.views.GameView;
 import fr.mathis.morpion.views.GameView.GameHandler;
 
+@TargetApi(19)
 @SuppressLint("HandlerLeak")
 public class MainActivity extends BaseGameActivity implements OnClickListener, OnItemClickListener, OnChildClickListener, OnStateLoadedListener, RoomUpdateListener, RealTimeMessageReceivedListener, RoomStatusUpdateListener, OnInvitationReceivedListener {
 
@@ -141,7 +142,6 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 	private DrawerLayout mDrawerLayout;
 	private ExpandableListView mDrawerList;
 	LinearLayout playerText;
-	ImageButton[][] tabIB;
 	int[][] tabVal;
 	int turn = BLUE_PLAYER;
 	int nbGame;
@@ -242,7 +242,6 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 
 	public void init() {
 		playerText = (LinearLayout) findViewById(R.id.playerText);
-		tabIB = new ImageButton[3][3];
 		tabVal = new int[3][3];
 	}
 
@@ -1411,7 +1410,6 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 		gv.invalidate();
 
 		playerText = (LinearLayout) findViewById(R.id.playerText);
-		tabIB = new ImageButton[3][3];
 		tabVal = new int[3][3];
 
 		for (int i = 0; i < 3; i++) {
@@ -1559,7 +1557,10 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 		}
 	}
 
+	@SuppressLint("NewApi")
 	private void createOnlineGame(boolean firstone) {
+
+
 		if (progress != null && progress.isShowing()) {
 			progress.dismiss();
 		}
@@ -1597,7 +1598,6 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 		gv.invalidate();
 
 		playerText = (LinearLayout) findViewById(R.id.playerText);
-		tabIB = new ImageButton[3][3];
 		tabVal = new int[3][3];
 
 		if (onlineHandler == null)
@@ -1928,30 +1928,7 @@ public class MainActivity extends BaseGameActivity implements OnClickListener, O
 		if (view.getId() == R.id.sign_in_button) {
 			// start the asynchronous sign in flow
 			beginUserInitiatedSignIn();
-		} else {
-
-			for (int i = 0; i < 3; i++) {
-				for (int j = 0; j < 3; j++) {
-					if (view.getId() == tabIB[i][j].getId()) {
-						Drawable d = getResources().getDrawable(ColorHolder.getInstance(this).getDrawable(turn));
-						if (turn == BLUE_PLAYER) {
-							tabVal[i][j] = BLUE_PLAYER;
-							displayNextTurn();
-						} else {
-							tabVal[i][j] = RED_PLAYER;
-							displayNextTurn();
-						}
-						if (m != null && activeNavSection != 0 && activeNavChild != 1) {
-							m.getItem(0).setVisible(true);
-						}
-						tabIB[i][j].setImageDrawable(d);
-						tabIB[i][j].setEnabled(false);
-						this.checkWinner(i, j, false, false, false);
-
-					}
-				}
-			}
-		}
+		} 
 	}
 
 	private void checkWinner(int i, int j, boolean fromBT, boolean fromMulti, boolean fromOnline) {

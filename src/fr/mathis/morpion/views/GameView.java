@@ -5,8 +5,6 @@ import java.util.ArrayList;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -39,8 +37,6 @@ public class GameView extends View {
 	int barcolor = Color.LTGRAY;
 	int bluepayercolor = Color.BLUE;
 	int redplayercolor = Color.RED;
-	Bitmap bluedrawable = null;
-	Bitmap reddrawable = null;
 	int[][] values = null;
 	int currentMode = MODE_NOT_INTERACTIVE;
 	int style = STYLE_TOP_VERTICAL;
@@ -69,8 +65,6 @@ public class GameView extends View {
 	public void loadcolors() {
 		bluepayercolor = Color.parseColor(ColorHolder.getInstance(context).getColor(MainActivity.BLUE_PLAYER));
 		redplayercolor = Color.parseColor(ColorHolder.getInstance(context).getColor(MainActivity.RED_PLAYER));
-		bluedrawable = BitmapFactory.decodeResource(context.getResources(), ColorHolder.getInstance(context).getDrawable(MainActivity.BLUE_PLAYER));
-		reddrawable = BitmapFactory.decodeResource(context.getResources(), ColorHolder.getInstance(context).getDrawable(MainActivity.RED_PLAYER));
 		strikeWidth = (convertDpToPixel(2, context) == 0 ? 1 : convertDpToPixel(2, context));
 	}
 
