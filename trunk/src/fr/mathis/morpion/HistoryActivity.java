@@ -1095,7 +1095,7 @@ public class HistoryActivity extends SherlockFragmentActivity implements OnItemL
 			} else if (winner == MainActivity.RED_PLAYER) {
 				selectorCheck.setBackgroundColor(Color.parseColor(ColorHolder.getInstance(getApplicationContext()).getColor(MainActivity.RED_PLAYER)));
 			} else {
-				selectorCheck.setBackgroundColor(isDark ? Color.rgb(19, 133, 173) : Color.LTGRAY);
+				selectorCheck.setBackgroundColor(isDark ? Color.DKGRAY : Color.LTGRAY);
 			}
 
 			final int indexForselector = position;
